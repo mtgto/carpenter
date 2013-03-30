@@ -1,11 +1,9 @@
 package net.mtgto.domain
 
-import net.mtgto.infrastructure.{UserDao, DatabaseUserDao}
-
-import org.sisioh.dddbase.core.{EntityNotFoundException, Repository}
-
-import scalaz.Identity
 import java.util.UUID
+import net.mtgto.infrastructure.{UserDao, DatabaseUserDao}
+import org.sisioh.dddbase.core.{EntityNotFoundException, Repository}
+import scalaz.Identity
 
 trait UserRepository extends Repository[User, UUID] {
   def findByNameAndPassword(name: String, password: String): Option[User]

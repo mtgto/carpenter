@@ -1,6 +1,8 @@
-@(message: String)
+@(message: String)(implicit flash: Flash)
 
-@main("Welcome to Play 2.1") {
+@headers = {}
+@footers = {}
+@main("Welcome to Carpenter", headers, footers) {
     
     @play20.welcome(message)
     

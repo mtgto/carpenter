@@ -1,8 +1,8 @@
 package net.mtgto.domain
 
-import scalaz.Identity
-import org.sisioh.dddbase.core.Entity
 import java.util.UUID
+import org.sisioh.dddbase.core.Entity
+import scalaz.Identity
 
 /**
  * User
