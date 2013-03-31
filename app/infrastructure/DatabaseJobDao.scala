@@ -11,10 +11,8 @@ class DatabaseJobDao extends JobDao {
 
   protected[this] def convertRowToJob(row: Row): Job = {
     row match {
-      case Row(id: String, projectId: String, None, log: java.sql.Clob) =>
-        Job(UUID.fromString(id), UUID.fromString(projectId), None, log.getSubString(1, log.length.toInt))
-      case Row(id: String, projectId: String, Some(exitCode: Int), log: java.sql.Clob) =>
-        Job(UUID.fromString(id), UUID.fromString(projectId), Some(exitCode), log.getSubString(1, log.length.toInt))
+      case Row(id: String, projectId: String, exitCode: Int, log: java.sql.Clob) =>
+        Job(UUID.fromString(id), UUID.fromString(projectId), exitCode, log.getSubString(1, log.length.toInt))
     }
   }
 
@@ -31,11 +29,11 @@ class DatabaseJobDao extends JobDao {
     }
   }
 
-  override def save(id: UUID, projectId: UUID, exitCode: Option[Int], log: String): Unit = {
+  override def save(id: UUID, projectId: UUID, exitCode: Int, log: String): Unit = {
     DB.withConnection{ implicit c =>
       val rowCount =
         SQL("UPDATE `jobs` SET `project_id` = {projectId}, `exit_code` = {exitCode}, `log` = {log} WHERE `id` = {id}")
-          .on('id -> id, 'projectId -> projectId, 'exit_code -> exitCode, 'log -> log).executeUpdate()
+          .on('id -> id, 'projectId -> projectId, 'exitCode -> exitCode, 'log -> log).executeUpdate()
       if (rowCount == 0)
         SQL("INSERT INTO `jobs` (`id`, `project_id`, `exit_code`, `log`) VALUES ({id},{projectId},{exitCode},{log})")
           .on('id -> id, 'projectId -> projectId, 'exitCode -> exitCode, 'log -> log).executeInsert()

@@ -15,16 +15,16 @@ import scalaz.Identity
 trait Job extends Entity[UUID] {
   override val identity: Identity[UUID]
   val project: Project
-  val exitCode: Option[Int]
+  val exitCode: Int
   val log: String
 
   override def toString: String = Seq(identity, project).mkString("Job(", ", ",")")
 }
 
 object Job {
-  private case class DefaultJob(identity: Identity[UUID], project: Project, exitCode: Option[Int], log: String) extends Job
+  private case class DefaultJob(identity: Identity[UUID], project: Project, exitCode: Int, log: String) extends Job
 
-  def apply(identity: Identity[UUID], project: Project, exitCode: Option[Int], log: String): Job = {
+  def apply(identity: Identity[UUID], project: Project, exitCode: Int, log: String): Job = {
     DefaultJob(identity, project, exitCode, log)
   }
 }

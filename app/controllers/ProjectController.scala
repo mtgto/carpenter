@@ -7,7 +7,7 @@ import play.api.data.Forms._
 import play.api.libs.json._
 
 import java.util.UUID
-import net.mtgto.domain.{User, UserRepository, Project, ProjectFactory, ProjectRepository, JobRepository}
+import net.mtgto.domain.{User, UserRepository, Project, ProjectFactory, ProjectRepository, JobRepository, JobFactory}
 import net.mtgto.domain.{Task}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Try, Success, Failure}
@@ -131,9 +131,11 @@ object ProjectController extends Controller with Secured {
             Async {
               taskService.execute(project, taskName).map( result =>
                 result match {
-                  case (exitCode, log) =>
-                    Logger.info("exitCode = " + exitCode + ", log = " + log)
+                  case (exitCode, log) => {
+                    val job = JobFactory(project, exitCode, log)
+                    jobRepository.store(job)
                     Ok(Json.obj("status" -> "ok", "task" -> Json.toJson(taskName), "exitCode" -> exitCode, "log" -> log))
+                  }
                 }
               )
             }

@@ -14,25 +14,26 @@
       select.children().remove()
       var tasks = data['tasks']
       for (var i=0; i<tasks.length; i++) {
-        console.log("tasks[" + i + "] = " + tasks[i]['name'] + ": " + tasks[i]['description']);
         select.append($("<option>").html(tasks[i]['name']))
       }
     }  
   });
   $(function(){
-      $('a.run_task').click(
-          function(){
-            var taskName = $('#task-select option:selected').val()
-            console.log("taskName = " + taskName)
-            $.post('@net.mtgto.controllers.routes.ProjectController.executeTask(project.identity.value.toString)', {name: taskName}, function(data) {
-              console.log("status = " + data['status']);
-              log = data['log'];
-              exitCode = data['exitCode'];
-              console.log("exitCode = " + exitCode);
-              $('#log').val(log);
-            });
-          }
-      );
+    var runLink = $('a.run_task');
+    runLink.click(
+      function(){
+        runLink.addClass("disabled");
+        var taskName = $('#task-select option:selected').val()
+        console.log("taskName = " + taskName)
+        $.post('@net.mtgto.controllers.routes.ProjectController.executeTask(project.identity.value.toString)', {name: taskName}, function(data) {
+          log = data['log'];
+          exitCode = data['exitCode'];
+          console.log("exitCode = " + exitCode);
+          $('#log').val(log);
+          runLink.removeClass("disabled");
+        });
+      }
+    );
   });
 </script>
 }
