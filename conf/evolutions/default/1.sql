@@ -12,6 +12,14 @@ CREATE TABLE `projects` (
   `recipe` TEXT NOT NULL,
   PRIMARY KEY (`id`)
 );
+CREATE TABLE `jobs` (
+  `id` CHAR(36) NOT NULL,
+  `project_id` CHAR(36) NOT NULL,
+  `exit_code` INT,
+  `log` TEXT NOT NULL,
+  PRIMARY KEY (`id`)
+);
 # --- !Downs
 DROP TABLE `users`;
 DROP TABLE `projects`;
+DROP TABLE `jobs`;

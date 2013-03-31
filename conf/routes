@@ -12,7 +12,7 @@ POST    /projects/create            net.mtgto.controllers.ProjectController.crea
 GET     /projects/:id/edit          net.mtgto.controllers.ProjectController.showEditView(id)
 POST    /projects/:id/edit          net.mtgto.controllers.ProjectController.edit(id)
 GET     /projects/:id/tasks         net.mtgto.controllers.ProjectController.tasks(id)
-POST    /projects/:id/task/:name/execute net.mtgto.controllers.ProjectController.executeTask(id, name)
+POST    /projects/:id/task/execute  net.mtgto.controllers.ProjectController.executeTask(id)
 GET     /projects/:id               net.mtgto.controllers.ProjectController.showProjectView(id)
 
 POST    /users/create               net.mtgto.controllers.UserController.create

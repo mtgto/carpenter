@@ -1,13 +1,21 @@
 package net.mtgto.domain
 
+import scala.concurrent.{Future, future}
+import scala.concurrent.ExecutionContext.Implicits.global
+
 trait TaskService {
   def getAllTasks(project: Project): Seq[Task]
+
+  def execute(project: Project, taskName: String): Future[(Int, String)]
 }
 
 class DefaultTaskService(workspacePath: String) extends TaskService {
-  private val descRegex = """""".r
+  protected[this] def getProjectWorkspace(project: Project): java.io.File = {
+    new java.io.File(workspacePath, project.identity.value.toString)
+  }
+
   protected[this] def createProjectWorkspace(project: Project): Unit = {
-    val projectDirectory = new java.io.File(workspacePath, project.identity.value.toString)
+    val projectDirectory = getProjectWorkspace(project)
     if (!projectDirectory.isDirectory) {
       projectDirectory.mkdirs
     }
@@ -20,11 +28,31 @@ class DefaultTaskService(workspacePath: String) extends TaskService {
   override def getAllTasks(project: Project): Seq[Task] = {
     import scala.sys.process.Process
     createProjectWorkspace(project)
-    val process: String = Process("cap -T", new java.io.File(workspacePath)).!!
-    process.split("\n").withFilter(_.contains(" # ")).map{ line =>
-      val index = line.lastIndexOf(" # ")
-      val nameAndDescription = line.split(" # ")
-      Task(nameAndDescription(0).trim, nameAndDescription(1).trim)
+    val process: String = Process("cap -vT", getProjectWorkspace(project)).!!
+    process.split("\n").withFilter(_.contains("#")).map{ line =>
+      val index = line.lastIndexOf("#")
+      val (name, description) = line.splitAt(index)
+      Task(name.trim.stripPrefix("cap "), description.stripPrefix("#").trim)
+    }
+  }
+
+  override def execute(project: Project, taskName: String): Future[(Int, String)] = {
+    createProjectWorkspace(project)
+    future {
+      import scala.sys.process.{Process, ProcessLogger}
+      val outputBuilder = new StringBuilder
+      val errorBuilder = new StringBuilder
+      val process: Process = Process(Seq("cap", taskName, "HOSTS="+project.hostname), getProjectWorkspace(project)).run(
+        ProcessLogger(
+          line => {
+            outputBuilder ++= line
+            outputBuilder ++= System.lineSeparator
+          }, line => {
+            errorBuilder ++= line
+            errorBuilder ++= System.lineSeparator
+          }))
+      val exitCode = process.exitValue
+      (exitCode, errorBuilder.toString)
     }
   }
 }

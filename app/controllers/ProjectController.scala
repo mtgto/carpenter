@@ -7,8 +7,9 @@ import play.api.data.Forms._
 import play.api.libs.json._
 
 import java.util.UUID
-import net.mtgto.domain.{User, UserRepository, Project, ProjectFactory, ProjectRepository}
+import net.mtgto.domain.{User, UserRepository, Project, ProjectFactory, ProjectRepository, JobRepository}
 import net.mtgto.domain.{Task}
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Try, Success, Failure}
 import scalaz.Identity
 
@@ -16,6 +17,10 @@ object ProjectController extends Controller with Secured {
   protected[this] val userRepository: UserRepository = UserRepository()
 
   protected[this] val projectRepository: ProjectRepository = ProjectRepository()
+
+  protected[this] val jobRepository: JobRepository = JobRepository()
+
+  protected[this] val taskService = new net.mtgto.domain.DefaultTaskService("./workspace")
 
   protected[this] val createForm = Form(
     tuple(
@@ -31,6 +36,10 @@ object ProjectController extends Controller with Secured {
       "hostname" -> nonEmptyText,
       "recipe" -> nonEmptyText
     )
+  )
+
+  protected[this] val taskNameForm = Form(
+    "name" -> nonEmptyText
   )
 
   def showCreateView = IsAuthenticated { user => implicit request =>
@@ -103,7 +112,6 @@ object ProjectController extends Controller with Secured {
     }
     getProjectByIdString(id) match {
       case Some(project) => {
-        val taskService = new net.mtgto.domain.DefaultTaskService("./workspace")
         val tasks = taskService.getAllTasks(project)
         Logger.info(tasks.toString)
         Ok(Json.obj("status" -> "ok", "tasks" -> Json.toJson(tasks)))
@@ -113,8 +121,27 @@ object ProjectController extends Controller with Secured {
     }
   }
 
-  def executeTask(id: String, taskName: String) = IsAuthenticated { user => implicit request =>
-    Ok
+  def executeTask(id: String) = IsAuthenticated { user => implicit request =>
+    taskNameForm.bindFromRequest.fold(
+      formWithErrors =>
+        BadRequest(Json.obj("status" -> "fail")),
+      taskName => {
+        getProjectByIdString(id) match {
+          case Some(project) =>
+            Async {
+              taskService.execute(project, taskName).map( result =>
+                result match {
+                  case (exitCode, log) =>
+                    Logger.info("exitCode = " + exitCode + ", log = " + log)
+                    Ok(Json.obj("status" -> "ok", "task" -> Json.toJson(taskName), "exitCode" -> exitCode, "log" -> log))
+                }
+              )
+            }
+          case None =>
+              BadRequest(Json.obj("status" -> "fail"))
+        }
+      }
+    )
   }
 
   protected[this] def getProjectByIdString(id: String): Option[Project] = {

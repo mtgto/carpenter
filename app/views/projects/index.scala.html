@@ -19,19 +19,38 @@
       }
     }  
   });
+  $(function(){
+      $('a.run_task').click(
+          function(){
+            var taskName = $('#task-select option:selected').val()
+            console.log("taskName = " + taskName)
+            $.post('@net.mtgto.controllers.routes.ProjectController.executeTask(project.identity.value.toString)', {name: taskName}, function(data) {
+              console.log("status = " + data['status']);
+              log = data['log'];
+              exitCode = data['exitCode'];
+              console.log("exitCode = " + exitCode);
+              $('#log').val(log);
+            });
+          }
+      );
+  });
 </script>
 }
 @main(s"Project ${project.name}", headers, footers) {
+  <section>
+    <h2>Project</h2>
+    @project.name</h3>
+  </section>
   <section>
     <h2>Task</h2>
     <select id="task-select">
       <option>Loading...</option>
     </select>
-    <a class="btn btn-primary" href="#">Run</a>
+    <a class="btn btn-primary run_task" href="#">Run</a>
   </section>
   <section>
     <h2>Log</h2>
-    <textarea rows="10"></textarea>
+    <textarea rows="10" id="log"></textarea>
   </section>
   <a class="btn btn-large" href="@net.mtgto.controllers.routes.Application.index">Back</a>
 }
