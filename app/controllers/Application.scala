@@ -15,7 +15,8 @@ object Application extends Controller with Secured {
   
   def index = IsAuthenticated { user => implicit request =>
     val projects = projectRepository.findAll
-    Ok(views.html.index(projects))
+    val users = userRepository.findAll
+    Ok(views.html.index(projects, users))
   }
   
 }

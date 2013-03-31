@@ -12,5 +12,8 @@ POST    /projects/create            net.mtgto.controllers.ProjectController.crea
 GET     /projects/:id/edit          net.mtgto.controllers.ProjectController.showEditView(id)
 POST    /projects/:id/edit          net.mtgto.controllers.ProjectController.edit(id)
 
+POST    /users/create               net.mtgto.controllers.UserController.create
+POST    /users/password             net.mtgto.controllers.UserController.changePassword
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

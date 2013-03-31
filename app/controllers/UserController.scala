@@ -23,6 +23,20 @@ object UserController extends Controller with Secured {
     )
   )
 
+  protected[this] val createForm = Form(
+    tuple(
+      "name" -> nonEmptyText,
+      "password" -> text
+    )
+  )
+
+  protected[this] val changePasswordForm = Form(
+    tuple(
+      "oldPassword" -> text,
+      "newPassword" -> text
+    )
+  )
+
   protected[this] def getHashedPassword(name: String, password: String): String = {
     val passwordBytes = (name + passwordHashingSalt + password).getBytes("UTF-8")
     toHashedString(passwordBytes)
@@ -66,8 +80,38 @@ object UserController extends Controller with Secured {
           case Some(user) => 
             Redirect(routes.Application.index).withSession("userId" -> user.identity.value.toString)
           case None =>
-            Redirect(routes.Application.index).flashing("error" -> "名前かパスワードが違います")
+            Redirect(routes.Application.index).flashing("error" -> "Name or password is wrong")
         }
+      }
+    )
+  }
+
+  def create = IsAuthenticated { user => implicit request =>
+    createForm.bindFromRequest.fold(
+      formWithErrors =>
+        Redirect(routes.Application.index).flashing("error" -> ("Inputs has someshing wrong" + formWithErrors)),
+      success => success match {
+        case (name, password) =>
+          userRepository.store(UserFactory.createUser(name, getHashedPassword(name, password)))
+          Redirect(routes.Application.index).flashing("success" -> (s"Create new user ${name}!"))
+      }
+    )
+  }
+
+  def changePassword = IsAuthenticated { user => implicit request =>
+    changePasswordForm.bindFromRequest.fold(
+      formWithErrors =>
+        Redirect(routes.Application.index).flashing("error" -> ("Inputs has someshing wrong" + formWithErrors)),
+      success => success match {
+        case (oldPassword, newPassword) =>
+          val oldHashedPassword = getHashedPassword(user.name, oldPassword)
+          userRepository.findByNameAndPassword(user.name, oldHashedPassword) match {
+            case Some(user) =>
+              userRepository.store(User(user.identity, user.name, Some(getHashedPassword(user.name, newPassword))))
+              Redirect(routes.Application.index).flashing("success" -> "Changed your password")
+            case _ =>
+              Redirect(routes.Application.index).flashing("error" -> "Password is incorrect!")
+          }
       }
     )
   }

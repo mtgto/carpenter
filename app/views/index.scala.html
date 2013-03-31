@@ -1,8 +1,77 @@
-@(projects: Seq[net.mtgto.domain.Project])(implicit flash: Flash)
+@(projects: Seq[net.mtgto.domain.Project], users: Seq[net.mtgto.domain.User])(implicit flash: Flash)
 
 @headers = {}
-@footers = {}
+@footers = {
+<script>
+  $(function(){
+      $('#create_user_cancel').click(
+          function(){
+              $('#modal_create_user').modal('hide');
+          }
+      );
+      $('a.create_user').click(
+          function(){
+              $('#modal_create_user').modal('show');
+          }
+      );
+      $('#create_user_submit').click(
+          function(){
+              $('#form_create_user').submit();
+          }
+      );
+  });
+  $(function(){
+      $('#change_password_cancel').click(
+          function(){
+              $('#modal_change_password').modal('hide');
+          }
+      );
+      $('a.change_password').click(
+          function(){
+              $('#modal_change_password').modal('show');
+          }
+      );
+      $('#change_password_submit').click(
+          function(){
+              $('#form_change_password').submit();
+          }
+      );
+  });
+</script>
+}
 @main("Welcome to Carpenter", headers, footers) {
+  <div class='modal hide' id='modal_create_user'>
+    @helper.form(action = net.mtgto.controllers.routes.UserController.create, 'id -> "form_create_user") {
+      <div class="modal-header">
+        <a class="close" data-dismiss="modal">×</a>
+        <h3 id='modal_create_user_title'>Create new user</h3>
+      </div>
+      <div class="modal-body">
+        <input type="text" placeholder="name" id="create_user_name" name="name"></input>
+        <input type="password" placeholder="password" id="create_user_password" name="password"></input>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn" id="create_user_cancel">Cancel</a>
+        <a href="#" class="btn btn-primary" id="create_user_submit">Submit</a>
+      </div>
+    }
+  </div>
+  <div class='modal hide' id='modal_change_password'>
+    @helper.form(action = net.mtgto.controllers.routes.UserController.changePassword, 'id -> "form_change_password") {
+      <div class="modal-header">
+        <a class="close" data-dismiss="modal">×</a>
+        <h3 id='modal_change_password_title'>Change password</h3>
+      </div>
+      <div class="modal-body">
+        <input type="password" placeholder="Old password" id="change_password_old_password" name="oldPassword"></input>
+        <input type="password" placeholder="New password" id="change_password_new_password" name="newPassword"></input>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn" id="change_password_cancel">Cancel</a>
+        <a href="#" class="btn btn-primary" id="change_password_submit">Change</a>
+      </div>
+    }
+  </div>
     <section id="projects" class="container">
     <h2>Projects</h2>
     <table class="table table-condensed table-striped">
@@ -24,5 +93,26 @@
       </tbody>
     </table>
     <a class="btn" href="@net.mtgto.controllers.routes.ProjectController.create">Create new project</a>
-  </section>    
+  </section>
+  </section>
+    <section id="users" class="container">
+    <h2>Users</h2>
+      <table class="table table-condensed table-striped">
+        <thead>
+          <tr>
+            <th>name</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for(user <- users) {
+            <tr>
+              <td>@user.name</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <a class="btn" href="@net.mtgto.controllers.routes.UserController.logout">logout</a>
+      <a class="btn create_user" href="#">Create new user</a>
+      <a class="btn change_password" href="#">Change password</a>
+  </section>
 }
