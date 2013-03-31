@@ -1,0 +1,17 @@
+@(createForm: Form[(String, String, String)])(implicit flash: Flash)
+
+@import helper._
+@import helper.twitterBootstrap._
+
+@headers = {}
+@footers = {}
+@main("New Project", headers, footers) {
+  <h2>New Project</h2>
+  @helper.form(action = net.mtgto.controllers.routes.ProjectController.create, 'class -> "form-horizontal") {
+    @inputText(createForm("name"), '_label -> "Project name", 'placeholder -> "Project name")
+    @inputText(createForm("hostname"), '_label -> "Hostname", 'placeholder -> "Hostname")
+    @textarea(createForm("recipe"), '_label -> "Recipe", 'placeholder -> "Recipe", 'rows -> 10)
+    <a class="btn btn-large" href="@net.mtgto.controllers.routes.Application.index">Back</a>
+    <button class="btn btn-large btn-primary" type="submit">Submit</button>
+  }
+}

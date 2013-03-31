@@ -4,15 +4,18 @@ import play.api._
 import play.api.mvc._
 
 import java.util.UUID
-import net.mtgto.domain.{User, UserRepository}
+import net.mtgto.domain.{User, UserRepository, ProjectRepository}
 import scala.util.{Failure, Success, Try}
 import scalaz.Identity
 
 object Application extends Controller with Secured {
   protected[this] val userRepository: UserRepository = UserRepository()
+
+  protected[this] val projectRepository: ProjectRepository = ProjectRepository()
   
   def index = IsAuthenticated { user => implicit request =>
-    Ok(views.html.index("Your new application is ready."))
+    val projects = projectRepository.findAll
+    Ok(views.html.index(projects))
   }
   
 }

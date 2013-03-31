@@ -11,8 +11,8 @@ class DatabaseProjectDao extends ProjectDao {
 
   protected[this] def convertRowToProject(row: Row): Project = {
     row match {
-      case Row(id: String, name: String, hostname: String, recipe: String) =>
-        Project(UUID.fromString(id), name, hostname, recipe)
+      case Row(id: String, name: String, hostname: String, recipe: java.sql.Clob) =>
+        Project(UUID.fromString(id), name, hostname, recipe.getSubString(1, recipe.length.toInt))
     }
   }
 

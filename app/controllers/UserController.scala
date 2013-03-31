@@ -43,33 +43,32 @@ object UserController extends Controller with Secured {
     Redirect(routes.Application.index).withNewSession
   }
 
-  def authenticate = Action {
-    implicit request =>
-      loginForm.bindFromRequest.fold(
-        formWithErrors =>
-          BadRequest(views.html.users.login(formWithErrors)),
-        userNameAndPassword => {
-          val user: Option[User] = userNameAndPassword match {
-            case (name, password) => {
-              val hashedPassword = getHashedPassword(name, password)
-              userRepository.findByNameAndPassword(name, hashedPassword).orElse {
-                if (name == adminName && password == adminPassword) {
-                  val adminUser = UserFactory.createUser(name, hashedPassword)
-                  userRepository.store(adminUser)
-                  userRepository.findByNameAndPassword(name, hashedPassword)
-                } else {
-                  None
-                }
+  def authenticate = Action { implicit request =>
+    loginForm.bindFromRequest.fold(
+      formWithErrors =>
+        BadRequest(views.html.users.login(formWithErrors)),
+      userNameAndPassword => {
+        val user: Option[User] = userNameAndPassword match {
+          case (name, password) => {
+            val hashedPassword = getHashedPassword(name, password)
+            userRepository.findByNameAndPassword(name, hashedPassword).orElse {
+              if (name == adminName && password == adminPassword) {
+                val adminUser = UserFactory.createUser(name, hashedPassword)
+                userRepository.store(adminUser)
+                userRepository.findByNameAndPassword(name, hashedPassword)
+              } else {
+                None
               }
             }
           }
-          user match {
-            case Some(user) => 
-              Redirect(routes.Application.index).withSession("userId" -> user.identity.value.toString)
-            case None =>
-              Redirect(routes.Application.index).flashing("error" -> "名前かパスワードが違います")
-          }
         }
-      )
+        user match {
+          case Some(user) => 
+            Redirect(routes.Application.index).withSession("userId" -> user.identity.value.toString)
+          case None =>
+            Redirect(routes.Application.index).flashing("error" -> "名前かパスワードが違います")
+        }
+      }
+    )
   }
 }

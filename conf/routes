@@ -7,6 +7,10 @@ GET     /                           net.mtgto.controllers.Application.index
 GET     /login                      net.mtgto.controllers.UserController.login
 GET     /logout                     net.mtgto.controllers.UserController.logout
 POST    /authenticate               net.mtgto.controllers.UserController.authenticate
+GET     /projects/create            net.mtgto.controllers.ProjectController.showCreateView
+POST    /projects/create            net.mtgto.controllers.ProjectController.create
+GET     /projects/:id/edit          net.mtgto.controllers.ProjectController.showEditView(id)
+POST    /projects/:id/edit          net.mtgto.controllers.ProjectController.edit(id)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

@@ -1,9 +1,28 @@
-@(message: String)(implicit flash: Flash)
+@(projects: Seq[net.mtgto.domain.Project])(implicit flash: Flash)
 
 @headers = {}
 @footers = {}
 @main("Welcome to Carpenter", headers, footers) {
-    
-    @play20.welcome(message)
-    
+    <section id="projects" class="container">
+    <h2>Projects</h2>
+    <table class="table table-condensed table-striped">
+      <thead>
+        <tr>
+          <th>name</th>
+          <th>hostname</th>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for(project <- projects) {
+          <tr>
+            <td>@project.name</td>
+            <td>@project.hostname</td>
+            <td><a href="@net.mtgto.controllers.routes.ProjectController.edit(project.identity.value.toString)">Edit</a></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    <a class="btn" href="@net.mtgto.controllers.routes.ProjectController.create">Create new project</a>
+  </section>    
 }
