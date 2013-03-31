@@ -4,9 +4,11 @@ import play.api._
 import play.api.mvc._
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.libs.json._
 
 import java.util.UUID
 import net.mtgto.domain.{User, UserRepository, Project, ProjectFactory, ProjectRepository}
+import net.mtgto.domain.{Task}
 import scala.util.{Try, Success, Failure}
 import scalaz.Identity
 
@@ -79,6 +81,40 @@ object ProjectController extends Controller with Secured {
         }
       }
     )
+  }
+
+  def showProjectView(id: String) = IsAuthenticated { user => implicit request =>
+    getProjectByIdString(id) match {
+      case Some(project) =>
+        Ok(views.html.projects.index(project))
+      case _ =>
+        Redirect(routes.Application.index).flashing("error" -> "Not found project to edit")
+    }
+  }
+
+  def tasks(id: String) = IsAuthenticated { user => implicit request =>
+    implicit val taskWrites = new Writes[Task] {
+      def writes(task: Task): JsValue = {
+        Json.obj(
+          "name" -> task.name,
+          "description" -> task.description
+        )
+      }
+    }
+    getProjectByIdString(id) match {
+      case Some(project) => {
+        val taskService = new net.mtgto.domain.DefaultTaskService("./workspace")
+        val tasks = taskService.getAllTasks(project)
+        Logger.info(tasks.toString)
+        Ok(Json.obj("status" -> "ok", "tasks" -> Json.toJson(tasks)))
+      }
+      case _ =>
+        BadRequest(Json.obj("status" -> "fail"))
+    }
+  }
+
+  def executeTask(id: String, taskName: String) = IsAuthenticated { user => implicit request =>
+    Ok
   }
 
   protected[this] def getProjectByIdString(id: String): Option[Project] = {

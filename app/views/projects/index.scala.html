@@ -1,0 +1,37 @@
+@(project: net.mtgto.domain.Project)(implicit flash: Flash)
+
+@import helper._
+@import helper.twitterBootstrap._
+
+@headers = {}
+@footers = {
+<script>
+  $.get('@net.mtgto.controllers.routes.ProjectController.tasks(project.identity.value.toString)', function(data) {
+    var status = data['status']
+    console.log("tasks.status: " + status)
+    if (status == 'ok') {
+      var select = $("#task-select")
+      select.children().remove()
+      var tasks = data['tasks']
+      for (var i=0; i<tasks.length; i++) {
+        console.log("tasks[" + i + "] = " + tasks[i]['name'] + ": " + tasks[i]['description']);
+        select.append($("<option>").html(tasks[i]['name']))
+      }
+    }  
+  });
+</script>
+}
+@main(s"Project ${project.name}", headers, footers) {
+  <section>
+    <h2>Task</h2>
+    <select id="task-select">
+      <option>Loading...</option>
+    </select>
+    <a class="btn btn-primary" href="#">Run</a>
+  </section>
+  <section>
+    <h2>Log</h2>
+    <textarea rows="10"></textarea>
+  </section>
+  <a class="btn btn-large" href="@net.mtgto.controllers.routes.Application.index">Back</a>
+}
