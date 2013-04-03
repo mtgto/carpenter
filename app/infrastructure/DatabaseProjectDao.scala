@@ -40,7 +40,7 @@ class DatabaseProjectDao extends ProjectDao {
     }
   }
 
-  override def delete(id: UUID): Unit = {
+  override def delete(id: UUID): Int = {
     DB.withConnection{ implicit c =>
       SQL("DELETE `projects` WHERE `id` = {id}")
         .on('id -> id).executeUpdate()
