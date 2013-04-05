@@ -1,58 +1,23 @@
-@(projects: Seq[net.mtgto.domain.Project], users: Seq[net.mtgto.domain.User])(implicit flash: Flash)
+@(projects: Seq[net.mtgto.domain.Project], users: Seq[net.mtgto.domain.User])(implicit lang: Lang, flash: Flash)
 
 @headers = {}
 @footers = {
-<script>
-  $(function(){
-      $('#create_user_cancel').click(
-          function(){
-              $('#modal_create_user').modal('hide');
-          }
-      );
-      $('a.create_user').click(
-          function(){
-              $('#modal_create_user').modal('show');
-          }
-      );
-      $('#create_user_submit').click(
-          function(){
-              $('#form_create_user').submit();
-          }
-      );
-  });
-  $(function(){
-      $('#change_password_cancel').click(
-          function(){
-              $('#modal_change_password').modal('hide');
-          }
-      );
-      $('a.change_password').click(
-          function(){
-              $('#modal_change_password').modal('show');
-          }
-      );
-      $('#change_password_submit').click(
-          function(){
-              $('#form_change_password').submit();
-          }
-      );
-  });
-</script>
+<script src="@routes.Assets.at("javascripts/index.min.js")" type="text/javascript"></script>
 }
 @main("Welcome to Carpenter", headers, footers) {
   <div class='modal hide' id='modal_create_user'>
     @helper.form(action = net.mtgto.controllers.routes.UserController.create, 'id -> "form_create_user") {
       <div class="modal-header">
         <a class="close" data-dismiss="modal">×</a>
-        <h3 id='modal_create_user_title'>Create new user</h3>
+        <h3 id='modal_create_user_title'>@Messages("views.index.create_user")</h3>
       </div>
       <div class="modal-body">
-        <input type="text" placeholder="name" id="create_user_name" name="name"></input>
-        <input type="password" placeholder="password" id="create_user_password" name="password"></input>
+        <input type="text" placeholder="@Messages("views.index.user.name")" id="create_user_name" name="name"></input>
+        <input type="password" placeholder="@Messages("views.index.user.password")" id="create_user_password" name="password"></input>
       </div>
       <div class="modal-footer">
-        <a href="#" class="btn" id="create_user_cancel">Cancel</a>
-        <a href="#" class="btn btn-primary" id="create_user_submit">Submit</a>
+        <a href="#" class="btn" id="create_user_cancel">@Messages("views.cancel")</a>
+        <a href="#" class="btn btn-primary" id="create_user_submit">@Messages("views.index.create_user_button")</a>
       </div>
     }
   </div>
@@ -60,25 +25,25 @@
     @helper.form(action = net.mtgto.controllers.routes.UserController.changePassword, 'id -> "form_change_password") {
       <div class="modal-header">
         <a class="close" data-dismiss="modal">×</a>
-        <h3 id='modal_change_password_title'>Change password</h3>
+        <h3 id='modal_change_password_title'>@Messages("views.index.change_password")</h3>
       </div>
       <div class="modal-body">
-        <input type="password" placeholder="Old password" id="change_password_old_password" name="oldPassword"></input>
-        <input type="password" placeholder="New password" id="change_password_new_password" name="newPassword"></input>
+        <input type="password" placeholder="@Messages("views.index.old_password")" id="change_password_old_password" name="oldPassword"></input>
+        <input type="password" placeholder="@Messages("views.index.new_password")" id="change_password_new_password" name="newPassword"></input>
       </div>
       <div class="modal-footer">
-        <a href="#" class="btn" id="change_password_cancel">Cancel</a>
-        <a href="#" class="btn btn-primary" id="change_password_submit">Change</a>
+        <a href="#" class="btn" id="change_password_cancel">@Messages("views.cancel")</a>
+        <a href="#" class="btn btn-primary" id="change_password_submit">@Messages("views.index.change_password_button")</a>
       </div>
     }
   </div>
     <section id="projects" class="container">
-    <h2>Projects</h2>
+    <h2>@Messages("views.index.header.projects")</h2>
     <table class="table table-condensed table-striped">
       <thead>
         <tr>
-          <th>name</th>
-          <th>hostname</th>
+          <th>@Messages("views.index.name")</th>
+          <th>@Messages("views.index.hostname")</th>
           <th>&nbsp;</th>
         </tr>
       </thead>
@@ -87,20 +52,20 @@
           <tr>
             <td><a href="@net.mtgto.controllers.routes.ProjectController.showProjectView(project.identity.value.toString)">@project.name</a></td>
             <td>@project.hostname</td>
-            <td><a href="@net.mtgto.controllers.routes.ProjectController.edit(project.identity.value.toString)">Edit</a></td>
+            <td><a href="@net.mtgto.controllers.routes.ProjectController.edit(project.identity.value.toString)">@Messages("views.edit")</a></td>
           </tr>
         }
       </tbody>
     </table>
-    <a class="btn" href="@net.mtgto.controllers.routes.ProjectController.create">Create new project</a>
+    <a class="btn" href="@net.mtgto.controllers.routes.ProjectController.create">@Messages("views.index.create_project")</a>
   </section>
   </section>
     <section id="users" class="container">
-    <h2>Users</h2>
+    <h2>@Messages("views.index.header.users")</h2>
       <table class="table table-condensed table-striped">
         <thead>
           <tr>
-            <th>name</th>
+            <th>@Messages("views.index.name")</th>
           </tr>
         </thead>
         <tbody>
@@ -111,8 +76,8 @@
           }
         </tbody>
       </table>
-      <a class="btn" href="@net.mtgto.controllers.routes.UserController.logout">logout</a>
-      <a class="btn create_user" href="#">Create new user</a>
-      <a class="btn change_password" href="#">Change password</a>
+      <a class="btn" href="@net.mtgto.controllers.routes.UserController.logout">@Messages("views.index.logout")</a>
+      <a class="btn create_user" href="#">@Messages("views.index.create_user")</a>
+      <a class="btn change_password" href="#">@Messages("views.index.change_password")</a>
   </section>
 }

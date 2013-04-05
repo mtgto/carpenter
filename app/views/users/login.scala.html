@@ -1,17 +1,14 @@
-@(loginForm: Form[(String, String)])(implicit flash: Flash)
-
-@import helper._
-@import helper.twitterBootstrap._
+@(loginForm: Form[(String, String)])(implicit lang: Lang, flash: Flash)
 
 @headers = {
-  <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/users/login.css")" />
+  <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/users/login.min.css")" />
 }
 @footers = {}
-@main("ログイン", headers, footers) {
+@main(Messages("views.users.login.signin"), headers, footers) {
   @helper.form(action = net.mtgto.controllers.routes.UserController.authenticate, 'class -> "form-signin") {
-  <h2 class="form-signin-heading">サインインが必要です</h2>
-    @inputText(loginForm("name"), '_label -> "ユーザ名", 'placeholder -> "ユーザ名")
-    @inputPassword(loginForm("password"), '_label -> "パスワード", 'placeholder -> "パスワード")
-    <button class="btn btn-large btn-primary" type="submit">サインイン</button>
+  <h2 class="form-signin-heading">@Messages("views.users.login.title")</h2>
+    @inputText(loginForm("name"), '_label -> Messages("views.users.login.user.name"), 'placeholder -> Messages("views.users.login.user.name"))
+    @inputPassword(loginForm("password"), '_label -> Messages("views.users.login.password"), 'placeholder -> Messages("views.users.login.password"))
+    <button class="btn btn-large btn-primary" type="submit">@Messages("views.users.login.signin")</button>
   }
 }

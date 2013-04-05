@@ -1,17 +1,14 @@
-@(id: String, editForm: Form[(String, String, String)])(implicit flash: Flash)
-
-@import helper._
-@import helper.twitterBootstrap._
+@(id: String, editForm: Form[(String, String, String)])(implicit lang: Lang, flash: Flash)
 
 @headers = {}
 @footers = {}
-@main("Edit Project", headers, footers) {
-  <h2>Edit Project</h2>
+@main(Messages("views.projects.edit.header"), headers, footers) {
+  <h2>@Messages("views.projects.edit.header")</h2>
   @helper.form(action = net.mtgto.controllers.routes.ProjectController.edit(id), 'class -> "form-horizontal") {
-    @inputText(editForm("name"), '_label -> "Project name", 'placeholder -> "Project name")
-    @inputText(editForm("hostname"), '_label -> "Hostname", 'placeholder -> "Hostname")
-    @textarea(editForm("recipe"), '_label -> "Recipe", 'placeholder -> "Recipe", 'rows -> 10)
-    <a class="btn btn-large" href="@net.mtgto.controllers.routes.Application.index">Back</a>
-    <button class="btn btn-large btn-primary" type="submit">Submit</button>
+    @inputText(editForm("name"), '_label -> Messages("views.projects.project_name"), 'placeholder -> Messages("views.projects.project_name"))
+    @inputText(editForm("hostname"), '_label -> Messages("views.projects.hostname"), 'placeholder -> Messages("views.projects.hostname"))
+    @textarea(editForm("recipe"), '_label -> Messages("views.projects.recipe"), 'placeholder -> Messages("views.projects.recipe"), 'rows -> 10)
+    <a class="btn btn-large" href="@net.mtgto.controllers.routes.Application.index">@Messages("views.back")</a>
+    <button class="btn btn-large btn-primary" type="submit">@Messages("views.submit")</button>
   }
 }

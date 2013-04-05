@@ -1,0 +1,70 @@
+# cancel
+views.cancel=Cancel
+# edit
+views.edit=Edit
+# submit
+views.submit=Submit
+# back
+views.back=Back
+
+views.users.login.title=Please sign-in
+# input field placeholder of user name
+views.users.login.user.name=name
+# input field placeholder of user password
+views.users.login.password=password
+# button to sign-in
+views.users.login.signin=Sign in
+
+# header of projects
+views.index.header.projects=Projects
+# header of users
+views.index.header.users=Users
+# table header of project and user
+views.index.name=name
+# table header of hostname
+views.index.hostname=hostname
+# button to logout
+views.index.logout=Logout
+# create new user
+views.index.create_user=Create new user
+# change password
+views.index.change_password=Change password
+# create new project
+views.index.create_project=Create new project
+# submit button to change password
+views.index.change_password_button=Change
+# submit button to create new user
+views.index.create_user_button=Create
+# input field placeholder of old password
+views.index.old_password=Old password
+# input field placeholder of new password
+views.index.new_password=New password
+# input field placeholder of user name
+views.index.user.name=name
+# input field placeholder of user password
+views.index.user.password=password
+
+# input header and placeholder of project name
+views.projects.project_name=Project name
+# input header and placeholder of hostname
+views.projects.hostname=Hostname
+# input header and placeholder of recipe
+views.projects.recipe=Recipe
+# header of new project
+views.projects.create.header=New Project
+# header of edit project
+views.projects.edit.header=Edit Project
+# message of create new project
+messages.create_project=Successed to create a project!
+# message of wrong input
+messages.wrong_input=Inputs has someshing wrong
+# message of no project found to edit
+messages.not_found_project_to_edit=Not found project to edit!
+# header of project task
+views.projects.index.task=Task
+# header of project task log
+views.projects.index.log=Log
+# button to run a task
+views.projects.run=Run
+# header of project
+views.projects.header=Project {0}

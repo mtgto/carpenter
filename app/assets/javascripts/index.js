@@ -1,0 +1,34 @@
+$(function(){
+    $('#create_user_cancel').click(
+        function(){
+            $('#modal_create_user').modal('hide');
+        }
+    );
+    $('a.create_user').click(
+        function(){
+            $('#modal_create_user').modal('show');
+        }
+    );
+    $('#create_user_submit').click(
+        function(){
+            $('#form_create_user').submit();
+        }
+    );
+});
+$(function(){
+    $('#change_password_cancel').click(
+        function(){
+            $('#modal_change_password').modal('hide');
+        }
+    );
+    $('a.change_password').click(
+        function(){
+            $('#modal_change_password').modal('show');
+        }
+    );
+    $('#change_password_submit').click(
+        function(){
+            $('#form_change_password').submit();
+        }
+    );
+});

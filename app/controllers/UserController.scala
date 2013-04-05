@@ -4,6 +4,7 @@ import play.api._
 import play.api.mvc._
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.i18n.Messages
 
 import net.mtgto.domain.{User, UserRepository, UserFactory}
 
@@ -101,7 +102,7 @@ object UserController extends Controller with Secured {
   def changePassword = IsAuthenticated { user => implicit request =>
     changePasswordForm.bindFromRequest.fold(
       formWithErrors =>
-        Redirect(routes.Application.index).flashing("error" -> ("Inputs has someshing wrong" + formWithErrors)),
+        Redirect(routes.Application.index).flashing("error" -> (Messages("messages.wrong_input"))),
       success => success match {
         case (oldPassword, newPassword) =>
           val oldHashedPassword = getHashedPassword(user.name, oldPassword)

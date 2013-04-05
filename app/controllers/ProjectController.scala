@@ -4,11 +4,12 @@ import play.api._
 import play.api.mvc._
 import play.api.data.Form
 import play.api.data.Forms._
+import play.api.i18n.Messages
 import play.api.libs.json._
 
 import java.util.UUID
 import net.mtgto.domain.{User, UserRepository, Project, ProjectFactory, ProjectRepository, JobRepository, JobFactory}
-import net.mtgto.domain.{Task}
+import net.mtgto.domain.Task
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Try, Success, Failure}
 import scalaz.Identity
@@ -49,13 +50,13 @@ object ProjectController extends Controller with Secured {
   def create = IsAuthenticated { user => implicit request =>
     createForm.bindFromRequest.fold(
       formWithErrors =>
-        BadRequest(views.html.projects.create(formWithErrors)).flashing("error" -> "Inputs has someshing wrong"),
+        BadRequest(views.html.projects.create(formWithErrors)).flashing("error" -> Messages("messages.wrong_input")),
       success => {
         success match {
           case (name, hostname, recipe) =>
             val project = ProjectFactory(name, hostname, recipe)
             projectRepository.store(project)
-            Redirect(routes.Application.index).flashing("success" -> "Successed to create a project!")
+            Redirect(routes.Application.index).flashing("success" -> Messages("messages.create_project"))
         }
       }
     )
@@ -67,14 +68,14 @@ object ProjectController extends Controller with Secured {
         Ok(views.html.projects.edit(id, editForm.fill(
           (project.name, project.hostname, project.recipe))))
       case _ =>
-        Redirect(routes.Application.index).flashing("error" -> "Not found project to edit")
+        Redirect(routes.Application.index).flashing("error" -> Messages("messages.not_found_project_to_edit"))
     }
   }
 
   def edit(id: String) = IsAuthenticated { user => implicit request =>
     editForm.bindFromRequest.fold(
       formWithErrors =>
-        BadRequest(views.html.projects.edit(id, formWithErrors)).flashing("error" -> "Inputs has someshing wrong"),
+        BadRequest(views.html.projects.edit(id, formWithErrors)).flashing("error" -> Messages("messages.wrong_input")),
       success => {
         getProjectByIdString(id) match {
           case Some(project) => {
@@ -86,7 +87,7 @@ object ProjectController extends Controller with Secured {
             }
           }
           case _ =>
-            Redirect(routes.Application.index).flashing("error" -> "Not found project to edit")
+            Redirect(routes.Application.index).flashing("error" -> Messages("messages.not_found_project_to_edit"))
         }
       }
     )

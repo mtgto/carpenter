@@ -1,7 +1,4 @@
-@(project: net.mtgto.domain.Project)(implicit flash: Flash)
-
-@import helper._
-@import helper.twitterBootstrap._
+@(project: net.mtgto.domain.Project)(implicit lang: Lang, flash: Flash)
 
 @headers = {}
 @footers = {
@@ -37,21 +34,20 @@
   });
 </script>
 }
-@main(s"Project ${project.name}", headers, footers) {
+@main(Messages("views.projects.header", project.name), headers, footers) {
   <section>
-    <h2>Project</h2>
-    @project.name</h3>
+    <h2>@Messages("views.projects.header", project.name)</h2>
   </section>
   <section>
-    <h2>Task</h2>
+    <h2>@Messages("views.projects.index.task")</h2>
     <select id="task-select">
       <option>Loading...</option>
     </select>
-    <a class="btn btn-primary run_task" href="#">Run</a>
+    <a class="btn btn-primary run_task" href="#">@Messages("views.projects.run")</a>
   </section>
   <section>
-    <h2>Log</h2>
+    <h2>@Messages("views.projects.index.log")</h2>
     <textarea rows="10" id="log"></textarea>
   </section>
-  <a class="btn btn-large" href="@net.mtgto.controllers.routes.Application.index">Back</a>
+  <a class="btn btn-large" href="@net.mtgto.controllers.routes.Application.index">@Messages("views.back")</a>
 }

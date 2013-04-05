@@ -1,0 +1,70 @@
+# cancel
+views.cancel=キャンセル
+# edit
+views.edit=編集
+# submit
+views.submit=送信
+# back
+views.back=戻る
+
+views.users.login.title=サインインが必要です
+# input field placeholder of user name
+views.users.login.user.name=ユーザ名
+# input field placeholder of user password
+views.users.login.password=パスワード
+# button to sign-in
+views.users.login.signin=サインイン
+
+# header of projects
+views.index.header.projects=プロジェクト
+# header of users
+views.index.header.users=ユーザ
+# table header of project and user
+views.index.name=名前
+# table header of hostname
+views.index.hostname=ホスト名
+# button to logout
+views.index.logout=ログアウト
+# create new user
+views.index.create_user=新しいユーザの作成
+# change password
+views.index.change_password=パスワードを変更する
+# create new project
+views.index.create_project=新しいプロジェクトの作成
+# submit button to chanage password
+views.index.change_password_button=変更
+# submit button to create new user
+views.index.create_user_button=作成
+# input field placeholder of old password
+views.index.old_password=古いパスワード
+# input field placeholder of new password
+views.index.new_password=新しいパスワード
+# input field placeholder of user name
+views.index.user.name=ユーザ名
+# input field placeholder of user password
+views.index.user.password=パスワード
+
+# input header and placeholder of project name
+views.projects.project_name=プロジェクト名
+# input header and placeholder of hostname
+views.projects.hostname=ホスト名
+# input header and placeholder of recipe
+views.projects.recipe=レシピ
+# header of new project
+views.projects.create.header=新規プロジェクト
+# header of edit project
+views.projects.edit.header=プロジェクトの編集
+# message of create new project
+messages.create_project=プロジェクトの作成に成功しました
+# message of wrong input
+messages.wrong_input=入力項目におかしなところがあります
+# message of no project found to edit
+messages.not_found_project_to_edit=編集しようとしたプロジェクトがありません
+# header of project task
+views.projects.index.task=タスク
+# header of project task log
+views.projects.index.log=ログ
+# button to run a task
+views.projects.run=実行
+# header of project
+views.projects.header=プロジェクト {0}
