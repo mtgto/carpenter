@@ -5,9 +5,9 @@
 @main(Messages("views.projects.create.header"), headers, footers) {
   <h2>@Messages("views.projects.create.header")</h2>
   @helper.form(action = net.mtgto.controllers.routes.ProjectController.create, 'class -> "form-horizontal") {
-    @inputText(createForm("name"), '_label -> Messages("views.projects.project_name"), 'placeholder -> Messages("views.projects.project_name"))
-    @inputText(createForm("hostname"), '_label -> Messages("views.projects.hostname"), 'placeholder -> Messages("views.projects.hostname"))
-    @textarea(createForm("recipe"), '_label -> Messages("views.projects.recipe"), 'placeholder -> Messages("views.projects.recipe"), 'rows -> 10)
+    @inputText(createForm("name"), '_label -> Messages("views.projects.project_name"), 'placeholder -> Messages("views.projects.project_name"), 'class -> "span9")
+    @inputText(createForm("hostname"), '_label -> Messages("views.projects.hostname"), 'placeholder -> Messages("views.projects.hostname"), 'class -> "span9")
+    @textarea(createForm("recipe"), '_label -> Messages("views.projects.recipe"), 'placeholder -> Messages("views.projects.recipe"), 'rows -> 10, 'class -> "span9")
     <a class="btn btn-large" href="@net.mtgto.controllers.routes.Application.index">@Messages("views.back")</a>
     <button class="btn btn-large btn-primary" type="submit">@Messages("views.submit")</button>
   }
