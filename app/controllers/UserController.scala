@@ -79,7 +79,7 @@ object UserController extends Controller with BaseController {
           case Some(user) => 
             Redirect(routes.Application.index).withSession("userId" -> user.identity.value.toString)
           case None =>
-            Redirect(routes.Application.index).flashing("error" -> "Name or password is wrong")
+            Redirect(routes.Application.index).flashing("error" -> Messages("messages.wrong_name_or_password"))
         }
       }
     )
@@ -88,11 +88,11 @@ object UserController extends Controller with BaseController {
   def create = IsAuthenticated { user => implicit request =>
     createForm.bindFromRequest.fold(
       formWithErrors =>
-        Redirect(routes.Application.index).flashing("error" -> ("Inputs has someshing wrong" + formWithErrors)),
+        Redirect(routes.Application.index).flashing("error" -> Messages("messages.wrong_input")),
       success => success match {
         case (name, password) =>
           userRepository.store(UserFactory.createUser(name, getHashedPassword(name, password)))
-          Redirect(routes.Application.index).flashing("success" -> (s"Create new user ${name}!"))
+          Redirect(routes.Application.index).flashing("success" -> Messages("messages.create_user", name))
       }
     )
   }
@@ -107,9 +107,9 @@ object UserController extends Controller with BaseController {
           userRepository.findByNameAndPassword(user.name, oldHashedPassword) match {
             case Some(user) =>
               userRepository.store(User(user.identity, user.name, Some(getHashedPassword(user.name, newPassword))))
-              Redirect(routes.Application.index).flashing("success" -> "Changed your password")
+              Redirect(routes.Application.index).flashing("success" -> Messages("messages.users.changed_password"))
             case _ =>
-              Redirect(routes.Application.index).flashing("error" -> "Password is incorrect!")
+              Redirect(routes.Application.index).flashing("error" -> Messages("messages.wrong_password"))
           }
       }
     )

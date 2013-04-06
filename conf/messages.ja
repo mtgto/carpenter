@@ -14,6 +14,8 @@ views.users.login.user.name=ユーザ名
 views.users.login.password=パスワード
 # button to sign-in
 views.users.login.signin=サインイン
+# changed password
+messages.users.changed_password=パスワードを変更しました
 
 # header of projects
 views.index.header.projects=プロジェクト
@@ -56,10 +58,16 @@ views.projects.create.header=新規プロジェクト
 views.projects.edit.header=プロジェクトの編集
 # message of create new project
 messages.create_project=プロジェクトの作成に成功しました
+# message of create new user
+messages.create_user=ユーザ {0} の作成に成功しました
 # message of wrong input
 messages.wrong_input=入力項目におかしなところがあります
 # message of no project found to edit
 messages.not_found_project_to_edit=編集しようとしたプロジェクトがありません
+# message of wrong password
+messages.wrong_password=パスワードが違います
+# message of wrong name or password
+messages.wrong_name_or_password=ユーザ名かパスワードが違います
 # header of project task
 views.projects.index.task=タスク
 # header of project task log

@@ -14,6 +14,8 @@ views.users.login.user.name=name
 views.users.login.password=password
 # button to sign-in
 views.users.login.signin=Sign in
+# changed password
+messages.users.changed_password=Changed password
 
 # header of projects
 views.index.header.projects=Projects
@@ -56,10 +58,16 @@ views.projects.create.header=New Project
 views.projects.edit.header=Edit Project
 # message of create new project
 messages.create_project=Successed to create a project!
+# message of create new user
+messages.create_user=Successed to create new user {0}!
 # message of wrong input
 messages.wrong_input=Inputs has someshing wrong
 # message of no project found to edit
 messages.not_found_project_to_edit=Not found project to edit!
+# message of wrong password
+messages.wrong_password=Password is incorrect!
+# message of wrong name or password
+messages.wrong_name_or_password=Name or password is wrong
 # header of project task
 views.projects.index.task=Task
 # header of project task log
