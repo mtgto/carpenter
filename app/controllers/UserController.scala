@@ -8,10 +8,8 @@ import play.api.i18n.Messages
 
 import net.mtgto.domain.{User, UserRepository, UserFactory}
 
-object UserController extends Controller with Secured {
+object UserController extends Controller with BaseController {
   protected[this] val userRepository: UserRepository = UserRepository()
-
-  private def getConfiguration(name: String): String = Play.current.configuration.getString(name).get
 
   private val (adminName, adminPassword) = (getConfiguration("carpenter.admin_name"), getConfiguration("carpenter.admin_password"))
 

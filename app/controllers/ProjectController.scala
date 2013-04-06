@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Try, Success, Failure}
 import scalaz.Identity
 
-object ProjectController extends Controller with Secured {
+object ProjectController extends Controller with BaseController {
   protected[this] val userRepository: UserRepository = UserRepository()
 
   protected[this] val projectRepository: ProjectRepository = ProjectRepository()
