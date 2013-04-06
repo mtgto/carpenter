@@ -21,7 +21,9 @@ object ProjectController extends Controller with BaseController {
 
   protected[this] val jobRepository: JobRepository = JobRepository()
 
-  protected[this] val taskService = new net.mtgto.domain.DefaultTaskService("./workspace")
+  private val workspacePath = getConfiguration("carpenter.workspace")
+
+  protected[this] val taskService = new net.mtgto.domain.DefaultTaskService(workspacePath)
 
   protected[this] val createForm = Form(
     tuple(
