@@ -10,7 +10,8 @@ object ApplicationBuild extends Build {
   val appDependencies = Seq(
     jdbc,
     anorm,
-    "org.sisioh" %% "scala-dddbase-core" % "0.0.1"
+    "org.sisioh" %% "scala-dddbase-core" % "0.0.1",
+    "org.sisioh" %% "baseunits-scala" % "0.0.1"
   )
 
   // Only compile the bootstrap bootstrap.less file and any other *.less file in the stylesheets directory
@@ -23,7 +24,8 @@ object ApplicationBuild extends Build {
 
   val main = play.Project(appName, appVersion, appDependencies).settings(
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-Xlint", "-encoding", "UTF8"),
-    resolvers += "scala-dddbase Repository" at "http://sisioh.github.com/scala-dddbase/repos/release/",
+    resolvers ++= Seq("scala-dddbase Repository" at "http://sisioh.github.com/scala-dddbase/repos/release/",
+                      "baseunits-scala Repository" at "http://sisioh.github.com/baseunits-scala/repos/release/"),
     templatesImport ++= Seq("views.html.helper._", "views.html.helper.twitterBootstrap._", "play.api.i18n.Messages"),
     lessEntryPoints <<= baseDirectory(customLessEntryPoints)
   )

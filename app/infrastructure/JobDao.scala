@@ -1,10 +1,14 @@
 package net.mtgto.infrastructure
 
-import java.util.UUID
+import java.util.{Date, UUID}
 
 trait JobDao {
   def findById(id: UUID): Option[Job]
   def findAll: Seq[Job]
-  def save(id: UUID, projectId: UUID, exitCode: Int, log: String): Unit
+  /**
+   * @param executeTime: start time to execute the job
+   * @param executeDuration: duration of the job
+   */
+  def save(id: UUID, projectId: UUID, userId: UUID, exitCode: Int, log: String, executeDate: Date, executeDuration: Long): Unit
   def delete(id: UUID): Int
 }

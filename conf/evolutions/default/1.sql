@@ -15,8 +15,11 @@ CREATE TABLE `projects` (
 CREATE TABLE `jobs` (
   `id` CHAR(36) NOT NULL,
   `project_id` CHAR(36) NOT NULL,
+  `user_id` CHAR(36) NOT NULL,
   `exit_code` INT,
   `log` TEXT NOT NULL,
+  `execute_time` DATETIME NOT NULL,
+  `execute_duration` INT,
   PRIMARY KEY (`id`)
 );
 # --- !Downs

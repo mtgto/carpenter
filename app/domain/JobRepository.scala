@@ -1,7 +1,8 @@
 package net.mtgto.domain
 
 import java.util.UUID
-import net.mtgto.infrastructure.{JobDao, DatabaseJobDao}
+import net.mtgto.infrastructure.{Job => InfraJob, JobDao, DatabaseJobDao}
+import org.sisioh.baseunits.scala.time.{Duration, TimePoint}
 import org.sisioh.dddbase.core.{EntityNotFoundException, Repository}
 import scalaz.Identity
 
@@ -15,9 +16,11 @@ object JobRepository {
 
     protected[this] val projectRepository: ProjectRepository = ProjectRepository()
 
+    protected[this] val userRepository: UserRepository = UserRepository()
+
     override def findAll: Seq[Job] = {
       jobDao.findAll.map {
-        infraJob => Job(Identity(infraJob.id), projectRepository.resolve(Identity(infraJob.projectId)), infraJob.exitCode, infraJob.log)
+        convertInfraToDomain(_)
       }
     }
 
@@ -37,7 +40,7 @@ object JobRepository {
 
     override def resolveOption(identifier: Identity[UUID]): Option[Job] = {
       jobDao.findById(identifier.value).map {
-        infraJob => Job(Identity(infraJob.id), projectRepository.resolve(Identity(infraJob.projectId)), infraJob.exitCode, infraJob.log)
+        convertInfraToDomain(_)
       }
     }
 
@@ -56,7 +59,8 @@ object JobRepository {
      * @throws RepositoryException リポジトリにアクセスできない場合
      */
     override def store(entity: Job): Unit = {
-      jobDao.save(entity.identity.value, entity.project.identity.value, entity.exitCode, entity.log)
+      jobDao.save(entity.identity.value, entity.project.identity.value, entity.user.identity.value, entity.exitCode,
+        entity.log, entity.executeTimePoint.asJavaUtilDate, entity.executeDuration.quantity)
     }
 
     /**
@@ -81,6 +85,12 @@ object JobRepository {
      */
     override def delete(entity: Job): Unit = {
       delete(entity.identity)
+    }
+
+    protected[this] def convertInfraToDomain(infraJob: InfraJob): Job = {
+      Job(Identity(infraJob.id), projectRepository.resolve(Identity(infraJob.projectId)),
+        userRepository.resolve(Identity(infraJob.userId)), infraJob.exitCode, infraJob.log,
+        TimePoint.from(infraJob.executeDate), Duration.milliseconds(infraJob.executeDuration))
     }
   }
 }

@@ -1,12 +1,14 @@
 package net.mtgto.domain
 
+import org.sisioh.baseunits.scala.time.{Duration, TimePoint}
+import org.sisioh.baseunits.scala.timeutil.Clock
 import scala.concurrent.{Future, future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait TaskService {
   def getAllTasks(project: Project): Seq[Task]
 
-  def execute(project: Project, taskName: String): Future[(Int, String)]
+  def execute(project: Project, taskName: String): Future[(Int, String, TimePoint, Duration)]
 }
 
 class DefaultTaskService(workspacePath: String) extends TaskService {
@@ -36,12 +38,13 @@ class DefaultTaskService(workspacePath: String) extends TaskService {
     }
   }
 
-  override def execute(project: Project, taskName: String): Future[(Int, String)] = {
+  override def execute(project: Project, taskName: String): Future[(Int, String, TimePoint, Duration)] = {
     createProjectWorkspace(project)
     future {
       import scala.sys.process.{Process, ProcessLogger}
       val outputBuilder = new StringBuilder
       val errorBuilder = new StringBuilder
+      val startTimePoint = Clock.now
       val process: Process = Process(Seq("cap", taskName, "HOSTS="+project.hostname), getProjectWorkspace(project)).run(
         ProcessLogger(
           line => {
@@ -52,7 +55,8 @@ class DefaultTaskService(workspacePath: String) extends TaskService {
             errorBuilder ++= System.lineSeparator
           }))
       val exitCode = process.exitValue
-      (exitCode, errorBuilder.toString)
+      val executeDuration = Duration.milliseconds(Clock.now.breachEncapsulationOfMillisecondsFromEpoc - startTimePoint.breachEncapsulationOfMillisecondsFromEpoc)
+      (exitCode, errorBuilder.toString, startTimePoint, executeDuration)
     }
   }
 }

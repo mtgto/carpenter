@@ -134,8 +134,8 @@ object ProjectController extends Controller with BaseController {
             Async {
               taskService.execute(project, taskName).map( result =>
                 result match {
-                  case (exitCode, log) => {
-                    val job = JobFactory(project, exitCode, log)
+                  case (exitCode, log, executeTimePoint, executeDuration) => {
+                    val job = JobFactory(project, user, exitCode, log, executeTimePoint, executeDuration)
                     jobRepository.store(job)
                     Ok(Json.obj("status" -> "ok", "task" -> Json.toJson(taskName), "exitCode" -> exitCode, "log" -> log))
                   }
