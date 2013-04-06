@@ -8,6 +8,8 @@ import scalaz.Identity
 
 trait JobRepository extends Repository[Job, UUID] {
   def findAll: Seq[Job]
+
+  def findAllByProject(project: Project): Seq[Job]
 }
 
 object JobRepository {
@@ -20,6 +22,12 @@ object JobRepository {
 
     override def findAll: Seq[Job] = {
       jobDao.findAll.map {
+        convertInfraToDomain(_)
+      }
+    }
+
+    override def findAllByProject(project: Project): Seq[Job] = {
+      jobDao.findAllByProject(project.identity.value).map {
         convertInfraToDomain(_)
       }
     }

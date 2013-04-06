@@ -2,6 +2,7 @@ package net.mtgto.infrastructure
 
 import anorm._
 import anorm.SqlParser._
+import java.sql.{Clob, Timestamp}
 import java.util.UUID
 import java.util.Date
 import play.api.db.DB
@@ -11,16 +12,16 @@ class DatabaseJobDao extends JobDao {
 
   protected[this] def convertRowToJob(row: Row): Job = {
     row match {
-      case Row(id: String, projectId: String, userId: String, exitCode: Int, log: java.sql.Clob, executeTime: Date, executeDuration: Long) =>
+      case Row(id: String, projectId: String, userId: String, exitCode: Int, log: Clob, executeTime: Timestamp, executeDuration: Int) =>
         Job(UUID.fromString(id), UUID.fromString(projectId), UUID.fromString(userId), exitCode,
-            log.getSubString(1, log.length.toInt), executeTime, executeDuration)
+            log.getSubString(1, log.length.toInt), new Date(executeTime.getTime), executeDuration.toLong)
     }
   }
 
   override def findById(id: UUID): Option[Job] = {
     DB.withConnection{ implicit c =>
       SQL("SELECT `id`, `project_id`, `user_id`, `exit_code`, `log`, `execute_time`, `execute_duration` FROM `jobs` WHERE `id` = {id}")
-      .on("id" -> id)()
+      .on('id -> id)()
       .headOption.map(convertRowToJob)
     }
   }
@@ -28,6 +29,14 @@ class DatabaseJobDao extends JobDao {
   override def findAll: Seq[Job] = {
     DB.withConnection{ implicit c =>
       SQL("SELECT `id`, `project_id`, `user_id`, `exit_code`, `log`, `execute_time`, `execute_duration` FROM `jobs`")()
+      .map(convertRowToJob).toList
+    }
+  }
+
+  override def findAllByProject(projectId: UUID): Seq[Job] = {
+    DB.withConnection{ implicit c =>
+      SQL("SELECT `id`, `project_id`, `user_id`, `exit_code`, `log`, `execute_time`, `execute_duration` FROM `jobs` WHERE `project_id` = {projectId}")
+      .on('projectId -> projectId)()
       .map(convertRowToJob).toList
     }
   }

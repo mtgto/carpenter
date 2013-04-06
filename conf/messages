@@ -76,3 +76,17 @@ views.projects.index.log=Log
 views.projects.run=Run
 # header of project
 views.projects.header=Project {0}
+# header of project jobs
+views.projects.index.header.project_job=Jobs
+# header of user
+views.header.user=User
+# header of result
+views.header.result=Result
+# header of job execute duration
+views.header.duration=Duration
+# header of job execute start date
+views.header.date=Start Time
+# success of job execution
+views.projects.job.success=Success
+# failure of job execution
+views.projects.job.failure=Failure

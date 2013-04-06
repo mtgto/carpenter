@@ -5,6 +5,7 @@ import java.util.{Date, UUID}
 trait JobDao {
   def findById(id: UUID): Option[Job]
   def findAll: Seq[Job]
+  def findAllByProject(projectId: UUID): Seq[Job]
   /**
    * @param executeTime: start time to execute the job
    * @param executeDuration: duration of the job

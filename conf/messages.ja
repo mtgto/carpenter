@@ -76,3 +76,17 @@ views.projects.index.log=ログ
 views.projects.run=実行
 # header of project
 views.projects.header=プロジェクト {0}
+# header of project jobs
+views.projects.index.header.project_job=実行ジョブ
+# header of user
+views.header.user=ユーザ
+# header of result
+views.header.result=結果
+# header of job execute duration
+views.header.duration=実行時間
+# header of job execute start date
+views.header.date=開始時間
+# success of job execution
+views.projects.job.success=成功
+# failure of job execution
+views.projects.job.failure=失敗

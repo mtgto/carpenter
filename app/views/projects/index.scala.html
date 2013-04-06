@@ -1,4 +1,4 @@
-@(project: net.mtgto.domain.Project)(implicit lang: Lang, flash: Flash)
+@(project: net.mtgto.domain.Project, jobs: Seq[net.mtgto.domain.Job])(implicit lang: Lang, flash: Flash)
 
 @headers = {}
 @footers = {
@@ -48,6 +48,35 @@
   <section>
     <h2>@Messages("views.projects.index.log")</h2>
     <textarea rows="10" id="log"></textarea>
+  </section>
+  <section>
+    <h2>@Messages("views.projects.index.header.project_job")</h2>
+    <table class="table table-condensed table-striped">
+      <thead>
+        <tr>
+          <th>@Messages("views.header.result")</th>
+          <th>@Messages("views.header.user")</th>
+          <th>@Messages("views.header.duration")</th>
+          <th>@Messages("views.header.date")</th>
+        </tr>
+      </thead>
+      <tbody>
+      @for(job <- jobs) {
+        <tr>
+          <td>
+            @if(job.exitCode == 0){
+              <span class="label label-success">@Messages("views.projects.job.success")</span>
+            }else{
+              <span class="label label-important">@Messages("views.projects.job.failure")</span>
+            }
+          </td>
+          <td>@job.user.name</td>
+          <td>@job.executeDuration</td>
+          <td>@job.executeTimePoint</td>
+        </tr>
+      }
+      </tbody>
+    </table>
   </section>
   <a class="btn btn-large" href="@net.mtgto.controllers.routes.Application.index">@Messages("views.back")</a>
 }

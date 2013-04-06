@@ -98,7 +98,7 @@ object ProjectController extends Controller with BaseController {
   def showProjectView(id: String) = IsAuthenticated { user => implicit request =>
     getProjectByIdString(id) match {
       case Some(project) =>
-        Ok(views.html.projects.index(project))
+        Ok(views.html.projects.index(project, jobRepository.findAllByProject(project)))
       case _ =>
         Redirect(routes.Application.index).flashing("error" -> "Not found project to edit")
     }
