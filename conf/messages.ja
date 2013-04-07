@@ -90,3 +90,5 @@ views.header.date=開始時間
 views.projects.job.success=成功
 # failure of job execution
 views.projects.job.failure=失敗
+# loading the jobs
+views.projects.index.loading=読み込み中...

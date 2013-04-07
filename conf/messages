@@ -90,3 +90,5 @@ views.header.date=Start Time
 views.projects.job.success=Success
 # failure of job execution
 views.projects.job.failure=Failure
+# loading the jobs
+views.projects.index.loading=Loading...
