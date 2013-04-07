@@ -41,6 +41,14 @@ class DatabaseJobDao extends JobDao {
     }
   }
 
+  override def findAllByProjectOrderByDateDesc(projectId: UUID): Seq[Job] = {
+    DB.withConnection{ implicit c =>
+      SQL("SELECT `id`, `project_id`, `user_id`, `exit_code`, `log`, `execute_time`, `execute_duration` FROM `jobs` WHERE `project_id` = {projectId} ORDER BY `execute_time` DESC")
+      .on('projectId -> projectId)()
+      .map(convertRowToJob).toList
+    }
+  }
+
   override def save(id: UUID, projectId: UUID, userId: UUID, exitCode: Int, log: String, executeDate: Date, executeDuration: Long): Unit = {
     DB.withConnection{ implicit c =>
       val rowCount =

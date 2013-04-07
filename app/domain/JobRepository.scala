@@ -10,6 +10,8 @@ trait JobRepository extends Repository[Job, UUID] {
   def findAll: Seq[Job]
 
   def findAllByProject(project: Project): Seq[Job]
+
+  def findAllByProjectOrderByTimePointDesc(project: Project): Seq[Job]
 }
 
 object JobRepository {
@@ -28,6 +30,12 @@ object JobRepository {
 
     override def findAllByProject(project: Project): Seq[Job] = {
       jobDao.findAllByProject(project.identity.value).map {
+        convertInfraToDomain(_)
+      }
+    }
+
+    override def findAllByProjectOrderByTimePointDesc(project: Project): Seq[Job] = {
+      jobDao.findAllByProjectOrderByDateDesc(project.identity.value).map {
         convertInfraToDomain(_)
       }
     }
