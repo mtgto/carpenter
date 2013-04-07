@@ -22,7 +22,14 @@ CREATE TABLE `jobs` (
   `execute_duration` INT NOT NULL,
   PRIMARY KEY (`id`)
 );
+CREATE TABLE `authorities` (
+  `user_id` CHAR(36) NOT NULL,
+  `can_login` TINYINT NOT NULL DEFAULT '1',
+  `can_create_user` TINYINT NOT NULL DEFAULT '0',
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`)
+);
 # --- !Downs
 DROP TABLE `users`;
 DROP TABLE `projects`;
 DROP TABLE `jobs`;
+DROP TABLE `authorities`;

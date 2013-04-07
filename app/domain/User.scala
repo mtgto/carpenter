@@ -14,14 +14,15 @@ trait User extends Entity[UUID] {
   override val identity: Identity[UUID]
   val name: String
   val password: Option[String]
+  val authority: Authority
 
-  override def toString: String = Seq(identity, name).mkString("User(", ", ",")")
+  override def toString: String = Seq(identity, name, authority).mkString("User(", ", ",")")
 }
 
 object User {
-  private case class DefaultUser(identity: Identity[UUID], name: String, password: Option[String]) extends User
+  private case class DefaultUser(identity: Identity[UUID], name: String, password: Option[String], authority: Authority) extends User
 
-  def apply(identity: Identity[UUID], name: String, password: Option[String]): User = {
-    DefaultUser(identity, name, password)
+  def apply(identity: Identity[UUID], name: String, password: Option[String], authority: Authority): User = {
+    DefaultUser(identity, name, password, authority)
   }
 }

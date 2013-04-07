@@ -16,6 +16,16 @@ views.users.login.password=パスワード
 views.users.login.signin=サインイン
 # changed password
 messages.users.changed_password=パスワードを変更しました
+# create new user
+views.users.create_user=新しいユーザの作成
+# submit button to create new user
+views.users.create_user_button=作成
+# input field placeholder of user name
+views.users.user.name=ユーザ名
+# input field placeholder of user password
+views.users.user.password=パスワード
+# checkbox header of authority to create new user
+views.users.create.can_create_user=新しいユーザの作成が可能
 
 # header of projects
 views.index.header.projects=プロジェクト
@@ -27,24 +37,16 @@ views.index.name=名前
 views.index.hostname=ホスト名
 # button to logout
 views.index.logout=ログアウト
-# create new user
-views.index.create_user=新しいユーザの作成
 # change password
 views.index.change_password=パスワードを変更する
 # create new project
 views.index.create_project=新しいプロジェクトの作成
 # submit button to chanage password
 views.index.change_password_button=変更
-# submit button to create new user
-views.index.create_user_button=作成
 # input field placeholder of old password
 views.index.old_password=古いパスワード
 # input field placeholder of new password
 views.index.new_password=新しいパスワード
-# input field placeholder of user name
-views.index.user.name=ユーザ名
-# input field placeholder of user password
-views.index.user.password=パスワード
 
 # input header and placeholder of project name
 views.projects.project_name=プロジェクト名

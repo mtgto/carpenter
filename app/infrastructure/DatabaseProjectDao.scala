@@ -33,17 +33,17 @@ class DatabaseProjectDao extends ProjectDao {
     DB.withConnection{ implicit c =>
       val rowCount =
         SQL("UPDATE `projects` SET `name` = {name}, `hostname` = {hostname}, `recipe` = {recipe} WHERE `id` = {id}")
-          .on('id -> id, 'name -> name, 'hostname -> hostname, 'recipe -> recipe).executeUpdate()
+          .on('id -> id.toString, 'name -> name, 'hostname -> hostname, 'recipe -> recipe).executeUpdate()
       if (rowCount == 0)
         SQL("INSERT INTO `projects` (`id`, `name`, `hostname`, `recipe`) VALUES ({id},{name},{hostname},{recipe})")
-          .on('id -> id, 'name -> name, 'hostname -> hostname, 'recipe -> recipe).executeInsert()
+          .on('id -> id.toString, 'name -> name, 'hostname -> hostname, 'recipe -> recipe).executeInsert()
     }
   }
 
   override def delete(id: UUID): Int = {
     DB.withConnection{ implicit c =>
       SQL("DELETE `projects` WHERE `id` = {id}")
-        .on('id -> id).executeUpdate()
+        .on('id -> id.toString).executeUpdate()
     }
   }
 }

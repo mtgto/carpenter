@@ -21,7 +21,7 @@ class DatabaseJobDao extends JobDao {
   override def findById(id: UUID): Option[Job] = {
     DB.withConnection{ implicit c =>
       SQL("SELECT `id`, `project_id`, `user_id`, `exit_code`, `log`, `execute_time`, `execute_duration` FROM `jobs` WHERE `id` = {id}")
-      .on('id -> id)()
+      .on('id -> id.toString)()
       .headOption.map(convertRowToJob)
     }
   }
@@ -36,7 +36,7 @@ class DatabaseJobDao extends JobDao {
   override def findAllByProject(projectId: UUID): Seq[Job] = {
     DB.withConnection{ implicit c =>
       SQL("SELECT `id`, `project_id`, `user_id`, `exit_code`, `log`, `execute_time`, `execute_duration` FROM `jobs` WHERE `project_id` = {projectId}")
-      .on('projectId -> projectId)()
+      .on('projectId -> projectId.toString)()
       .map(convertRowToJob).toList
     }
   }
@@ -44,7 +44,7 @@ class DatabaseJobDao extends JobDao {
   override def findAllByProjectOrderByDateDesc(projectId: UUID): Seq[Job] = {
     DB.withConnection{ implicit c =>
       SQL("SELECT `id`, `project_id`, `user_id`, `exit_code`, `log`, `execute_time`, `execute_duration` FROM `jobs` WHERE `project_id` = {projectId} ORDER BY `execute_time` DESC")
-      .on('projectId -> projectId)()
+      .on('projectId -> projectId.toString)()
       .map(convertRowToJob).toList
     }
   }
@@ -54,12 +54,12 @@ class DatabaseJobDao extends JobDao {
       val rowCount =
         SQL("""UPDATE `jobs` SET `project_id` = {projectId}, `user_id` = {userId}, `exit_code` = {exitCode},
               |`log` = {log}, `execute_time` = {executeTime}, `execute_duration` = {executeDuration} WHERE `id` = {id}""".stripMargin)
-          .on('id -> id, 'projectId -> projectId, 'userId -> userId, 'exitCode -> exitCode, 'log -> log,
+          .on('id -> id.toString, 'projectId -> projectId.toString, 'userId -> userId.toString, 'exitCode -> exitCode, 'log -> log,
               'executeTime -> executeDate, 'executeDuration -> executeDuration).executeUpdate()
       if (rowCount == 0)
         SQL("""INSERT INTO `jobs` (`id`, `project_id`, `user_id`, `exit_code`, `log`, `execute_time`, `execute_duration`)
               |VALUES ({id},{projectId},{userId},{exitCode},{log},{executeTime},{executeDuration})""".stripMargin)
-          .on('id -> id, 'projectId -> projectId, 'userId -> userId, 'exitCode -> exitCode, 'log -> log,
+          .on('id -> id.toString, 'projectId -> projectId.toString, 'userId -> userId.toString, 'exitCode -> exitCode, 'log -> log,
               'executeTime -> executeDate, 'executeDuration -> executeDuration).executeInsert()
     }
   }
@@ -67,7 +67,7 @@ class DatabaseJobDao extends JobDao {
   override def delete(id: UUID): Int = {
     DB.withConnection{ implicit c =>
       SQL("DELETE `jobs` WHERE `id` = {id}")
-        .on('id -> id).executeUpdate()
+        .on('id -> id.toString).executeUpdate()
     }
   }
 }

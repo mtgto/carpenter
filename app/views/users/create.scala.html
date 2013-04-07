@@ -1,0 +1,14 @@
+@(createForm: Form[(String, String, Boolean)])(implicit lang: Lang, flash: Flash)
+
+@headers = {}
+@footers = {}
+@main(Messages("views.users.create_user"), headers, footers) {
+  <h2>@Messages("views.users.create_user")</h2>
+  @helper.form(action = net.mtgto.controllers.routes.UserController.create, 'class -> "form-horizontal") {
+    @inputText(createForm("name"), '_label -> Messages("views.users.user.name"), 'placeholder -> Messages("views.users.user.name"), 'class -> "span9")
+    @inputPassword(createForm("password"), '_label -> Messages("views.users.user.password"), 'placeholder -> Messages("views.users.user.password"), 'class -> "span9")
+    @checkbox(createForm("canCreateUser"), '_label -> Messages("views.users.create.can_create_user"), 'placeholder -> Messages("views.users.create.can_create_user"))
+    <a class="btn btn-large" href="@net.mtgto.controllers.routes.Application.index">@Messages("views.back")</a>
+    <button class="btn btn-large btn-primary" type="submit">@Messages("views.submit")</button>
+  }
+}

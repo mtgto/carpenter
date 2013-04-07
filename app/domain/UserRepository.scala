@@ -1,7 +1,7 @@
 package net.mtgto.domain
 
 import java.util.UUID
-import net.mtgto.infrastructure.{UserDao, DatabaseUserDao}
+import net.mtgto.infrastructure.{UserDao, DatabaseUserDao, Authority => InfraAuthority, User => InfraUser}
 import org.sisioh.dddbase.core.{EntityNotFoundException, Repository}
 import scalaz.Identity
 
@@ -14,16 +14,20 @@ object UserRepository {
   def apply(): UserRepository = new UserRepository {
     private val userDao: UserDao = new DatabaseUserDao
 
+    protected[this] def convertInfraAuthorityToDomain(infraAuthority: InfraAuthority): Authority = {
+      Authority(canLogin = infraAuthority.canLogin, canCreateUser = infraAuthority.canCreateUser)
+    }
+
+    protected[this] def convertInfraToDomain(infraUser: InfraUser): User = {
+      User(Identity(infraUser.id), infraUser.name, None, convertInfraAuthorityToDomain(infraUser.authority))
+    }
+
     override def findByNameAndPassword(name: String, password: String): Option[User] = {
-      userDao.findByNameAndPassword(name, password).map {
-        infraUser => User(Identity(infraUser.id), infraUser.name, None)
-      }
+      userDao.findByNameAndPassword(name, password).map(convertInfraToDomain)
     }
 
     override def findAll: Seq[User] = {
-      userDao.findAll.map {
-        infraUser => User(Identity(infraUser.id), infraUser.name, None)
-      }
+      userDao.findAll.map(convertInfraToDomain)
     }
 
     /**
@@ -41,9 +45,7 @@ object UserRepository {
     }
 
     override def resolveOption(identifier: Identity[UUID]): Option[User] = {
-      userDao.findById(identifier.value).map {
-        infraUser => User(Identity(infraUser.id), infraUser.name, None)
-      }
+      userDao.findById(identifier.value).map(convertInfraToDomain)
     }
 
     override def contains(identifier: Identity[UUID]): Boolean = {
@@ -62,7 +64,8 @@ object UserRepository {
      */
     override def store(entity: User): Unit = {
       assert(entity.password.isDefined)
-      userDao.save(entity.identity.value, entity.name, entity.password.get)
+      val infraAuthority = InfraAuthority(canLogin = entity.authority.canLogin, canCreateUser = entity.authority.canCreateUser)
+      userDao.save(entity.identity.value, entity.name, entity.password.get, infraAuthority)
     }
 
     /**

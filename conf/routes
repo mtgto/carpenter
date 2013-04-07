@@ -15,6 +15,7 @@ GET     /projects/:id/tasks         net.mtgto.controllers.ProjectController.task
 POST    /projects/:id/task/execute  net.mtgto.controllers.ProjectController.executeTask(id)
 GET     /projects/:id               net.mtgto.controllers.ProjectController.showProjectView(id)
 
+GET     /users/create               net.mtgto.controllers.UserController.showCreateView
 POST    /users/create               net.mtgto.controllers.UserController.create
 POST    /users/password             net.mtgto.controllers.UserController.changePassword
 

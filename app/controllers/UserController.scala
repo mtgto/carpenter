@@ -6,7 +6,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.Messages
 
-import net.mtgto.domain.{User, UserRepository, UserFactory}
+import net.mtgto.domain.{Authority, User, UserRepository, UserFactory}
 
 object UserController extends Controller with BaseController {
   protected[this] val userRepository: UserRepository = UserRepository()
@@ -25,7 +25,8 @@ object UserController extends Controller with BaseController {
   protected[this] val createForm = Form(
     tuple(
       "name" -> nonEmptyText,
-      "password" -> text
+      "password" -> text,
+      "canCreateUser" -> boolean
     )
   )
 
@@ -66,7 +67,8 @@ object UserController extends Controller with BaseController {
             val hashedPassword = getHashedPassword(name, password)
             userRepository.findByNameAndPassword(name, hashedPassword).orElse {
               if (name == adminName && password == adminPassword) {
-                val adminUser = UserFactory.createUser(name, hashedPassword)
+                val adminUser = UserFactory.createUser(
+                  name, hashedPassword, Authority(canLogin = true, canCreateUser = true))
                 userRepository.store(adminUser)
                 userRepository.findByNameAndPassword(name, hashedPassword)
               } else {
@@ -79,10 +81,15 @@ object UserController extends Controller with BaseController {
           case Some(user) => 
             Redirect(routes.Application.index).withSession("userId" -> user.identity.value.toString)
           case None =>
-            Redirect(routes.Application.index).flashing("error" -> Messages("messages.wrong_name_or_password"))
+            Redirect(routes.UserController.login).flashing("error" -> Messages("messages.wrong_name_or_password"))
         }
       }
     )
+  }
+
+  // TODO check user authority
+  def showCreateView = IsAuthenticated { user => implicit request =>
+    Ok(views.html.users.create(createForm))
   }
 
   def create = IsAuthenticated { user => implicit request =>
@@ -90,8 +97,10 @@ object UserController extends Controller with BaseController {
       formWithErrors =>
         Redirect(routes.Application.index).flashing("error" -> Messages("messages.wrong_input")),
       success => success match {
-        case (name, password) =>
-          userRepository.store(UserFactory.createUser(name, getHashedPassword(name, password)))
+        case (name, password, canCreateUser) =>
+          userRepository.store(
+            UserFactory.createUser(
+              name, getHashedPassword(name, password), Authority(canLogin = true, canCreateUser = canCreateUser)))
           Redirect(routes.Application.index).flashing("success" -> Messages("messages.create_user", name))
       }
     )
@@ -106,7 +115,7 @@ object UserController extends Controller with BaseController {
           val oldHashedPassword = getHashedPassword(user.name, oldPassword)
           userRepository.findByNameAndPassword(user.name, oldHashedPassword) match {
             case Some(user) =>
-              userRepository.store(User(user.identity, user.name, Some(getHashedPassword(user.name, newPassword))))
+              userRepository.store(User(user.identity, user.name, Some(getHashedPassword(user.name, newPassword)), user.authority))
               Redirect(routes.Application.index).flashing("success" -> Messages("messages.users.changed_password"))
             case _ =>
               Redirect(routes.Application.index).flashing("error" -> Messages("messages.wrong_password"))

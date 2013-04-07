@@ -1,21 +1,4 @@
 $(function(){
-    $('#create_user_cancel').click(
-        function(){
-            $('#modal_create_user').modal('hide');
-        }
-    );
-    $('a.create_user').click(
-        function(){
-            $('#modal_create_user').modal('show');
-        }
-    );
-    $('#create_user_submit').click(
-        function(){
-            $('#form_create_user').submit();
-        }
-    );
-});
-$(function(){
     $('#change_password_cancel').click(
         function(){
             $('#modal_change_password').modal('hide');
