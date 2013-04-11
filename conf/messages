@@ -37,6 +37,8 @@ views.index.name=name
 views.index.hostname=hostname
 # button to logout
 views.index.logout=Logout
+# button to create new user
+views.index.create_user=Create new user
 # change password
 views.index.change_password=Change password
 # create new project
@@ -59,11 +61,11 @@ views.projects.create.header=New Project
 # header of edit project
 views.projects.edit.header=Edit Project
 # message of create new project
-messages.create_project=Successed to create a project!
+messages.create_project=Succeeded to create a project!
 # message of create new user
-messages.create_user=Successed to create new user {0}!
+messages.create_user=Succeeded to create new user {0}!
 # message of wrong input
-messages.wrong_input=Inputs has someshing wrong
+messages.wrong_input=Inputs has something wrong
 # message of no project found to edit
 messages.not_found_project_to_edit=Not found project to edit!
 # message of wrong password

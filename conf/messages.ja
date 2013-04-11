@@ -37,6 +37,8 @@ views.index.name=名前
 views.index.hostname=ホスト名
 # button to logout
 views.index.logout=ログアウト
+# button to create new user
+views.index.create_user=新しいユーザの作成
 # change password
 views.index.change_password=パスワードを変更する
 # create new project
