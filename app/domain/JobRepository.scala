@@ -1,7 +1,7 @@
-package net.mtgto.domain
+package net.mtgto.carpenter.domain
 
 import java.util.UUID
-import net.mtgto.infrastructure.{Job => InfraJob, JobDao, DatabaseJobDao}
+import net.mtgto.carpenter.infrastructure.{Job => InfraJob, JobDao, DatabaseJobDao}
 import org.sisioh.baseunits.scala.time.{Duration, TimePoint}
 import org.sisioh.dddbase.core.{EntityNotFoundException, Repository}
 import scalaz.Identity

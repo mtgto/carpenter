@@ -1,9 +1,9 @@
-package net.mtgto.controllers
+package net.mtgto.carpenter.controllers
 
 import play.api._
 import play.api.mvc._
 
-import net.mtgto.domain.{UserRepository, ProjectRepository}
+import net.mtgto.carpenter.domain.{UserRepository, ProjectRepository}
 
 object Application extends Controller with BaseController {
   protected[this] val userRepository: UserRepository = UserRepository()

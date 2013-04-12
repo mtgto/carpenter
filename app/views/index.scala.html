@@ -1,4 +1,4 @@
-@(projects: Seq[net.mtgto.domain.Project], users: Seq[net.mtgto.domain.User])(implicit lang: Lang, flash: Flash)
+@(projects: Seq[net.mtgto.carpenter.domain.Project], users: Seq[net.mtgto.carpenter.domain.User])(implicit lang: Lang, flash: Flash)
 
 @headers = {}
 @footers = {
@@ -6,7 +6,7 @@
 }
 @main("Welcome to Carpenter", headers, footers) {
   <div class='modal hide' id='modal_change_password'>
-    @helper.form(action = net.mtgto.controllers.routes.UserController.changePassword, 'id -> "form_change_password") {
+    @helper.form(action = net.mtgto.carpenter.controllers.routes.UserController.changePassword, 'id -> "form_change_password") {
       <div class="modal-header">
         <a class="close" data-dismiss="modal">×</a>
         <h3 id='modal_change_password_title'>@Messages("views.index.change_password")</h3>
@@ -34,14 +34,14 @@
       <tbody>
         @for(project <- projects) {
           <tr>
-            <td><a href="@net.mtgto.controllers.routes.ProjectController.showProjectView(project.identity.value.toString)">@project.name</a></td>
+            <td><a href="@net.mtgto.carpenter.controllers.routes.ProjectController.showProjectView(project.identity.value.toString)">@project.name</a></td>
             <td>@project.hostname</td>
-            <td><a href="@net.mtgto.controllers.routes.ProjectController.edit(project.identity.value.toString)">@Messages("views.edit")</a></td>
+            <td><a href="@net.mtgto.carpenter.controllers.routes.ProjectController.edit(project.identity.value.toString)">@Messages("views.edit")</a></td>
           </tr>
         }
       </tbody>
     </table>
-    <a class="btn" href="@net.mtgto.controllers.routes.ProjectController.create">@Messages("views.index.create_project")</a>
+    <a class="btn" href="@net.mtgto.carpenter.controllers.routes.ProjectController.create">@Messages("views.index.create_project")</a>
   </section>
   </section>
     <section id="users" class="container">
@@ -60,8 +60,8 @@
           }
         </tbody>
       </table>
-      <a class="btn" href="@net.mtgto.controllers.routes.UserController.logout">@Messages("views.index.logout")</a>
-      <a class="btn create_user" href="@net.mtgto.controllers.routes.UserController.showCreateView">@Messages("views.index.create_user")</a>
+      <a class="btn" href="@net.mtgto.carpenter.controllers.routes.UserController.logout">@Messages("views.index.logout")</a>
+      <a class="btn create_user" href="@net.mtgto.carpenter.controllers.routes.UserController.showCreateView">@Messages("views.index.create_user")</a>
       <a class="btn change_password" href="#">@Messages("views.index.change_password")</a>
   </section>
 }

@@ -1,4 +1,4 @@
-package net.mtgto.controllers
+package net.mtgto.carpenter.controllers
 
 import play.api._
 import play.api.mvc._
@@ -8,8 +8,8 @@ import play.api.i18n.Messages
 import play.api.libs.json._
 
 import java.util.UUID
-import net.mtgto.domain.{User, UserRepository, Project, ProjectFactory, ProjectRepository, JobRepository, JobFactory}
-import net.mtgto.domain.Task
+import net.mtgto.carpenter.domain.{User, UserRepository, Project, ProjectFactory, ProjectRepository, JobRepository, JobFactory}
+import net.mtgto.carpenter.domain.Task
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Try, Success, Failure}
 import scalaz.Identity
@@ -23,7 +23,7 @@ object ProjectController extends Controller with BaseController {
 
   private val workspacePath = getConfiguration("carpenter.workspace")
 
-  protected[this] val taskService = new net.mtgto.domain.DefaultTaskService(workspacePath)
+  protected[this] val taskService = new net.mtgto.carpenter.domain.DefaultTaskService(workspacePath)
 
   protected[this] val createForm = Form(
     tuple(

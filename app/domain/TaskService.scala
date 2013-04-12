@@ -1,4 +1,4 @@
-package net.mtgto.domain
+package net.mtgto.carpenter.domain
 
 import org.sisioh.baseunits.scala.time.{Duration, TimePoint}
 import org.sisioh.baseunits.scala.timeutil.Clock

@@ -1,4 +1,4 @@
-package net.mtgto.controllers
+package net.mtgto.carpenter.controllers
 
 import play.api._
 import play.api.mvc._
@@ -6,7 +6,7 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.Messages
 
-import net.mtgto.domain.{Authority, User, UserRepository, UserFactory}
+import net.mtgto.carpenter.domain.{Authority, User, UserRepository, UserFactory}
 
 object UserController extends Controller with BaseController {
   protected[this] val userRepository: UserRepository = UserRepository()

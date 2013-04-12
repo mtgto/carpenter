@@ -1,4 +1,4 @@
-package net.mtgto.infrastructure
+package net.mtgto.carpenter.infrastructure
 
 import java.util.UUID
 

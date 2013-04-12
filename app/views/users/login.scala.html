@@ -5,7 +5,7 @@
 }
 @footers = {}
 @main(Messages("views.users.login.signin"), headers, footers) {
-  @helper.form(action = net.mtgto.controllers.routes.UserController.authenticate, 'class -> "form-signin") {
+  @helper.form(action = net.mtgto.carpenter.controllers.routes.UserController.authenticate, 'class -> "form-signin") {
   <h2 class="form-signin-heading">@Messages("views.users.login.title")</h2>
     @inputText(loginForm("name"), '_label -> Messages("views.users.login.user.name"), 'placeholder -> Messages("views.users.login.user.name"))
     @inputPassword(loginForm("password"), '_label -> Messages("views.users.login.password"), 'placeholder -> Messages("views.users.login.password"))

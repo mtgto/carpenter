@@ -3,21 +3,21 @@
 # ~~~~
 
 # Home page
-GET     /                           net.mtgto.controllers.Application.index
-GET     /login                      net.mtgto.controllers.UserController.login
-GET     /logout                     net.mtgto.controllers.UserController.logout
-POST    /authenticate               net.mtgto.controllers.UserController.authenticate
-GET     /projects/create            net.mtgto.controllers.ProjectController.showCreateView
-POST    /projects/create            net.mtgto.controllers.ProjectController.create
-GET     /projects/:id/edit          net.mtgto.controllers.ProjectController.showEditView(id)
-POST    /projects/:id/edit          net.mtgto.controllers.ProjectController.edit(id)
-GET     /projects/:id/tasks         net.mtgto.controllers.ProjectController.tasks(id)
-POST    /projects/:id/task/execute  net.mtgto.controllers.ProjectController.executeTask(id)
-GET     /projects/:id               net.mtgto.controllers.ProjectController.showProjectView(id)
+GET     /                           net.mtgto.carpenter.controllers.Application.index
+GET     /login                      net.mtgto.carpenter.controllers.UserController.login
+GET     /logout                     net.mtgto.carpenter.controllers.UserController.logout
+POST    /authenticate               net.mtgto.carpenter.controllers.UserController.authenticate
+GET     /projects/create            net.mtgto.carpenter.controllers.ProjectController.showCreateView
+POST    /projects/create            net.mtgto.carpenter.controllers.ProjectController.create
+GET     /projects/:id/edit          net.mtgto.carpenter.controllers.ProjectController.showEditView(id)
+POST    /projects/:id/edit          net.mtgto.carpenter.controllers.ProjectController.edit(id)
+GET     /projects/:id/tasks         net.mtgto.carpenter.controllers.ProjectController.tasks(id)
+POST    /projects/:id/task/execute  net.mtgto.carpenter.controllers.ProjectController.executeTask(id)
+GET     /projects/:id               net.mtgto.carpenter.controllers.ProjectController.showProjectView(id)
 
-GET     /users/create               net.mtgto.controllers.UserController.showCreateView
-POST    /users/create               net.mtgto.controllers.UserController.create
-POST    /users/password             net.mtgto.controllers.UserController.changePassword
+GET     /users/create               net.mtgto.carpenter.controllers.UserController.showCreateView
+POST    /users/create               net.mtgto.carpenter.controllers.UserController.create
+POST    /users/password             net.mtgto.carpenter.controllers.UserController.changePassword
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

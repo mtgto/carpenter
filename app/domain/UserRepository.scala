@@ -1,7 +1,7 @@
-package net.mtgto.domain
+package net.mtgto.carpenter.domain
 
 import java.util.UUID
-import net.mtgto.infrastructure.{UserDao, DatabaseUserDao, Authority => InfraAuthority, User => InfraUser}
+import net.mtgto.carpenter.infrastructure.{UserDao, DatabaseUserDao, Authority => InfraAuthority, User => InfraUser}
 import org.sisioh.dddbase.core.{EntityNotFoundException, Repository}
 import scalaz.Identity
 

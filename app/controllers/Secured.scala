@@ -1,7 +1,7 @@
-package net.mtgto.controllers
+package net.mtgto.carpenter.controllers
 
 import java.util.UUID
-import net.mtgto.domain.{User, UserRepository}
+import net.mtgto.carpenter.domain.{User, UserRepository}
 import play.api.mvc._
 import scala.util.{Failure, Success, Try}
 import scalaz.Identity

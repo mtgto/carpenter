@@ -1,4 +1,4 @@
-package net.mtgto.domain
+package net.mtgto.carpenter.domain
 
 case class Authority(
   canLogin: Boolean,

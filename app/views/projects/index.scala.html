@@ -1,9 +1,9 @@
-@(project: net.mtgto.domain.Project, jobs: Seq[net.mtgto.domain.Job])(implicit lang: Lang, flash: Flash)
+@(project: net.mtgto.carpenter.domain.Project, jobs: Seq[net.mtgto.carpenter.domain.Job])(implicit lang: Lang, flash: Flash)
 
 @headers = {}
 @footers = {
 <script>
-  $.get('@net.mtgto.controllers.routes.ProjectController.tasks(project.identity.value.toString)', function(data) {
+  $.get('@net.mtgto.carpenter.controllers.routes.ProjectController.tasks(project.identity.value.toString)', function(data) {
     var status = data['status']
     console.log("tasks.status: " + status)
     if (status == 'ok') {
@@ -22,7 +22,7 @@
         runLink.addClass("disabled");
         var taskName = $('#task-select option:selected').val()
         console.log("taskName = " + taskName)
-        $.post('@net.mtgto.controllers.routes.ProjectController.executeTask(project.identity.value.toString)', {name: taskName}, function(data) {
+        $.post('@net.mtgto.carpenter.controllers.routes.ProjectController.executeTask(project.identity.value.toString)', {name: taskName}, function(data) {
           log = data['log'];
           exitCode = data['exitCode'];
           console.log("exitCode = " + exitCode);
@@ -78,5 +78,5 @@
       </tbody>
     </table>
   </section>
-  <a class="btn btn-large" href="@net.mtgto.controllers.routes.Application.index">@Messages("views.back")</a>
+  <a class="btn btn-large" href="@net.mtgto.carpenter.controllers.routes.Application.index">@Messages("views.back")</a>
 }
