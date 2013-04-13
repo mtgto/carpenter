@@ -6,4 +6,6 @@ trait SourceRepositoryDao {
   def findByProjectId(id: UUID): Seq[SourceRepository]
 
   def save(projectId: UUID, sourceRepository: SourceRepository): Unit
+
+  def deleteByProjectId(projectId: UUID): Int
 }

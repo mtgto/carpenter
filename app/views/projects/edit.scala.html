@@ -1,4 +1,4 @@
-@(id: String, editForm: Form[(String, String, String)])(implicit lang: Lang, flash: Flash)
+@(id: String, editForm: Form[(String, String, String, String, String)], sourceRepositoryTypes: Seq[(String, String)])(implicit lang: Lang, flash: Flash)
 
 @headers = {}
 @footers = {}
@@ -7,6 +7,8 @@
   @helper.form(action = net.mtgto.carpenter.controllers.routes.ProjectController.edit(id), 'class -> "form-horizontal") {
     @inputText(editForm("name"), '_label -> Messages("views.projects.project_name"), 'placeholder -> Messages("views.projects.project_name"), 'class -> "span9")
     @inputText(editForm("hostname"), '_label -> Messages("views.projects.hostname"), 'placeholder -> Messages("views.projects.hostname"), 'class -> "span9")
+    @inputRadioGroup(editForm("sourceRepositoryType"), options = sourceRepositoryTypes, '_label -> Messages("views.projects.source_repository_type"), 'placeholder -> Messages("views.projects.source_repository_type"), 'placeholder -> Messages("views.projects.source_repository_type"))
+    @inputText(editForm("url"), '_label -> Messages("views.projects.source_repository_url"), 'class -> "span9")
     @textarea(editForm("recipe"), '_label -> Messages("views.projects.recipe"), 'placeholder -> Messages("views.projects.recipe"), 'rows -> 10, 'class -> "span9")
     <a class="btn btn-large" href="@net.mtgto.carpenter.controllers.routes.Application.index">@Messages("views.back")</a>
     <button class="btn btn-large btn-primary" type="submit">@Messages("views.submit")</button>

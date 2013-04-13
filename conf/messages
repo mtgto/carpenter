@@ -56,12 +56,18 @@ views.projects.project_name=Project name
 views.projects.hostname=Hostname
 # input header and placeholder of recipe
 views.projects.recipe=Recipe
+# input header and placeholder of repository type
+views.projects.source_repository_type=Repository Type
+# input header and placeholder of repository url
+views.projects.source_repository_url=Repository URL
 # header of new project
 views.projects.create.header=New Project
 # header of edit project
 views.projects.edit.header=Edit Project
 # message of create new project
 messages.create_project=Succeeded to create a project!
+# message of edit a project
+messages.edit_project=Succeeded to edit the project!
 # message of create new user
 messages.create_user=Succeeded to create new user {0}!
 # message of wrong input

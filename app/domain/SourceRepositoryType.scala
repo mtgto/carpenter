@@ -1,5 +1,6 @@
 package net.mtgto.carpenter.domain
 
 object SourceRepositoryType extends Enumeration {
-  val Subversion, Git = Value
+  val Subversion = Value("subversion")
+  val Git = Value("git")
 }

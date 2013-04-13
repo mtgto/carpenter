@@ -1,7 +1,7 @@
 package net.mtgto.carpenter.domain
 
 import java.util.UUID
-import net.mtgto.carpenter.infrastructure.{ProjectDao, DatabaseProjectDao}
+import net.mtgto.carpenter.infrastructure.{Project => InfraProject, ProjectDao, DatabaseProjectDao}
 import org.sisioh.dddbase.core.{EntityNotFoundException, Repository}
 import scalaz.Identity
 
@@ -13,10 +13,16 @@ object ProjectRepository {
   def apply(): ProjectRepository = new ProjectRepository {
     private val projectDao: ProjectDao = new DatabaseProjectDao
 
+    private val sourceRepositoryService: SourceRepositoryService = SourceRepositoryService
+
+    private def convertInfraProjectToDomain(infraProject: InfraProject): Project = {
+      Project(
+        Identity(infraProject.id), infraProject.name, infraProject.hostname,
+        sourceRepositoryService.get(Identity(infraProject.id)), infraProject.recipe)
+    }
+
     override def findAll: Seq[Project] = {
-      projectDao.findAll.map {
-        infraProject => Project(Identity(infraProject.id), infraProject.name, infraProject.hostname, infraProject.recipe)
-      }
+      projectDao.findAll.map(convertInfraProjectToDomain)
     }
 
     /**
@@ -34,9 +40,7 @@ object ProjectRepository {
     }
 
     override def resolveOption(identifier: Identity[UUID]): Option[Project] = {
-      projectDao.findById(identifier.value).map {
-        infraProject => Project(Identity(infraProject.id), infraProject.name, infraProject.hostname, infraProject.recipe)
-      }
+      projectDao.findById(identifier.value).map(convertInfraProjectToDomain)
     }
 
     override def contains(identifier: Identity[UUID]): Boolean = {
@@ -55,6 +59,7 @@ object ProjectRepository {
      */
     override def store(entity: Project): Unit = {
       projectDao.save(entity.identity.value, entity.name, entity.hostname, entity.recipe)
+      sourceRepositoryService.save(entity.identity, entity.sourceRepository)
     }
 
     /**

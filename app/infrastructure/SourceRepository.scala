@@ -1,5 +1,5 @@
 package net.mtgto.carpenter.infrastructure
 
-import java.net.URL
+import java.net.URI
 
-case class SourceRepository(software: String, url: URL)
+case class SourceRepository(software: String, uri: URI)

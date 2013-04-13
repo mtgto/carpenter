@@ -56,12 +56,18 @@ views.projects.project_name=プロジェクト名
 views.projects.hostname=ホスト名
 # input header and placeholder of recipe
 views.projects.recipe=レシピ
+# input header and placeholder of repository type
+views.projects.source_repository_type=リポジトリの種別
+# input header and placeholder of repository url
+views.projects.source_repository_url=リポジトリURL
 # header of new project
 views.projects.create.header=新規プロジェクト
 # header of edit project
 views.projects.edit.header=プロジェクトの編集
 # message of create new project
 messages.create_project=プロジェクトの作成に成功しました
+# message of edit a project
+messages.edit_project=プロジェクトの編集に成功しました
 # message of create new user
 messages.create_user=ユーザ {0} の作成に成功しました
 # message of wrong input

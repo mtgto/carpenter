@@ -16,15 +16,24 @@ trait Project extends Entity[UUID] {
   override val identity: Identity[UUID]
   val name: String
   val hostname: String
+  val sourceRepository: SourceRepository
   val recipe: String
 
-  override def toString: String = Seq(identity, name, hostname).mkString("Project(", ", ",")")
+  override def toString: String = Seq(identity, name, hostname, sourceRepository, recipe).mkString("Project(", ", ",")")
 }
 
 object Project {
-  private case class DefaultProject(identity: Identity[UUID], name: String, hostname: String, recipe: String) extends Project
+  private case class DefaultProject(identity: Identity[UUID],
+                                    name: String,
+                                    hostname: String,
+                                    sourceRepository: SourceRepository,
+                                    recipe: String) extends Project
 
-  def apply(identity: Identity[UUID], name: String, hostname: String, recipe: String): Project = {
-    DefaultProject(identity, name, hostname, recipe)
+  def apply(identity: Identity[UUID],
+            name: String,
+            hostname: String,
+            sourceRepository: SourceRepository,
+            recipe: String): Project = {
+    DefaultProject(identity, name, hostname, sourceRepository, recipe)
   }
 }

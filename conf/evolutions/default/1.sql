@@ -12,6 +12,12 @@ CREATE TABLE `projects` (
   `recipe` TEXT NOT NULL,
   PRIMARY KEY (`id`)
 );
+CREATE TABLE `source_repositories` (
+  `project_id` CHAR(36) NOT NULL UNIQUE,
+  `software` VARCHAR(63) NOT NULL,
+  `url` VARCHAR(1023) NOT NULL,
+  FOREIGN KEY (`project_id`) REFERENCES `projects`(`id`)
+);
 CREATE TABLE `jobs` (
   `id` CHAR(36) NOT NULL,
   `project_id` CHAR(36) NOT NULL,
@@ -31,5 +37,6 @@ CREATE TABLE `authorities` (
 # --- !Downs
 DROP TABLE `users`;
 DROP TABLE `projects`;
+DROP TABLE `source_repositories`;
 DROP TABLE `jobs`;
 DROP TABLE `authorities`;

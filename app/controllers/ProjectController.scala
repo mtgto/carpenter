@@ -7,12 +7,15 @@ import play.api.data.Forms._
 import play.api.i18n.Messages
 import play.api.libs.json._
 
+import java.net.URI
 import java.util.UUID
-import net.mtgto.carpenter.domain.{User, UserRepository, Project, ProjectFactory, ProjectRepository, JobRepository, JobFactory}
-import net.mtgto.carpenter.domain.Task
+import net.mtgto.carpenter.domain._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Try, Success, Failure}
 import scalaz.Identity
+import scala.util.Failure
+import scala.Some
+import scala.util.Success
 
 object ProjectController extends Controller with BaseController {
   protected[this] val userRepository: UserRepository = UserRepository()
@@ -23,13 +26,19 @@ object ProjectController extends Controller with BaseController {
 
   private val workspacePath = getConfiguration("carpenter.workspace")
 
+  protected[this] val sourceRepositoryService: SourceRepositoryService = SourceRepositoryService
+
   protected[this] val taskService = new net.mtgto.carpenter.domain.DefaultTaskService(workspacePath)
+
+  private val sourceRepositoryTypes = Seq("git" -> "Git", "subversion" -> "Subversion")
 
   protected[this] val createForm = Form(
     tuple(
       "name" -> nonEmptyText,
       "hostname" -> nonEmptyText,
-      "recipe" -> nonEmptyText
+      "recipe" -> nonEmptyText,
+      "sourceRepositoryType" -> nonEmptyText,
+      "url" -> nonEmptyText
     )
   )
 
@@ -37,7 +46,9 @@ object ProjectController extends Controller with BaseController {
     tuple(
       "name" -> nonEmptyText,
       "hostname" -> nonEmptyText,
-      "recipe" -> nonEmptyText
+      "recipe" -> nonEmptyText,
+      "sourceRepositoryType" -> nonEmptyText,
+      "url" -> nonEmptyText
     )
   )
 
@@ -46,17 +57,20 @@ object ProjectController extends Controller with BaseController {
   )
 
   def showCreateView = IsAuthenticated { user => implicit request =>
-    Ok(views.html.projects.create(createForm))
+    Ok(views.html.projects.create(createForm, sourceRepositoryTypes))
   }
 
   def create = IsAuthenticated { user => implicit request =>
     createForm.bindFromRequest.fold(
       formWithErrors =>
-        BadRequest(views.html.projects.create(formWithErrors)).flashing("error" -> Messages("messages.wrong_input")),
+        BadRequest(views.html.projects.create(formWithErrors, sourceRepositoryTypes))
+          .flashing("error" -> Messages("messages.wrong_input")),
       success => {
         success match {
-          case (name, hostname, recipe) =>
-            val project = ProjectFactory(name, hostname, recipe)
+          case (name, hostname, recipe, sourceRepositoryTypeString, url) =>
+            val sourceRepositoryType = sourceRepositoryService.resolveSourceRepositoryType(sourceRepositoryTypeString)
+            val sourceRepository = SourceRepository(sourceRepositoryType, new URI(url))
+            val project = ProjectFactory(name, hostname, sourceRepository, recipe)
             projectRepository.store(project)
             Redirect(routes.Application.index).flashing("success" -> Messages("messages.create_project"))
         }
@@ -68,7 +82,8 @@ object ProjectController extends Controller with BaseController {
     getProjectByIdString(id) match {
       case Some(project) =>
         Ok(views.html.projects.edit(id, editForm.fill(
-          (project.name, project.hostname, project.recipe))))
+          (project.name, project.hostname, project.recipe, project.sourceRepository.sourceRepositoryType.toString,
+            project.sourceRepository.uri.toString)), sourceRepositoryTypes))
       case _ =>
         Redirect(routes.Application.index).flashing("error" -> Messages("messages.not_found_project_to_edit"))
     }
@@ -77,15 +92,17 @@ object ProjectController extends Controller with BaseController {
   def edit(id: String) = IsAuthenticated { user => implicit request =>
     editForm.bindFromRequest.fold(
       formWithErrors =>
-        BadRequest(views.html.projects.edit(id, formWithErrors)).flashing("error" -> Messages("messages.wrong_input")),
+        BadRequest(views.html.projects.edit(id, formWithErrors, sourceRepositoryTypes)).flashing("error" -> Messages("messages.wrong_input")),
       success => {
         getProjectByIdString(id) match {
           case Some(project) => {
             success match {
-              case (name, hostname, recipe) =>
+              case (name, hostname, recipe, sourceRepositoryTypeString, url) =>
+                val sourceRepositoryType = sourceRepositoryService.resolveSourceRepositoryType(sourceRepositoryTypeString)
+                val sourceRepository = SourceRepository(sourceRepositoryType, new URI(url))
                 projectRepository.store(
-                  Project(project.identity, name, hostname, recipe))
-                Redirect(routes.Application.index).flashing("success" -> "Successed to edit a project!")
+                  Project(project.identity, name, hostname, sourceRepository, recipe))
+                Redirect(routes.Application.index).flashing("success" -> Messages("messages.edit_project"))
             }
           }
           case _ =>
