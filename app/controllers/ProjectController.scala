@@ -118,7 +118,7 @@ object ProjectController extends Controller with BaseController {
         val jobs = jobRepository.findAllByProjectOrderByTimePointDesc(project)
         Ok(views.html.projects.index(project, jobs))
       case _ =>
-        Redirect(routes.Application.index).flashing("error" -> "Not found project to edit")
+        Redirect(routes.Application.index).flashing("error" -> Messages("messages.not_found_project_to_edit"))
     }
   }
 
@@ -165,6 +165,34 @@ object ProjectController extends Controller with BaseController {
         }
       }
     )
+  }
+
+  def branches(id: String) = IsAuthenticated { user => implicit request =>
+    getProjectByIdString(id) match {
+      case Some(project) => {
+        Async {
+          taskService.getAllBranches(project).map { branches =>
+            Ok(Json.obj("status" -> "ok", "branches" -> Json.toJson(branches)))
+          }
+        }
+      }
+      case _ =>
+        BadRequest(Json.obj("status" -> "fail"))
+    }
+  }
+
+  def tags(id: String) = IsAuthenticated { user => implicit request =>
+    getProjectByIdString(id) match {
+      case Some(project) => {
+        Async {
+          taskService.getAllTags(project).map { tags =>
+            Ok(Json.obj("status" -> "ok", "tags" -> Json.toJson(tags)))
+          }
+        }
+      }
+      case _ =>
+        BadRequest(Json.obj("status" -> "fail"))
+    }
   }
 
   protected[this] def getProjectByIdString(id: String): Option[Project] = {

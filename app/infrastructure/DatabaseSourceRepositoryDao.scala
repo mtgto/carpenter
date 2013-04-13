@@ -28,7 +28,7 @@ class DatabaseSourceRepositoryDao extends SourceRepositoryDao {
           .executeUpdate()
       if (rowCount == 0)
         SQL("INSERT INTO `source_repositories` (`project_id`, `software`, `url`) VALUES ({projectId},{software},{url})")
-          .on('projectId -> projectId, 'software -> sourceRepository.software, 'url -> sourceRepository.uri.toString)
+          .on('projectId -> projectId.toString, 'software -> sourceRepository.software, 'url -> sourceRepository.uri.toString)
           .executeInsert()
     }
   }

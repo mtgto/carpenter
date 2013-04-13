@@ -13,6 +13,8 @@ GET     /projects/:id/edit          net.mtgto.carpenter.controllers.ProjectContr
 POST    /projects/:id/edit          net.mtgto.carpenter.controllers.ProjectController.edit(id)
 GET     /projects/:id/tasks         net.mtgto.carpenter.controllers.ProjectController.tasks(id)
 POST    /projects/:id/task/execute  net.mtgto.carpenter.controllers.ProjectController.executeTask(id)
+GET     /projects/:id/branches      net.mtgto.carpenter.controllers.ProjectController.branches(id)
+GET     /projects/:id/tags          net.mtgto.carpenter.controllers.ProjectController.tags(id)
 GET     /projects/:id               net.mtgto.carpenter.controllers.ProjectController.showProjectView(id)
 
 GET     /users/create               net.mtgto.carpenter.controllers.UserController.showCreateView

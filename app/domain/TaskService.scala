@@ -4,11 +4,13 @@ import org.sisioh.baseunits.scala.time.{Duration, TimePoint}
 import org.sisioh.baseunits.scala.timeutil.Clock
 import scala.concurrent.{Future, future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.sys.process.{Process, ProcessLogger}
 
 trait TaskService {
   def getAllTasks(project: Project): Seq[Task]
-
   def execute(project: Project, taskName: String): Future[(Int, String, TimePoint, Duration)]
+  def getAllBranches(project: Project): Future[Seq[String]]
+  def getAllTags(project: Project): Future[Seq[String]]
 }
 
 class DefaultTaskService(workspacePath: String) extends TaskService {
@@ -28,7 +30,6 @@ class DefaultTaskService(workspacePath: String) extends TaskService {
   }
 
   override def getAllTasks(project: Project): Seq[Task] = {
-    import scala.sys.process.Process
     createProjectWorkspace(project)
     val process: String = Process("cap -vT", getProjectWorkspace(project)).!!
     process.split("\n").withFilter(_.contains("#")).map{ line =>
@@ -41,7 +42,6 @@ class DefaultTaskService(workspacePath: String) extends TaskService {
   override def execute(project: Project, taskName: String): Future[(Int, String, TimePoint, Duration)] = {
     createProjectWorkspace(project)
     future {
-      import scala.sys.process.{Process, ProcessLogger}
       val outputBuilder = new StringBuilder
       val errorBuilder = new StringBuilder
       val startTimePoint = Clock.now
@@ -57,6 +57,38 @@ class DefaultTaskService(workspacePath: String) extends TaskService {
       val exitCode = process.exitValue
       val executeDuration = Duration.milliseconds(Clock.now.breachEncapsulationOfMillisecondsFromEpoc - startTimePoint.breachEncapsulationOfMillisecondsFromEpoc)
       (exitCode, errorBuilder.toString, startTimePoint, executeDuration)
+    }
+  }
+
+  override def getAllBranches(project: Project): Future[Seq[String]] = {
+    future {
+      project.sourceRepository.sourceRepositoryType match {
+        case SourceRepositoryType.Subversion =>
+          val branchesUri = project.sourceRepository.uri.toString.stripSuffix("/") + "/branches"
+          Process(Seq("svn", "ls", branchesUri)).lines.map {
+            line => line.stripSuffix("/")
+          }
+        case SourceRepositoryType.Git =>
+          Process(Seq("git", "ls-remote", "--heads", project.sourceRepository.uri.toString)).lines.map {
+            line => line.split("""\s+""")(1).stripPrefix("refs/heads/")
+          }
+      }
+    }
+  }
+
+  override def getAllTags(project: Project): Future[Seq[String]] = {
+    future {
+      project.sourceRepository.sourceRepositoryType match {
+        case SourceRepositoryType.Subversion =>
+          val tagsUri = project.sourceRepository.uri.toString.stripSuffix("/") + "/tags"
+          Process(Seq("svn", "ls", tagsUri)).lines.map {
+            line => line.stripSuffix("/")
+          }
+        case SourceRepositoryType.Git =>
+          Process(Seq("git", "ls-remote", "--tags", project.sourceRepository.uri.toString)).lines.map {
+            line => line.split("""\s+""")(1).stripPrefix("refs/tags/")
+          }
+      }
     }
   }
 }
