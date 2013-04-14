@@ -112,3 +112,8 @@ views.projects.execute.choose_branch=ブランチから選択:
 views.projects.execute.choose_tag=タグから選択:
 # header of choosing trunk
 views.projects.execute.choose_trunk=trunkを選択
+
+# notification message on success
+messages.notification.success=プロジェクト {1} のタスク {2} の実行に成功しました。実行したのは {0} です。
+# notification message on failure
+messages.notification.failure=プロジェクト {1} のタスク {2} の実行に失敗しました。実行したのは {0} です。

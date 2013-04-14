@@ -32,6 +32,13 @@ object ProjectController extends Controller with BaseController {
 
   private val sourceRepositoryTypes = Seq("git" -> "Git", "subversion" -> "Subversion")
 
+  private val notification = Notification(
+    getConfiguration("carpenter.irc.hostname"),
+    getConfiguration("carpenter.irc.port").toInt,
+    getConfiguration("carpenter.irc.username"),
+    getConfiguration("carpenter.irc.channel_name"),
+    getConfiguration("carpenter.irc.encoding"))
+
   protected[this] val createForm = Form(
     tuple(
       "name" -> nonEmptyText,
@@ -181,6 +188,11 @@ object ProjectController extends Controller with BaseController {
                     case (exitCode, log, executeTimePoint, executeDuration) => {
                       val job = JobFactory(project, user, exitCode, log, executeTimePoint, executeDuration)
                       jobRepository.store(job)
+                      val message = if (exitCode == 0)
+                        Messages("messages.notification.success", user.name, project.name, taskName)
+                      else
+                        Messages("messages.notification.failure", user.name, project.name, taskName)
+                      NotificationService.notify(notification, message)
                       Ok(Json.obj("status" -> "ok", "task" -> Json.toJson(taskName), "exitCode" -> exitCode, "log" -> log))
                     }
                   }

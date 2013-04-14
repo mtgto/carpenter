@@ -112,3 +112,8 @@ views.projects.execute.choose_branch=Choose branch:
 views.projects.execute.choose_tag=Choose tag:
 # header of choosing trunk
 views.projects.execute.choose_trunk=Choose trunk
+
+# notification message on success
+messages.notification.success=Succeeded to execute a task {2} of project {1} by {0}
+# notification message on failure
+messages.notification.failure=Failed to execute a task {2} of project {1} by {0}

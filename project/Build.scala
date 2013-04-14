@@ -11,7 +11,8 @@ object ApplicationBuild extends Build {
     jdbc,
     anorm,
     "org.sisioh" %% "scala-dddbase-core" % "0.0.1",
-    "org.sisioh" %% "baseunits-scala" % "0.0.1"
+    "org.sisioh" %% "baseunits-scala" % "0.0.1",
+    "org.pircbotx" % "pircbotx" % "1.9"
   )
 
   // Only compile the bootstrap bootstrap.less file and any other *.less file in the stylesheets directory
