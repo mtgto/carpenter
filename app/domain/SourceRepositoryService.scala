@@ -1,5 +1,6 @@
 package net.mtgto.carpenter.domain
 
+import java.net.URI
 import java.util.UUID
 import net.mtgto.carpenter.infrastructure.{SourceRepository => InfraSourceRepository, SourceRepositoryDao, DatabaseSourceRepositoryDao}
 import scalaz.Identity
@@ -9,6 +10,7 @@ trait SourceRepositoryService {
   def save(projectId: Identity[UUID], sourceRepository: SourceRepository): Unit
   def delete(projectId: Identity[UUID]): Boolean
   def resolveSourceRepositoryType(str: String): SourceRepositoryType.Value
+  def resolveURIByBranch(sourceRepository: SourceRepository, branchType: BranchType.Value, branchName: String): URI
 }
 
 object SourceRepositoryService extends SourceRepositoryService {
@@ -34,6 +36,19 @@ object SourceRepositoryService extends SourceRepositoryService {
       case "subversion" => SourceRepositoryType.Subversion
       case "git" => SourceRepositoryType.Git
       case _ => throw new IllegalArgumentException(s"invalid software: $software")
+    }
+  }
+
+  override def resolveURIByBranch(sourceRepository: SourceRepository, branchType: BranchType.Value, branchName: String): URI = {
+    (sourceRepository.sourceRepositoryType, branchType) match {
+      case (SourceRepositoryType.Subversion, BranchType.Branch) =>
+        new URI(sourceRepository.uri.toString.stripSuffix("/") + "/branches/" + branchName)
+      case (SourceRepositoryType.Subversion, BranchType.Tag) =>
+        new URI(sourceRepository.uri.toString.stripSuffix("/") + "/tags/" + branchName)
+      case (SourceRepositoryType.Subversion, BranchType.Trunk) =>
+        new URI(sourceRepository.uri.toString.stripSuffix("/") + "/trunk")
+      case (SourceRepositoryType.Git, _) =>
+        sourceRepository.uri
     }
   }
 

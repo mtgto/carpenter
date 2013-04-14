@@ -1,0 +1,72 @@
+@(project: net.mtgto.carpenter.domain.Project, taskName: String, branches: Seq[String], tags: Seq[String])(implicit lang: Lang, flash: Flash)
+
+@headers = {}
+@footers = {
+<script>
+  $(function(){
+    var runLink = $('button.run_task');
+    runLink.click(
+      function(){
+        runLink.addClass("disabled");
+        var branchType = $('input[name="branch-types"]:checked').val();
+        var branchName = ""
+        if (branchType == "branch") {
+          branchName = $('#branch-names option:selected').val();
+        } else if (branchType == "tag") {
+          branchName = $('#tag-names option:selected').val();
+        }
+        console.log("branchType = " + branchType + ", branchName = " + branchName)
+        $.post('/projects/@project.identity.value.toString/tasks/@taskName/execute', {type: branchType, name: branchName}, function(data) {
+          log = data['log'];
+          exitCode = data['exitCode'];
+          console.log("exitCode = " + exitCode);
+          $('#log').val(log);
+          runLink.removeClass("disabled");
+        });
+      }
+    );
+  });
+</script>
+}
+@main(Messages("views.projects.execute.header"), headers, footers) {
+  <section>
+    <h2>@Messages("views.projects.execute.header")</h2>
+    Project: @project.name
+    Task： @taskName
+  </section>
+  <section>
+    <h3>@Messages("views.projects.execute.choose_branch_tag")</h3>
+    <label class="radio">
+      <input type="radio" name="branch-types" id="branch" value="branch" checked></input>
+        @Messages("views.projects.execute.choose_branch")
+        <select id="branch-names">
+          @for(branch <- branches){
+            <option>@branch</option>
+          }
+        </select>
+    </label>
+    <label class="radio">
+      <input type="radio" name="branch-types" id="tag" value="tag"></input>
+        @Messages("views.projects.execute.choose_tag")
+        <select id="tag-names">
+          @for(tag <- tags){
+            <option>@tag</option>
+          }
+        </select>
+    </label>
+    <label class="radio">
+      <input type="radio" name="branch-types" id="trunk" value="trunk"></input>
+        @Messages("views.projects.execute.choose_trunk")
+    </label>
+    <section>
+      <h3>IRC notification</h3>
+        TODO
+    </section>
+    <a class="btn btn-large" href="@net.mtgto.carpenter.controllers.routes.ProjectController.showProjectView(project.identity.value.toString)">@Messages("views.back")</a>
+    <button class="btn-large btn-primary run_task" type="button">@Messages("views.projects.run")</button>
+    <section>
+      <h3>@Messages("views.projects.index.log")</h3>
+      <textarea rows="10" id="log" class="span9"></textarea>
+    </section>
+  </section>
+}

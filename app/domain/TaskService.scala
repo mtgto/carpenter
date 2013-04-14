@@ -1,5 +1,6 @@
 package net.mtgto.carpenter.domain
 
+import java.net.URI
 import org.sisioh.baseunits.scala.time.{Duration, TimePoint}
 import org.sisioh.baseunits.scala.timeutil.Clock
 import scala.concurrent.{Future, future}
@@ -8,7 +9,7 @@ import scala.sys.process.{Process, ProcessLogger}
 
 trait TaskService {
   def getAllTasks(project: Project): Seq[Task]
-  def execute(project: Project, taskName: String): Future[(Int, String, TimePoint, Duration)]
+  def execute(project: Project, taskName: String, repositoryUri: URI, branchType: BranchType.Value, branchName: String): Future[(Int, String, TimePoint, Duration)]
   def getAllBranches(project: Project): Future[Seq[String]]
   def getAllTags(project: Project): Future[Seq[String]]
 }
@@ -39,13 +40,19 @@ class DefaultTaskService(workspacePath: String) extends TaskService {
     }
   }
 
-  override def execute(project: Project, taskName: String): Future[(Int, String, TimePoint, Duration)] = {
+  override def execute(project: Project, taskName: String, repositoryUri: URI, branchType: BranchType.Value, branchName: String): Future[(Int, String, TimePoint, Duration)] = {
     createProjectWorkspace(project)
     future {
       val outputBuilder = new StringBuilder
       val errorBuilder = new StringBuilder
       val startTimePoint = Clock.now
-      val process: Process = Process(Seq("cap", taskName, "HOSTS="+project.hostname), getProjectWorkspace(project)).run(
+      val repositoryParams = project.sourceRepository.sourceRepositoryType match {
+        case SourceRepositoryType.Subversion =>
+          Seq("--set", "scm=subversion", "--set", s"repository=${repositoryUri.toString}")
+        case SourceRepositoryType.Git =>
+          Seq("--set", "scm=git", "--set", s"repository=${repositoryUri.toString}", "--set", s"branch=$branchName")
+      }
+      val process: Process = Process(Seq("cap", taskName, "HOSTS="+project.hostname) ++ repositoryParams, getProjectWorkspace(project)).run(
         ProcessLogger(
           line => {
             outputBuilder ++= line

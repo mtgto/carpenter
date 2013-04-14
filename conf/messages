@@ -102,3 +102,13 @@ views.projects.job.success=Success
 views.projects.job.failure=Failure
 # loading the jobs
 views.projects.index.loading=Loading...
+# header of execute a task
+views.projects.execute.header=Execute a task
+# header of choosing from branch or tag
+views.projects.execute.choose_branch_tag=Choose branch / tag
+# header of choosing from branch
+views.projects.execute.choose_branch=Choose branch:
+# header of choosing from tag
+views.projects.execute.choose_tag=Choose tag:
+# header of choosing trunk
+views.projects.execute.choose_trunk=Choose trunk

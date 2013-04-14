@@ -20,15 +20,8 @@
     runLink.click(
       function(){
         runLink.addClass("disabled");
-        var taskName = $('#task-select option:selected').val()
-        console.log("taskName = " + taskName)
-        $.post('@net.mtgto.carpenter.controllers.routes.ProjectController.executeTask(project.identity.value.toString)', {name: taskName}, function(data) {
-          log = data['log'];
-          exitCode = data['exitCode'];
-          console.log("exitCode = " + exitCode);
-          $('#log').val(log);
-          runLink.removeClass("disabled");
-        });
+        var taskName = $('#task-select option:selected').val();
+        window.location = '/projects/@project.identity.value.toString/tasks/' + taskName;
       }
     );
   });
@@ -44,10 +37,6 @@
       <option>@Messages("views.projects.index.loading")</option>
     </select>
     <a class="btn btn-primary run_task" href="#">@Messages("views.projects.run")</a>
-  </section>
-  <section>
-    <h3>@Messages("views.projects.index.log")</h2>
-    <textarea rows="10" id="log" class="span9"></textarea>
   </section>
   <section>
     <h2>@Messages("views.projects.index.header.project_job")</h2>

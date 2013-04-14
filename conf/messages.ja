@@ -102,3 +102,13 @@ views.projects.job.success=成功
 views.projects.job.failure=失敗
 # loading the jobs
 views.projects.index.loading=読み込み中...
+# header of execute a task
+views.projects.execute.header=タスクの実行
+# header of choosing from branch or tag
+views.projects.execute.choose_branch_tag=ブランチ・タグの選択
+# header of choosing from branch
+views.projects.execute.choose_branch=ブランチから選択:
+# header of choosing from tag
+views.projects.execute.choose_tag=タグから選択:
+# header of choosing trunk
+views.projects.execute.choose_trunk=trunkを選択

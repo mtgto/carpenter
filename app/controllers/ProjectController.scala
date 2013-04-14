@@ -52,8 +52,11 @@ object ProjectController extends Controller with BaseController {
     )
   )
 
-  protected[this] val taskNameForm = Form(
-    "name" -> nonEmptyText
+  protected[this] val executeForm = Form(
+    tuple(
+      "type" -> nonEmptyText,
+      "name" -> text
+    )
   )
 
   def showCreateView = IsAuthenticated { user => implicit request =>
@@ -142,26 +145,50 @@ object ProjectController extends Controller with BaseController {
     }
   }
 
-  def executeTask(id: String) = IsAuthenticated { user => implicit request =>
-    taskNameForm.bindFromRequest.fold(
-      formWithErrors =>
-        BadRequest(Json.obj("status" -> "fail")),
-      taskName => {
-        getProjectByIdString(id) match {
-          case Some(project) =>
-            Async {
-              taskService.execute(project, taskName).map( result =>
-                result match {
-                  case (exitCode, log, executeTimePoint, executeDuration) => {
-                    val job = JobFactory(project, user, exitCode, log, executeTimePoint, executeDuration)
-                    jobRepository.store(job)
-                    Ok(Json.obj("status" -> "ok", "task" -> Json.toJson(taskName), "exitCode" -> exitCode, "log" -> log))
-                  }
+  def showExecuteTaskView(id: String, taskName: String) = IsAuthenticated { user => implicit request =>
+    getProjectByIdString(id) match {
+      case Some(project) =>
+        Async {
+          val branchAndTags = for {
+            branches <- taskService.getAllBranches(project)
+            tags <- taskService.getAllTags(project)
+          } yield (branches, tags)
+          branchAndTags.map( result => result match {
+            case (branches, tags) => Ok(views.html.projects.execute(project, taskName, branches, tags))
+          })
+        }
+      case _ =>
+        BadRequest("")
+    }
+  }
+
+  def executeTask(id: String, taskName: String) = IsAuthenticated { user => implicit request =>
+    executeForm.bindFromRequest.fold(
+      formWithErrors => BadRequest(Json.obj("status" -> "fail")),
+      success => success match {
+        case (branchTypeString, branchName) => {
+          getProjectByIdString(id) match {
+            case Some(project) =>
+              Async {
+                val branchType = branchTypeString match {
+                  case "branch" => BranchType.Branch
+                  case "tag" => BranchType.Tag
+                  case "trunk" => BranchType.Trunk
                 }
-              )
-            }
-          case None =>
+                val repositoryUri = sourceRepositoryService.resolveURIByBranch(project.sourceRepository, branchType, branchName)
+                taskService.execute(project, taskName, repositoryUri, branchType, branchName).map( result =>
+                  result match {
+                    case (exitCode, log, executeTimePoint, executeDuration) => {
+                      val job = JobFactory(project, user, exitCode, log, executeTimePoint, executeDuration)
+                      jobRepository.store(job)
+                      Ok(Json.obj("status" -> "ok", "task" -> Json.toJson(taskName), "exitCode" -> exitCode, "log" -> log))
+                    }
+                  }
+                )
+              }
+            case None =>
               BadRequest(Json.obj("status" -> "fail"))
+          }
         }
       }
     )
