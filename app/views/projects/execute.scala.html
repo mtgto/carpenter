@@ -16,7 +16,7 @@
           branchName = $('#tag-names option:selected').val();
         }
         console.log("branchType = " + branchType + ", branchName = " + branchName)
-        $.post('/projects/@project.identity.value.toString/tasks/@taskName/execute', {type: branchType, name: branchName}, function(data) {
+        $.post('@net.mtgto.carpenter.controllers.routes.ProjectController.executeTask(project.identity.value.toString, taskName)', {type: branchType, name: branchName}, function(data) {
           log = data['log'];
           exitCode = data['exitCode'];
           console.log("exitCode = " + exitCode);

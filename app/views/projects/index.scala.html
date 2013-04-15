@@ -21,7 +21,7 @@
       function(){
         runLink.addClass("disabled");
         var taskName = $('#task-select option:selected').val();
-        window.location = '/projects/@project.identity.value.toString/tasks/' + taskName;
+        window.location = '/projects/@project.identity.value.toString/tasks/' + encodeURIComponent(taskName);
       }
     );
   });
