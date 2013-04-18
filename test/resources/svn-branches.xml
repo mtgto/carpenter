@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<lists>
+<list
+   path="file:///Users/user/svn/repo/branches">
+<entry
+   kind="dir">
+<name>feature1</name>
+<commit
+   revision="2">
+<author>user</author>
+<date>2013-04-13T05:02:37.616182Z</date>
+</commit>
+</entry>
+<entry
+   kind="dir">
+<name>feature2</name>
+<commit
+   revision="2">
+<author>user</author>
+<date>2013-04-13T05:02:37.616182Z</date>
+</commit>
+</entry>
+<entry
+   kind="dir">
+<name>feature3</name>
+<commit
+   revision="2">
+<author>user</author>
+<date>2013-04-13T05:02:37.616182Z</date>
+</commit>
+</entry>
+</list>
+</lists>
