@@ -28,6 +28,13 @@ CREATE TABLE `jobs` (
   `execute_duration` INT NOT NULL,
   PRIMARY KEY (`id`)
 );
+CREATE TABLE `snapshots` (
+  `job_id` CHAR(36) NOT NULL UNIQUE,
+  `name` VARCHAR(255) NOT NULL,
+  `revision` VARCHAR(63) NOT NULL,
+  `branch_type` VARCHAR(63) NOT NULL,
+  FOREIGN KEY (`job_id`) REFERENCES `jobs`(`id`)
+);
 CREATE TABLE `authorities` (
   `user_id` CHAR(36) NOT NULL,
   `can_login` TINYINT NOT NULL DEFAULT '1',
@@ -39,4 +46,5 @@ DROP TABLE `users`;
 DROP TABLE `projects`;
 DROP TABLE `source_repositories`;
 DROP TABLE `jobs`;
+DROP TABLE `snapshots`;
 DROP TABLE `authorities`;

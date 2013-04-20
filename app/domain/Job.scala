@@ -3,6 +3,7 @@ package net.mtgto.carpenter.domain
 import java.util.UUID
 import org.sisioh.dddbase.core.{Identity, Entity}
 import org.sisioh.baseunits.scala.time.{Duration, TimePoint}
+import net.mtgto.carpenter.domain.vcs.Snapshot
 
 case class JobId(uuid: UUID) extends Identity[JobId] {
   override def value = this
@@ -20,6 +21,7 @@ trait Job extends Entity[JobId] {
   override val identity: JobId
   val project: Project
   val user: User
+  val snapshot: Snapshot
   val exitCode: Int
   val log: String
   val executeTimePoint: TimePoint
@@ -30,11 +32,11 @@ trait Job extends Entity[JobId] {
 
 object Job {
   private case class DefaultJob(
-    identity: JobId, project: Project, user: User, exitCode: Int, log: String, executeTimePoint: TimePoint,
-    executeDuration: Duration) extends Job
+    identity: JobId, project: Project, user: User, snapshot: Snapshot, exitCode: Int, log: String,
+    executeTimePoint: TimePoint, executeDuration: Duration) extends Job
 
-  def apply(identity: JobId, project: Project, user: User, exitCode: Int, log: String, executeTimePoint: TimePoint,
-    executeDuration: Duration): Job = {
-    DefaultJob(identity, project, user, exitCode, log, executeTimePoint, executeDuration)
+  def apply(identity: JobId, project: Project, user: User, snapshot: Snapshot, exitCode: Int, log: String,
+            executeTimePoint: TimePoint, executeDuration: Duration): Job = {
+    DefaultJob(identity, project, user, snapshot, exitCode, log, executeTimePoint, executeDuration)
   }
 }

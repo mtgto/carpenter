@@ -1,6 +1,5 @@
 package net.mtgto.carpenter.domain
 
-import java.util.UUID
 import net.mtgto.carpenter.infrastructure.{Project => InfraProject, ProjectDao, DatabaseProjectDao}
 import org.sisioh.dddbase.core.{Identity, EntityNotFoundException, Repository}
 import scala.util.Try

@@ -2,6 +2,10 @@ package net.mtgto.carpenter.domain
 
 import java.net.URI
 import net.mtgto.carpenter.infrastructure.{SourceRepository => InfraSourceRepository, SourceRepositoryDao, DatabaseSourceRepositoryDao}
+import net.mtgto.carpenter.domain.vcs.{GitTagSnapshot, GitBranchSnapshot, SubversionSnapshot, Snapshot}
+import net.mtgto.carpenter.infrastructure.vcs.{GitRevision, GitService, SubversionRevision, SubversionService}
+import scala.concurrent.Future
+import scala.util.Try
 
 trait SourceRepositoryService {
   def get(projectId: ProjectId): SourceRepository
@@ -9,10 +13,15 @@ trait SourceRepositoryService {
   def delete(projectId: ProjectId): Boolean
   def resolveSourceRepositoryType(str: String): SourceRepositoryType.Value
   def resolveURIByBranch(sourceRepository: SourceRepository, branchType: BranchType.Value, branchName: String): URI
+  def resolveSnapshot(sourceRepository: SourceRepository, branchType: BranchType.Value, branchName: String): Try[Snapshot]
 }
 
 object SourceRepositoryService extends SourceRepositoryService {
   private val sourceRepositoryDao: SourceRepositoryDao = new DatabaseSourceRepositoryDao
+
+  private val subversionService: SubversionService = new SubversionService
+
+  private val gitService: GitService = new GitService
 
   override def get(projectId: ProjectId): SourceRepository = {
     val infraSourceRepository = sourceRepositoryDao.findByProjectId(projectId.uuid).head
@@ -47,6 +56,31 @@ object SourceRepositoryService extends SourceRepositoryService {
         new URI(sourceRepository.uri.toString.stripSuffix("/") + "/trunk")
       case (SourceRepositoryType.Git, _) =>
         sourceRepository.uri
+    }
+  }
+
+  override def resolveSnapshot(sourceRepository: SourceRepository, branchType: BranchType.Value, branchName: String): Try[Snapshot] = {
+    val uri = resolveURIByBranch(sourceRepository, branchType, branchName)
+    (sourceRepository.sourceRepositoryType, branchType) match {
+      case (SourceRepositoryType.Subversion, _) =>
+        subversionService.getRevision(uri).map(convertSubversionRevisionToSnapshot(branchName, branchType, uri, _))
+      case (SourceRepositoryType.Git, BranchType.Branch) =>
+        gitService.getBranchRevision(uri, branchName).map(convertGitRevisionToSnapshot(branchType, _))
+      case (SourceRepositoryType.Git, BranchType.Tag) =>
+        gitService.getTagRevision(uri, branchName).map(convertGitRevisionToSnapshot(branchType, _))
+    }
+  }
+
+  private def convertSubversionRevisionToSnapshot(branchName: String, branchType: BranchType.Value, uri: URI, revision: SubversionRevision): Snapshot = {
+    SubversionSnapshot(branchName, branchType, uri, revision.revision)
+  }
+
+  private def convertGitRevisionToSnapshot(branchType: BranchType.Value, revision: GitRevision): Snapshot = {
+    branchType match {
+      case BranchType.Branch =>
+        GitBranchSnapshot(name = revision.name, revision = revision.revision)
+      case BranchType.Tag =>
+        GitTagSnapshot(name = revision.name, revision = revision.revision)
     }
   }
 
