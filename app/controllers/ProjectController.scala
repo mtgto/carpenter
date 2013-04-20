@@ -12,10 +12,7 @@ import java.util.UUID
 import net.mtgto.carpenter.domain._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Try, Success, Failure}
-import scalaz.Identity
-import scala.util.Failure
-import scala.Some
-import scala.util.Success
+import org.sisioh.dddbase.core.Identity
 
 object ProjectController extends Controller with BaseController {
   protected[this] val userRepository: UserRepository = UserRepository()
@@ -125,7 +122,7 @@ object ProjectController extends Controller with BaseController {
   def showProjectView(id: String) = IsAuthenticated { user => implicit request =>
     getProjectByIdString(id) match {
       case Some(project) =>
-        val jobs = jobRepository.findAllByProjectOrderByTimePointDesc(project)
+        val jobs = jobRepository.findAllByProjectOrderByTimePointDesc(project).get
         Ok(views.html.projects.index(project, jobs))
       case _ =>
         Redirect(routes.Application.index).flashing("error" -> Messages("messages.not_found_project_to_edit"))
@@ -144,7 +141,6 @@ object ProjectController extends Controller with BaseController {
     getProjectByIdString(id) match {
       case Some(project) => {
         val tasks = taskService.getAllTasks(project)
-        Logger.info(tasks.toString)
         Ok(Json.obj("status" -> "ok", "tasks" -> Json.toJson(tasks)))
       }
       case _ =>
@@ -237,7 +233,7 @@ object ProjectController extends Controller with BaseController {
   protected[this] def getProjectByIdString(id: String): Option[Project] = {
     Try(UUID.fromString(id)) match {
       case Success(uuid) =>
-        projectRepository.resolveOption(Identity(uuid))
+        projectRepository.resolveOption(Identity(ProjectId(uuid)))
       case Failure(e) =>
         None
     }

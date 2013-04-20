@@ -1,17 +1,16 @@
 package net.mtgto.carpenter.domain
 
-import java.util.UUID
 import net.mtgto.carpenter.infrastructure.{Job => InfraJob, JobDao, DatabaseJobDao}
 import org.sisioh.baseunits.scala.time.{Duration, TimePoint}
-import org.sisioh.dddbase.core.{EntityNotFoundException, Repository}
-import scalaz.Identity
+import org.sisioh.dddbase.core.{Identity, EntityNotFoundException, Repository}
+import scala.util.Try
 
-trait JobRepository extends Repository[Job, UUID] {
-  def findAll: Seq[Job]
+trait JobRepository extends Repository[JobId, Job] {
+  def findAll: Try[Seq[Job]]
 
-  def findAllByProject(project: Project): Seq[Job]
+  def findAllByProject(project: Project): Try[Seq[Job]]
 
-  def findAllByProjectOrderByTimePointDesc(project: Project): Seq[Job]
+  def findAllByProjectOrderByTimePointDesc(project: Project): Try[Seq[Job]]
 }
 
 object JobRepository {
@@ -22,21 +21,27 @@ object JobRepository {
 
     protected[this] val userRepository: UserRepository = UserRepository()
 
-    override def findAll: Seq[Job] = {
-      jobDao.findAll.map {
-        convertInfraToDomain(_)
+    override def findAll: Try[Seq[Job]] = {
+      Try {
+        jobDao.findAll.map {
+          convertInfraToDomain(_).get
+        }
       }
     }
 
-    override def findAllByProject(project: Project): Seq[Job] = {
-      jobDao.findAllByProject(project.identity.value).map {
-        convertInfraToDomain(_)
+    override def findAllByProject(project: Project): Try[Seq[Job]] = {
+      Try {
+        jobDao.findAllByProject(project.identity.uuid).map {
+          convertInfraToDomain(_).get
+        }
       }
     }
 
-    override def findAllByProjectOrderByTimePointDesc(project: Project): Seq[Job] = {
-      jobDao.findAllByProjectOrderByDateDesc(project.identity.value).map {
-        convertInfraToDomain(_)
+    override def findAllByProjectOrderByTimePointDesc(project: Project): Try[Seq[Job]] = {
+      Try {
+        jobDao.findAllByProjectOrderByDateDesc(project.identity.uuid).map {
+          convertInfraToDomain(_).get
+        }
       }
     }
 
@@ -50,63 +55,77 @@ object JobRepository {
      *  @throws EntityNotFoundException エンティティが見つからなかった場合
      *  @throws RepositoryException リポジトリにアクセスできない場合
      */
-    override def resolve(identifier: Identity[UUID]): Job = {
-      resolveOption(identifier).getOrElse(throw new EntityNotFoundException)
+    override def resolve(identifier: Identity[JobId]): Try[Job] = {
+      Try(resolveOption(identifier).getOrElse(throw new EntityNotFoundException))
     }
 
-    override def resolveOption(identifier: Identity[UUID]): Option[Job] = {
-      jobDao.findById(identifier.value).map {
-        convertInfraToDomain(_)
+    /**
+     * 識別子に該当するエンティティを取得する。
+     *
+     * @param identity 識別子
+     * @return Option[T]
+     */
+    override def resolveOption(identifier: Identity[JobId]): Option[Job] = {
+      jobDao.findById(identifier.value.uuid).flatMap {
+        convertInfraToDomain(_).toOption
       }
     }
 
-    override def contains(identifier: Identity[UUID]): Boolean = {
-      resolveOption(identifier).isDefined
-    }
-
-    override def contains(entity: Job): Boolean = {
-      resolveOption(entity.identity).isDefined
+    /**
+     * 指定した識別子のエンティティが存在するかを返す。
+     *
+     * @param identifier 識別子
+     * @return Success:
+     *          存在する場合はtrue
+     *         Failure:
+     *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
+     */
+    override def contains(identifier: Identity[JobId]): Try[Boolean] = {
+      Try(resolveOption(identifier).isDefined)
     }
 
     /**
      * エンティティを保存する。
      *
      * @param entity 保存する対象のエンティティ
-     * @throws RepositoryException リポジトリにアクセスできない場合
+     * @return Success:
+     *          リポジトリインスタンス
+     *         Failure:
+     *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    override def store(entity: Job): Unit = {
-      jobDao.save(entity.identity.value, entity.project.identity.value, entity.user.identity.value, entity.exitCode,
-        entity.log, entity.executeTimePoint.asJavaUtilDate, entity.executeDuration.quantity)
+    override def store(entity: Job): Try[JobRepository] = {
+      Try {
+        jobDao.save(entity.identity.uuid, entity.project.identity.uuid, entity.user.identity.value.uuid, entity.exitCode,
+          entity.log, entity.executeTimePoint.asJavaUtilDate, entity.executeDuration.quantity)
+        this
+      }
     }
 
     /**
      * 指定した識別子のエンティティを削除する。
      *
      * @param identity 識別子
-     * @throws EntityNotFoundException 指定された識別子を持つエンティティが見つからなかった場合
-     * @throws RepositoryException リポジトリにアクセスできない場合
+     * @return Success:
+     *          リポジトリインスタンス
+     *         Failure:
+     *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    override def delete(identity: Identity[UUID]): Unit = {
-      if (jobDao.delete(identity.value) == 0) {
-        throw new EntityNotFoundException
+    override def delete(identity: Identity[JobId]): Try[JobRepository] = {
+      Try {
+        if (jobDao.delete(identity.value.uuid) == 0) {
+          throw new EntityNotFoundException
+        }
+        this
       }
     }
 
-    /**
-     * 指定したエンティティを削除する。
-     *
-     * @param entity エンティティ
-     * @throws EntityNotFoundException 指定された識別子を持つエンティティが見つからなかった場合
-     * @throws RepositoryException リポジトリにアクセスできない場合
-     */
-    override def delete(entity: Job): Unit = {
-      delete(entity.identity)
-    }
-
-    protected[this] def convertInfraToDomain(infraJob: InfraJob): Job = {
-      Job(Identity(infraJob.id), projectRepository.resolve(Identity(infraJob.projectId)),
-        userRepository.resolve(Identity(infraJob.userId)), infraJob.exitCode, infraJob.log,
-        TimePoint.from(infraJob.executeDate), Duration.milliseconds(infraJob.executeDuration))
+    protected[this] def convertInfraToDomain(infraJob: InfraJob): Try[Job] = {
+      projectRepository.resolve(Identity(ProjectId(infraJob.projectId))).flatMap { project =>
+        userRepository.resolve(Identity(UserId(infraJob.userId))).map { user =>
+          Job(JobId(infraJob.id), project, user, infraJob.exitCode, infraJob.log,
+            TimePoint.from(infraJob.executeDate), Duration.milliseconds(infraJob.executeDuration))
+        }
+      }
     }
   }
 }

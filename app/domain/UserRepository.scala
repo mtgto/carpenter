@@ -2,10 +2,10 @@ package net.mtgto.carpenter.domain
 
 import java.util.UUID
 import net.mtgto.carpenter.infrastructure.{UserDao, DatabaseUserDao, Authority => InfraAuthority, User => InfraUser}
-import org.sisioh.dddbase.core.{EntityNotFoundException, Repository}
-import scalaz.Identity
+import org.sisioh.dddbase.core.{Identity, EntityNotFoundException, Repository}
+import scala.util.Try
 
-trait UserRepository extends Repository[User, UUID] {
+trait UserRepository extends Repository[UserId, User] {
   def findByNameAndPassword(name: String, password: String): Option[User]
   def findAll: Seq[User]
 }
@@ -19,7 +19,7 @@ object UserRepository {
     }
 
     protected[this] def convertInfraToDomain(infraUser: InfraUser): User = {
-      User(Identity(infraUser.id), infraUser.name, None, convertInfraAuthorityToDomain(infraUser.authority))
+      User(UserId(infraUser.id), infraUser.name, None, convertInfraAuthorityToDomain(infraUser.authority))
     }
 
     override def findByNameAndPassword(name: String, password: String): Option[User] = {
@@ -33,27 +33,38 @@ object UserRepository {
     /**
      * 識別子に該当するエンティティを取得する。
      *
-     *  @param identifier 識別子
-     *  @return エンティティ
-     *
-     *  @throws IllegalArgumentException
-     *  @throws EntityNotFoundException エンティティが見つからなかった場合
-     *  @throws RepositoryException リポジトリにアクセスできない場合
+     * @param identity 識別子
+     * @return Success:
+     *          エンティティ
+     *         Failure:
+     *          EntityNotFoundExceptionは、エンティティが見つからなかった場合
+     *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    override def resolve(identifier: Identity[UUID]): User = {
-      resolveOption(identifier).getOrElse(throw new EntityNotFoundException)
+    override def resolve(identity: Identity[UserId]): Try[User] = {
+      Try(resolveOption(identity).getOrElse(throw new EntityNotFoundException))
     }
 
-    override def resolveOption(identifier: Identity[UUID]): Option[User] = {
-      userDao.findById(identifier.value).map(convertInfraToDomain)
+    /**
+     * 識別子に該当するエンティティを取得する。
+     *
+     * @param identity 識別子
+     * @return Option[T]
+     */
+    override def resolveOption(identity: Identity[UserId]): Option[User] = {
+      userDao.findById(identity.value.uuid).map(convertInfraToDomain)
     }
 
-    override def contains(identifier: Identity[UUID]): Boolean = {
-      resolveOption(identifier).isDefined
-    }
-
-    override def contains(entity: User): Boolean = {
-      resolveOption(entity.identity).isDefined
+    /**
+     * 指定した識別子のエンティティが存在するかを返す。
+     *
+     * @param identifier 識別子
+     * @return Success:
+     *          存在する場合はtrue
+     *         Failure:
+     *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
+     */
+    override def contains(identifier: Identity[UserId]): Try[Boolean] = {
+      Try(resolveOption(identifier).isDefined)
     }
 
     /**
@@ -62,34 +73,31 @@ object UserRepository {
      * @param entity 保存する対象のエンティティ
      * @throws RepositoryException リポジトリにアクセスできない場合
      */
-    override def store(entity: User): Unit = {
-      assert(entity.password.isDefined)
-      val infraAuthority = InfraAuthority(canLogin = entity.authority.canLogin, canCreateUser = entity.authority.canCreateUser)
-      userDao.save(entity.identity.value, entity.name, entity.password.get, infraAuthority)
+    override def store(entity: User): Try[UserRepository] = {
+      Try {
+        assert(entity.password.isDefined)
+        val infraAuthority = InfraAuthority(canLogin = entity.authority.canLogin, canCreateUser = entity.authority.canCreateUser)
+        userDao.save(entity.identity.value.uuid, entity.name, entity.password.get, infraAuthority)
+        this
+      }
     }
 
     /**
      * 指定した識別子のエンティティを削除する。
      *
      * @param identity 識別子
-     * @throws EntityNotFoundException 指定された識別子を持つエンティティが見つからなかった場合
-     * @throws RepositoryException リポジトリにアクセスできない場合
+     * @return Success:
+     *          リポジトリインスタンス
+     *         Failure:
+     *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    override def delete(identity: Identity[UUID]): Unit = {
-      if (userDao.delete(identity.value) == 0) {
-        throw new EntityNotFoundException
+    override def delete(identity: Identity[UserId]): Try[UserRepository] = {
+      Try {
+        if (userDao.delete(identity.value.uuid) == 0) {
+          throw new EntityNotFoundException
+        }
+        this
       }
-    }
-
-    /**
-     * 指定したエンティティを削除する。
-     *
-     * @param entity エンティティ
-     * @throws EntityNotFoundException 指定された識別子を持つエンティティが見つからなかった場合
-     * @throws RepositoryException リポジトリにアクセスできない場合
-     */
-    override def delete(entity: User): Unit = {
-      delete(entity.identity)
     }
   }
 }

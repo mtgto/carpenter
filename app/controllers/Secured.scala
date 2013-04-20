@@ -1,10 +1,9 @@
 package net.mtgto.carpenter.controllers
 
 import java.util.UUID
-import net.mtgto.carpenter.domain.{User, UserRepository}
+import net.mtgto.carpenter.domain.{UserId, User, UserRepository}
 import play.api.mvc._
 import scala.util.{Failure, Success, Try}
-import scalaz.Identity
 
 trait Secured {
   protected val userRepository: UserRepository
@@ -12,7 +11,7 @@ trait Secured {
   protected def getUser(request: RequestHeader): Option[User] = {
     request.session.get("userId").flatMap( userId =>
       Try(UUID.fromString(userId)) match {
-        case Success(id) => userRepository.resolveOption(Identity(id))
+        case Success(id) => userRepository.resolveOption(UserId(id))
         case Failure(e) => None
       }
     )

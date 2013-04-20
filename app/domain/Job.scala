@@ -1,9 +1,12 @@
 package net.mtgto.carpenter.domain
 
 import java.util.UUID
-import org.sisioh.dddbase.core.Entity
+import org.sisioh.dddbase.core.{Identity, Entity}
 import org.sisioh.baseunits.scala.time.{Duration, TimePoint}
-import scalaz.Identity
+
+case class JobId(uuid: UUID) extends Identity[JobId] {
+  override def value = this
+}
 
 /**
  * Job
@@ -13,8 +16,8 @@ import scalaz.Identity
  * @param exitCode exit code
  * @param log log
  */
-trait Job extends Entity[UUID] {
-  override val identity: Identity[UUID]
+trait Job extends Entity[JobId] {
+  override val identity: JobId
   val project: Project
   val user: User
   val exitCode: Int
@@ -27,10 +30,10 @@ trait Job extends Entity[UUID] {
 
 object Job {
   private case class DefaultJob(
-    identity: Identity[UUID], project: Project, user: User, exitCode: Int, log: String, executeTimePoint: TimePoint,
+    identity: JobId, project: Project, user: User, exitCode: Int, log: String, executeTimePoint: TimePoint,
     executeDuration: Duration) extends Job
 
-  def apply(identity: Identity[UUID], project: Project, user: User, exitCode: Int, log: String, executeTimePoint: TimePoint,
+  def apply(identity: JobId, project: Project, user: User, exitCode: Int, log: String, executeTimePoint: TimePoint,
     executeDuration: Duration): Job = {
     DefaultJob(identity, project, user, exitCode, log, executeTimePoint, executeDuration)
   }

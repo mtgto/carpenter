@@ -1,8 +1,11 @@
 package net.mtgto.carpenter.domain
 
 import java.util.UUID
-import org.sisioh.dddbase.core.Entity
-import scalaz.Identity
+import org.sisioh.dddbase.core.{Identity, Entity}
+
+case class UserId(uuid: UUID) extends Identity[UserId] {
+  override def value = this
+}
 
 /**
  * User
@@ -10,8 +13,8 @@ import scalaz.Identity
  * @param identity identity
  * @param name name
  */
-trait User extends Entity[UUID] {
-  override val identity: Identity[UUID]
+trait User extends Entity[UserId] {
+  override val identity: Identity[UserId]
   val name: String
   val password: Option[String]
   val authority: Authority
@@ -20,9 +23,9 @@ trait User extends Entity[UUID] {
 }
 
 object User {
-  private case class DefaultUser(identity: Identity[UUID], name: String, password: Option[String], authority: Authority) extends User
+  private case class DefaultUser(identity: UserId, name: String, password: Option[String], authority: Authority) extends User
 
-  def apply(identity: Identity[UUID], name: String, password: Option[String], authority: Authority): User = {
+  def apply(identity: UserId, name: String, password: Option[String], authority: Authority): User = {
     DefaultUser(identity, name, password, authority)
   }
 }

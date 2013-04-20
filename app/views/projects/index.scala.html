@@ -3,7 +3,7 @@
 @headers = {}
 @footers = {
 <script>
-  $.get('@net.mtgto.carpenter.controllers.routes.ProjectController.tasks(project.identity.value.toString)', function(data) {
+  $.get('@net.mtgto.carpenter.controllers.routes.ProjectController.tasks(project.identity.value.uuid.toString)', function(data) {
     var status = data['status']
     console.log("tasks.status: " + status)
     if (status == 'ok') {
@@ -21,7 +21,7 @@
       function(){
         runLink.addClass("disabled");
         var taskName = $('#task-select option:selected').val();
-        window.location = '/projects/@project.identity.value.toString/tasks/' + encodeURIComponent(taskName);
+        window.location = '/projects/@project.identity.value.uuid.toString/tasks/' + encodeURIComponent(taskName);
       }
     );
   });

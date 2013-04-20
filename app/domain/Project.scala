@@ -1,8 +1,11 @@
 package net.mtgto.carpenter.domain
 
 import java.util.UUID
-import org.sisioh.dddbase.core.Entity
-import scalaz.Identity
+import org.sisioh.dddbase.core.{Identity, Entity}
+
+case class ProjectId(uuid: UUID) extends Identity[ProjectId] {
+  override def value = this
+}
 
 /**
  * Project
@@ -12,8 +15,8 @@ import scalaz.Identity
  * @param hostname hostname
  * @param recipe recipe
  */
-trait Project extends Entity[UUID] {
-  override val identity: Identity[UUID]
+trait Project extends Entity[ProjectId] {
+  override val identity: ProjectId
   val name: String
   val hostname: String
   val sourceRepository: SourceRepository
@@ -23,13 +26,13 @@ trait Project extends Entity[UUID] {
 }
 
 object Project {
-  private case class DefaultProject(identity: Identity[UUID],
+  private case class DefaultProject(identity: ProjectId,
                                     name: String,
                                     hostname: String,
                                     sourceRepository: SourceRepository,
                                     recipe: String) extends Project
 
-  def apply(identity: Identity[UUID],
+  def apply(identity: ProjectId,
             name: String,
             hostname: String,
             sourceRepository: SourceRepository,

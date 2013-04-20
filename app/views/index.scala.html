@@ -34,9 +34,9 @@
       <tbody>
         @for(project <- projects) {
           <tr>
-            <td><a href="@net.mtgto.carpenter.controllers.routes.ProjectController.showProjectView(project.identity.value.toString)">@project.name</a></td>
+            <td><a href="@net.mtgto.carpenter.controllers.routes.ProjectController.showProjectView(project.identity.value.uuid.toString)">@project.name</a></td>
             <td>@project.hostname</td>
-            <td><a href="@net.mtgto.carpenter.controllers.routes.ProjectController.edit(project.identity.value.toString)">@Messages("views.edit")</a></td>
+            <td><a href="@net.mtgto.carpenter.controllers.routes.ProjectController.edit(project.identity.value.uuid.toString)">@Messages("views.edit")</a></td>
           </tr>
         }
       </tbody>

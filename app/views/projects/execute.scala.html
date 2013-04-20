@@ -16,7 +16,7 @@
           branchName = $('#tag-names option:selected').val();
         }
         console.log("branchType = " + branchType + ", branchName = " + branchName)
-        $.post('@net.mtgto.carpenter.controllers.routes.ProjectController.executeTask(project.identity.value.toString, taskName)', {type: branchType, name: branchName}, function(data) {
+        $.post('@net.mtgto.carpenter.controllers.routes.ProjectController.executeTask(project.identity.value.uuid.toString, taskName)', {type: branchType, name: branchName}, function(data) {
           log = data['log'];
           exitCode = data['exitCode'];
           console.log("exitCode = " + exitCode);
@@ -62,7 +62,7 @@
       <h3>IRC notification</h3>
         TODO
     </section>
-    <a class="btn btn-large" href="@net.mtgto.carpenter.controllers.routes.ProjectController.showProjectView(project.identity.value.toString)">@Messages("views.back")</a>
+    <a class="btn btn-large" href="@net.mtgto.carpenter.controllers.routes.ProjectController.showProjectView(project.identity.value.uuid.toString)">@Messages("views.back")</a>
     <button class="btn-large btn-primary run_task" type="button">@Messages("views.projects.run")</button>
     <section>
       <h3>@Messages("views.projects.index.log")</h3>
