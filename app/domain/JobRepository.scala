@@ -101,8 +101,8 @@ object JobRepository {
      */
     override def store(entity: Job): Try[JobRepository] = {
       Try {
-        jobDao.save(entity.identity.uuid, entity.project.identity.uuid, entity.user.identity.value.uuid, entity.exitCode,
-          entity.log, entity.executeTimePoint.asJavaUtilDate, entity.executeDuration.quantity)
+        jobDao.save(entity.identity.uuid, entity.project.identity.uuid, entity.user.identity.value.uuid,
+          entity.taskName, entity.exitCode, entity.log, entity.executeTimePoint.asJavaUtilDate, entity.executeDuration.quantity)
         val (snapshotName, snapshotRevision, branchType) = entity.snapshot match {
           case snapshot: GitBranchSnapshot => (snapshot.name, snapshot.revision, "branch")
           case snapshot: GitTagSnapshot => (snapshot.name, snapshot.revision, "tag")
@@ -135,7 +135,7 @@ object JobRepository {
       projectRepository.resolve(Identity(ProjectId(infraJob.projectId))).flatMap { project =>
         userRepository.resolve(Identity(UserId(infraJob.userId))).flatMap { user =>
           convertInfraSnapshotToDomain(project.sourceRepository, snapshotDao.findByJobId(infraJob.id).get).map { snapshot =>
-            Job(JobId(infraJob.id), project, user, snapshot, infraJob.exitCode, infraJob.log,
+            Job(JobId(infraJob.id), project, user, snapshot, infraJob.task, infraJob.exitCode, infraJob.log,
               TimePoint.from(infraJob.executeDate), Duration.milliseconds(infraJob.executeDuration))
           }
         }

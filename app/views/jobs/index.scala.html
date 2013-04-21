@@ -1,0 +1,32 @@
+@(job: net.mtgto.carpenter.domain.Job)(implicit lang: Lang, flash: Flash)
+
+@headers = {}
+@footers = {}
+@main(Messages("views.jobs.header"), headers, footers) {
+    <section>
+        <h2>@Messages("views.jobs.header")</h2>
+    </section>
+    <section>
+        <h3>@Messages("views.jobs.header.project")</h3>
+        <a href="@net.mtgto.carpenter.controllers.routes.ProjectController.showProjectView(job.project.identity.uuid.toString)">@job.project.name</a>
+        <h3>@Messages("views.header.user")</h3>
+        @job.user.name
+        <h3>@Messages("views.jobs.header.task")</h3>
+        @job.taskName
+        <h3>@Messages("views.header.result")</h3>
+        
+            @if(job.exitCode == 0){
+              <span class="label label-success">@Messages("views.projects.job.success")</span>
+            }else{
+              <span class="label label-important">@Messages("views.projects.job.failure")</span>
+            }
+        
+        <h3>@Messages("views.header.duration")</h3>
+        @job.executeDuration
+        <h3>@Messages("views.header.date")</h3>
+        @job.executeTimePoint
+        <h3>@Messages("views.projects.index.log")</h3>
+        <pre><code>@job.log</code></pre>
+    </section>
+    <a class="btn btn-large" href="@net.mtgto.carpenter.controllers.routes.ProjectController.showProjectView(job.project.identity.uuid.toString)">@Messages("views.back")</a>
+}

@@ -183,7 +183,7 @@ object ProjectController extends Controller with BaseController {
                 taskService.execute(project, taskName, repositoryUri, branchType, branchName).map( result =>
                   result match {
                     case (exitCode, log, executeTimePoint, executeDuration) => {
-                      val job = JobFactory(project, user, snapshot, exitCode, log, executeTimePoint, executeDuration)
+                      val job = JobFactory(project, user, snapshot, taskName, exitCode, log, executeTimePoint, executeDuration)
                       jobRepository.store(job)
                       val message = if (exitCode == 0)
                         Messages("messages.notification.success", user.name, project.name, taskName)

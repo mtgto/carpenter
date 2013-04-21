@@ -43,7 +43,7 @@ views.index.create_user=新しいユーザの作成
 views.index.change_password=パスワードを変更する
 # create new project
 views.index.create_project=新しいプロジェクトの作成
-# submit button to chanage password
+# submit button to change password
 views.index.change_password_button=変更
 # input field placeholder of old password
 views.index.old_password=古いパスワード
@@ -96,6 +96,8 @@ views.header.result=結果
 views.header.duration=実行時間
 # header of job execute start date
 views.header.date=開始時間
+# header of job detail
+views.header.detail=詳細...
 # success of job execution
 views.projects.job.success=成功
 # failure of job execution
@@ -112,6 +114,13 @@ views.projects.execute.choose_branch=ブランチから選択:
 views.projects.execute.choose_tag=タグから選択:
 # header of choosing trunk
 views.projects.execute.choose_trunk=trunkを選択
+
+# header of job
+views.jobs.header=ジョブ実行結果
+# header of project
+views.jobs.header.project=プロジェクト
+# header of task
+views.jobs.header.task=タスク
 
 # notification message on success
 messages.notification.success=プロジェクト {1} のタスク {2} の実行に成功しました。実行したのは {0} です。

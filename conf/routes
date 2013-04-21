@@ -21,6 +21,7 @@ GET     /projects/:id                      net.mtgto.carpenter.controllers.Proje
 GET     /users/create                      net.mtgto.carpenter.controllers.UserController.showCreateView
 POST    /users/create                      net.mtgto.carpenter.controllers.UserController.create
 POST    /users/password                    net.mtgto.carpenter.controllers.UserController.changePassword
+GET     /jobs/:id                          net.mtgto.carpenter.controllers.JobController.showJobView(id)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                      controllers.Assets.at(path="/public", file)

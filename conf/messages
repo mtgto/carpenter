@@ -96,6 +96,8 @@ views.header.result=Result
 views.header.duration=Duration
 # header of job execute start date
 views.header.date=Start Time
+# header of job detail
+views.header.detail=Detail...
 # success of job execution
 views.projects.job.success=Success
 # failure of job execution
@@ -112,6 +114,13 @@ views.projects.execute.choose_branch=Choose branch:
 views.projects.execute.choose_tag=Choose tag:
 # header of choosing trunk
 views.projects.execute.choose_trunk=Choose trunk
+
+# header of job
+views.jobs.header=Job result
+# header of project
+views.jobs.header.project=Project
+# header of task
+views.jobs.header.task=Task
 
 # notification message on success
 messages.notification.success=Succeeded to execute a task {2} of project {1} by {0}

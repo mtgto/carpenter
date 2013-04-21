@@ -11,6 +11,6 @@ trait JobDao {
    * @param executeTime: start time to execute the job
    * @param executeDuration: duration of the job
    */
-  def save(id: UUID, projectId: UUID, userId: UUID, exitCode: Int, log: String, executeDate: Date, executeDuration: Long): Unit
+  def save(id: UUID, projectId: UUID, userId: UUID, task: String, exitCode: Int, log: String, executeDate: Date, executeDuration: Long): Unit
   def delete(id: UUID): Int
 }
