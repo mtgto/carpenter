@@ -43,28 +43,34 @@
     <table class="table table-condensed table-striped">
       <thead>
         <tr>
-          <th>@Messages("views.header.result")</th>
+          <th>@Messages("views.projects.index.task")</th>
           <th>@Messages("views.header.user")</th>
           <th>@Messages("views.header.duration")</th>
           <th>@Messages("views.header.date")</th>
+          <th>@Messages("views.header.result")</th>
           <th>&nbsp;</th>
         </tr>
       </thead>
       <tbody>
       @for(job <- jobs) {
-        <tr>
-          <td>
-            @if(job.exitCode == 0){
-              <span class="label label-success">@Messages("views.projects.job.success")</span>
-            }else{
-              <span class="label label-important">@Messages("views.projects.job.failure")</span>
-            }
-          </td>
-          <td>@job.user.name</td>
-          <td>@job.executeDuration</td>
-          <td>@job.executeTimePoint</td>
-          <td><a href="@net.mtgto.carpenter.controllers.routes.JobController.showJobView(job.identity.uuid.toString)">@Messages("views.header.detail")</a></td>
-        </tr>
+        @defining(job.exitCode == 0){ isSuccess =>
+          @defining(if(isSuccess)"success" else "error"){ trClassName =>
+            <tr class="@trClassName">
+              <td>@job.taskName</td>
+              <td>@job.user.name</td>
+              <td>@job.executeDuration</td>
+              <td>@job.executeTimePoint</td>
+              <td>
+                  @if(isSuccess){
+                      <span class="label label-success">@Messages("views.projects.job.success")</span>
+                  }else{
+                      <span class="label label-important">@Messages("views.projects.job.failure")</span>
+                  }
+              </td>
+              <td><a href="@net.mtgto.carpenter.controllers.routes.JobController.showJobView(job.identity.uuid.toString)">@Messages("views.header.detail")</a></td>
+            </tr>
+          }
+        }
       }
       </tbody>
     </table>
