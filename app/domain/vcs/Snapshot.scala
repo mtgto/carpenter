@@ -1,3 +1,8 @@
 package net.mtgto.carpenter.domain.vcs
 
-trait Snapshot
+import net.mtgto.carpenter.domain.BranchType
+
+trait Snapshot {
+  val branchType: BranchType.Value
+  val name: String
+}

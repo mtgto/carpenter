@@ -1,5 +1,7 @@
 package net.mtgto.carpenter.domain.vcs
 
+import net.mtgto.carpenter.domain.BranchType
+
 /**
  * Git revision and branch name
  * @param name
@@ -8,7 +10,9 @@ package net.mtgto.carpenter.domain.vcs
 case class GitBranchSnapshot(
   name: String,
   revision: String
-) extends Snapshot
+) extends Snapshot {
+  override val branchType = BranchType.Branch
+}
 
 /**
  * Git revision and tag name
@@ -18,4 +22,6 @@ case class GitBranchSnapshot(
 case class GitTagSnapshot(
   name: String,
   revision: String
-) extends Snapshot
+) extends Snapshot {
+  override val branchType = BranchType.Tag
+}

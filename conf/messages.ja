@@ -92,6 +92,8 @@ views.projects.index.header.project_job=実行ジョブ
 views.header.user=ユーザ
 # header of result
 views.header.result=結果
+# header of snapshot
+views.header.snapshot=スナップショット
 # header of job execute duration
 views.header.duration=実行時間
 # header of job execute start date

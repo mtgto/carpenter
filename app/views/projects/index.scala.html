@@ -45,6 +45,7 @@
         <tr>
           <th>@Messages("views.projects.index.task")</th>
           <th>@Messages("views.header.user")</th>
+          <th>@Messages("views.header.snapshot")</th>
           <th>@Messages("views.header.duration")</th>
           <th>@Messages("views.header.date")</th>
           <th>@Messages("views.header.result")</th>
@@ -58,6 +59,7 @@
             <tr class="@trClassName">
               <td>@job.taskName</td>
               <td>@job.user.name</td>
+              <td>[@job.snapshot.branchType.toString] @job.snapshot.name</td>
               <td>@job.executeDuration</td>
               <td>@job.executeTimePoint</td>
               <td>

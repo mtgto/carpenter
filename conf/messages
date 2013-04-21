@@ -92,6 +92,8 @@ views.projects.index.header.project_job=Jobs
 views.header.user=User
 # header of result
 views.header.result=Result
+# header of snapshot
+views.header.snapshot=Snapshot
 # header of job execute duration
 views.header.duration=Duration
 # header of job execute start date
