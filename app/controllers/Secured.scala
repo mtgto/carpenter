@@ -10,10 +10,7 @@ trait Secured {
 
   protected def getUser(request: RequestHeader): Option[User] = {
     request.session.get("userId").flatMap( userId =>
-      Try(UUID.fromString(userId)) match {
-        case Success(id) => userRepository.resolveOption(UserId(id))
-        case Failure(e) => None
-      }
+      Try(UUID.fromString(userId)).flatMap(uuid => userRepository.resolve(UserId(uuid))).toOption
     )
   }
 

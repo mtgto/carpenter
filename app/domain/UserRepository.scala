@@ -5,7 +5,7 @@ import net.mtgto.carpenter.infrastructure.{UserDao, DatabaseUserDao, Authority =
 import org.sisioh.dddbase.core.{Identity, EntityNotFoundException, Repository}
 import scala.util.Try
 
-trait UserRepository extends Repository[UserId, User] {
+trait UserRepository extends Repository[UserId, User] with BaseEntityResolver[UserId, User] {
   def findByNameAndPassword(name: String, password: String): Option[User]
   def findAll: Seq[User]
 }
@@ -31,40 +31,17 @@ object UserRepository {
     }
 
     /**
-     * 識別子に該当するエンティティを取得する。
+     * 識別子に該当するエンティティを解決する。
      *
      * @param identity 識別子
      * @return Success:
-     *          エンティティ
-     *         Failure:
-     *          EntityNotFoundExceptionは、エンティティが見つからなかった場合
-     *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
-     */
-    override def resolve(identity: Identity[UserId]): Try[User] = {
-      Try(resolveOption(identity).getOrElse(throw new EntityNotFoundException))
-    }
-
-    /**
-     * 識別子に該当するエンティティを取得する。
-     *
-     * @param identity 識別子
-     * @return Option[T]
-     */
-    override def resolveOption(identity: Identity[UserId]): Option[User] = {
-      userDao.findById(identity.value.uuid).map(convertInfraToDomain)
-    }
-
-    /**
-     * 指定した識別子のエンティティが存在するかを返す。
-     *
-     * @param identifier 識別子
-     * @return Success:
-     *          存在する場合はtrue
+     *          Some: エンティティが存在する場合
+     *          None: エンティティが存在しない場合
      *         Failure:
      *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    override def contains(identifier: Identity[UserId]): Try[Boolean] = {
-      Try(resolveOption(identifier).isDefined)
+    override def resolveOption(identity: UserId): Try[Option[User]] = {
+      Try(userDao.findById(identity.value.uuid).map(convertInfraToDomain))
     }
 
     /**
@@ -91,7 +68,7 @@ object UserRepository {
      *         Failure:
      *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    override def delete(identity: Identity[UserId]): Try[UserRepository] = {
+    override def delete(identity: UserId): Try[UserRepository] = {
       Try {
         if (userDao.delete(identity.value.uuid) == 0) {
           throw new EntityNotFoundException

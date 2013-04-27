@@ -4,10 +4,10 @@ import net.mtgto.carpenter.domain.vcs.{Snapshot, SubversionSnapshot, GitTagSnaps
 import net.mtgto.carpenter.infrastructure.{Job => InfraJob, JobDao, DatabaseJobDao}
 import net.mtgto.carpenter.infrastructure.vcs.{Snapshot => InfraSnapshot, SnapshotDao, DatabaseSnapshotDao}
 import org.sisioh.baseunits.scala.time.{Duration, TimePoint}
-import org.sisioh.dddbase.core.{Repository, Identity, EntityNotFoundException}
+import org.sisioh.dddbase.core.{Repository, EntityNotFoundException}
 import scala.util.Try
 
-trait JobRepository extends Repository[JobId, Job] {
+trait JobRepository extends Repository[JobId, Job] with BaseEntityResolver[JobId, Job] {
   def findAll: Try[Seq[Job]]
 
   def findAllByProject(project: Project): Try[Seq[Job]]
@@ -52,42 +52,19 @@ object JobRepository {
     }
 
     /**
-     * 識別子に該当するエンティティを取得する。
+     * 識別子に該当するエンティティを解決する。
      *
-     *  @param identifier 識別子
-     *  @return エンティティ
-     *
-     *  @throws IllegalArgumentException
-     *  @throws EntityNotFoundException エンティティが見つからなかった場合
-     *  @throws RepositoryException リポジトリにアクセスできない場合
-     */
-    override def resolve(identifier: Identity[JobId]): Try[Job] = {
-      Try(resolveOption(identifier).getOrElse(throw new EntityNotFoundException))
-    }
-
-    /**
-     * 識別子に該当するエンティティを取得する。
-     *
-     * @param identifier 識別子
-     * @return Option[T]
-     */
-    override def resolveOption(identifier: Identity[JobId]): Option[Job] = {
-      jobDao.findById(identifier.value.uuid).flatMap {
-        convertInfraToDomain(_).toOption
-      }
-    }
-
-    /**
-     * 指定した識別子のエンティティが存在するかを返す。
-     *
-     * @param identifier 識別子
+     * @param identity 識別子
      * @return Success:
-     *          存在する場合はtrue
+     *          Some: エンティティが存在する場合
+     *          None: エンティティが存在しない場合
      *         Failure:
      *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    override def contains(identifier: Identity[JobId]): Try[Boolean] = {
-      Try(resolveOption(identifier).isDefined)
+    override def resolveOption(identity: JobId): Try[Option[Job]] = {
+      Try(jobDao.findById(identity.value.uuid).flatMap {
+        convertInfraToDomain(_).toOption
+      })
     }
 
     /**
@@ -122,7 +99,7 @@ object JobRepository {
      *         Failure:
      *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    override def delete(identity: Identity[JobId]): Try[JobRepository] = {
+    override def delete(identity: JobId): Try[JobRepository] = {
       Try {
         if (jobDao.delete(identity.value.uuid) == 0) {
           throw new EntityNotFoundException
@@ -132,8 +109,8 @@ object JobRepository {
     }
 
     protected[this] def convertInfraToDomain(infraJob: InfraJob): Try[Job] = {
-      projectRepository.resolve(Identity(ProjectId(infraJob.projectId))).flatMap { project =>
-        userRepository.resolve(Identity(UserId(infraJob.userId))).flatMap { user =>
+      projectRepository.resolve(ProjectId(infraJob.projectId)).flatMap { project =>
+        userRepository.resolve(UserId(infraJob.userId)).flatMap { user =>
           convertInfraSnapshotToDomain(project.sourceRepository, snapshotDao.findByJobId(infraJob.id).get).map { snapshot =>
             Job(JobId(infraJob.id), project, user, snapshot, infraJob.task, infraJob.exitCode, infraJob.log,
               TimePoint.from(infraJob.executeDate), Duration.milliseconds(infraJob.executeDuration))

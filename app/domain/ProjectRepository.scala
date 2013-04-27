@@ -4,7 +4,7 @@ import net.mtgto.carpenter.infrastructure.{Project => InfraProject, ProjectDao, 
 import org.sisioh.dddbase.core.{Identity, EntityNotFoundException, Repository}
 import scala.util.Try
 
-trait ProjectRepository extends Repository[ProjectId, Project] {
+trait ProjectRepository extends Repository[ProjectId, Project] with BaseEntityResolver[ProjectId, Project] {
   def findAll: Seq[Project]
 }
 
@@ -25,40 +25,17 @@ object ProjectRepository {
     }
 
     /**
-     * 識別子に該当するエンティティを取得する。
+     * 識別子に該当するエンティティを解決する。
      *
      * @param identity 識別子
      * @return Success:
-     *          エンティティ
-     *         Failure:
-     *          EntityNotFoundExceptionは、エンティティが見つからなかった場合
-     *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
-     */
-    override def resolve(identity: Identity[ProjectId]): Try[Project] = {
-      Try(resolveOption(identity).getOrElse(throw new EntityNotFoundException))
-    }
-
-    /**
-     * 識別子に該当するエンティティを取得する。
-     *
-     * @param identity 識別子
-     * @return Option[T]
-     */
-    override def resolveOption(identity: Identity[ProjectId]): Option[Project] = {
-      projectDao.findById(identity.value.uuid).map(convertInfraProjectToDomain)
-    }
-
-    /**
-     * 指定した識別子のエンティティが存在するかを返す。
-     *
-     * @param identifier 識別子
-     * @return Success:
-     *          存在する場合はtrue
+     *          Some: エンティティが存在する場合
+     *          None: エンティティが存在しない場合
      *         Failure:
      *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    override def contains(identifier: Identity[ProjectId]): Try[Boolean] = {
-      Try(resolveOption(identifier).isDefined)
+    override def resolveOption(identity: ProjectId): Try[Option[Project]] = {
+      Try(projectDao.findById(identity.value.uuid).map(convertInfraProjectToDomain))
     }
 
     /**
@@ -87,7 +64,7 @@ object ProjectRepository {
      *         Failure:
      *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    override def delete(identity: Identity[ProjectId]): Try[ProjectRepository] = {
+    override def delete(identity: ProjectId): Try[ProjectRepository] = {
       Try {
         if (projectDao.delete(identity.value.uuid) == 0) {
           throw new EntityNotFoundException

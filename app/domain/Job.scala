@@ -14,8 +14,13 @@ case class JobId(uuid: UUID) extends Identity[JobId] {
  *
  * @param identity identity
  * @param project parent project
+ * @param user user who execute this job
+ * @param snapshot source repository snapshot to deploy
+ * @param taskName name of the task
  * @param exitCode exit code
  * @param log log
+ * @param executeTimePoint starting time point to execute
+ * @param executeDuration job executing duration
  */
 trait Job extends Entity[JobId] {
   override val identity: JobId

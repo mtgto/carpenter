@@ -14,7 +14,7 @@ case class UserId(uuid: UUID) extends Identity[UserId] {
  * @param name name
  */
 trait User extends Entity[UserId] {
-  override val identity: Identity[UserId]
+  override val identity: UserId
   val name: String
   val password: Option[String]
   val authority: Authority

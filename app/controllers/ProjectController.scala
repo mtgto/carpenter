@@ -87,7 +87,7 @@ object ProjectController extends Controller with BaseController {
 
   def showEditView(id: String) = IsAuthenticated { user => implicit request =>
     getProjectByIdString(id) match {
-      case Some(project) =>
+      case Success(project) =>
         Ok(views.html.projects.edit(id, editForm.fill(
           (project.name, project.hostname, project.recipe, project.sourceRepository.sourceRepositoryType.toString,
             project.sourceRepository.uri.toString)), sourceRepositoryTypes))
@@ -102,7 +102,7 @@ object ProjectController extends Controller with BaseController {
         BadRequest(views.html.projects.edit(id, formWithErrors, sourceRepositoryTypes)).flashing("error" -> Messages("messages.wrong_input")),
       success => {
         getProjectByIdString(id) match {
-          case Some(project) => {
+          case Success(project) => {
             success match {
               case (name, hostname, recipe, sourceRepositoryTypeString, url) =>
                 val sourceRepositoryType = sourceRepositoryService.resolveSourceRepositoryType(sourceRepositoryTypeString)
@@ -121,7 +121,7 @@ object ProjectController extends Controller with BaseController {
 
   def showProjectView(id: String) = IsAuthenticated { user => implicit request =>
     getProjectByIdString(id) match {
-      case Some(project) =>
+      case Success(project) =>
         val jobs = jobRepository.findAllByProjectOrderByTimePointDesc(project).get
         Ok(views.html.projects.index(project, jobs))
       case _ =>
@@ -139,7 +139,7 @@ object ProjectController extends Controller with BaseController {
       }
     }
     getProjectByIdString(id) match {
-      case Some(project) => {
+      case Success(project) => {
         val tasks = taskService.getAllTasks(project)
         Ok(Json.obj("status" -> "ok", "tasks" -> Json.toJson(tasks)))
       }
@@ -150,7 +150,7 @@ object ProjectController extends Controller with BaseController {
 
   def showExecuteTaskView(id: String, taskName: String) = IsAuthenticated { user => implicit request =>
     getProjectByIdString(id) match {
-      case Some(project) =>
+      case Success(project) =>
         Async {
           val branchAndTags = for {
             branches <- taskService.getAllBranches(project)
@@ -171,7 +171,7 @@ object ProjectController extends Controller with BaseController {
       success => success match {
         case (branchTypeString, branchName) => {
           getProjectByIdString(id) match {
-            case Some(project) =>
+            case Success(project) =>
               Async {
                 val branchType = branchTypeString match {
                   case "branch" => BranchType.Branch
@@ -195,7 +195,7 @@ object ProjectController extends Controller with BaseController {
                   }
                 )
               }
-            case None =>
+            case Failure(_) =>
               BadRequest(Json.obj("status" -> "fail"))
           }
         }
@@ -205,7 +205,7 @@ object ProjectController extends Controller with BaseController {
 
   def branches(id: String) = IsAuthenticated { user => implicit request =>
     getProjectByIdString(id) match {
-      case Some(project) => {
+      case Success(project) => {
         Async {
           taskService.getAllBranches(project).map { branches =>
             Ok(Json.obj("status" -> "ok", "branches" -> Json.toJson(branches)))
@@ -219,7 +219,7 @@ object ProjectController extends Controller with BaseController {
 
   def tags(id: String) = IsAuthenticated { user => implicit request =>
     getProjectByIdString(id) match {
-      case Some(project) => {
+      case Success(project) => {
         Async {
           taskService.getAllTags(project).map { tags =>
             Ok(Json.obj("status" -> "ok", "tags" -> Json.toJson(tags)))
@@ -231,12 +231,7 @@ object ProjectController extends Controller with BaseController {
     }
   }
 
-  protected[this] def getProjectByIdString(id: String): Option[Project] = {
-    Try(UUID.fromString(id)) match {
-      case Success(uuid) =>
-        projectRepository.resolveOption(Identity(ProjectId(uuid)))
-      case Failure(e) =>
-        None
-    }
+  protected[this] def getProjectByIdString(id: String): Try[Project] = {
+    Try(UUID.fromString(id)).flatMap(uuid => projectRepository.resolve(ProjectId(uuid)))
   }
 }

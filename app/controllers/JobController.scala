@@ -6,7 +6,7 @@ import play.api.i18n.Messages
 import net.mtgto.carpenter.domain.{UserRepository, JobRepository, JobId, Job}
 import scala.util.{Failure, Success, Try}
 import java.util.UUID
-import org.sisioh.dddbase.core.Identity
+import org.sisioh.dddbase.core.{EntityNotFoundException, Identity}
 
 object JobController extends Controller with Secured {
   protected[this] val userRepository: UserRepository = UserRepository()
@@ -25,7 +25,7 @@ object JobController extends Controller with Secured {
   protected[this] def getJobByIdString(id: String): Option[Job] = {
     Try(UUID.fromString(id)) match {
       case Success(uuid) =>
-        jobRepository.resolveOption(Identity(JobId(uuid)))
+        jobRepository.resolveOption(JobId(uuid)).getOrElse(throw new EntityNotFoundException)
       case Failure(e) =>
         None
     }
