@@ -13,6 +13,7 @@ import net.mtgto.carpenter.domain._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Try, Success, Failure}
 import org.sisioh.dddbase.core.Identity
+import org.sisioh.baseunits.scala.timeutil.Clock
 
 object ProjectController extends Controller with BaseController {
   protected[this] val userRepository: UserRepository = UserRepository()
@@ -180,12 +181,15 @@ object ProjectController extends Controller with BaseController {
                 }
                 val snapshot = sourceRepositoryService.resolveSnapshot(project.sourceRepository, branchType, branchName).get
                 val repositoryUri = sourceRepositoryService.resolveURIByBranch(project.sourceRepository, branchType, branchName)
+                val currentTimePoint = Clock.now
+                val job = JobFactory(project, user, snapshot, taskName, currentTimePoint)
+                jobRepository.store(job)
                 taskService.execute(project, taskName, repositoryUri, branchType, branchName).map( result =>
                   result match {
                     case (exitCode, log, executeTimePoint, executeDuration) => {
-                      val job = JobFactory(project, user, snapshot, taskName, exitCode, log, executeTimePoint, executeDuration)
-                      jobRepository.store(job)
-                      val message = if (exitCode == 0)
+                      val executedJob = JobFactory(job, exitCode, log, executeDuration)
+                      jobRepository.store(executedJob)
+                      val message = if (exitCode == Some(0))
                         Messages("messages.notification.success", user.name, project.name, taskName)
                       else
                         Messages("messages.notification.failure", user.name, project.name, taskName)

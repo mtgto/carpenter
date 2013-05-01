@@ -12,7 +12,7 @@ class GitService extends VCSService {
       // ProcessBuilder#!! throws an Exception when exit code != 0
       Process(Seq(command, "ls-remote", "--heads", uri.toString)).lines.map {
         line =>
-          val Array(revision, name) = line.split("""\s+""")
+          val Array(revision, name) = line.split("""\s+refs/heads/""")
           GitRevision(name = name, revision = revision)
       }.find(_.name == branchName).get
     }
@@ -23,7 +23,7 @@ class GitService extends VCSService {
       // ProcessBuilder#!! throws an Exception when exit code != 0
       Process(Seq(command, "ls-remote", "--tags", uri.toString)).lines.map {
         line =>
-          val Array(revision, name) = line.split("""\s+""")
+          val Array(revision, name) = line.split("""\s+refs/tags/""")
           GitRevision(name = name, revision = revision)
       }.find(_.name == tagName).get
     }

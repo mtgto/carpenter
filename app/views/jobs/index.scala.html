@@ -14,7 +14,7 @@
         <h3>@Messages("views.jobs.header.task")</h3>
         @job.taskName
         <h3>@Messages("views.header.result")</h3>
-            @if(job.exitCode == 0){
+            @if(job.exitCode == Some(0)){
               <span class="label label-success">@Messages("views.projects.job.success")</span>
             }else{
               <span class="label label-important">@Messages("views.projects.job.failure")</span>

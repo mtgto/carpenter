@@ -23,10 +23,10 @@ CREATE TABLE `jobs` (
   `project_id` CHAR(36) NOT NULL,
   `user_id` CHAR(36) NOT NULL,
   `task` VARCHAR(255) NOT NULL,
-  `exit_code` INT NOT NULL,
-  `log` TEXT NOT NULL,
+  `exit_code` INT,
+  `log` TEXT,
   `execute_time` DATETIME NOT NULL,
-  `execute_duration` INT NOT NULL,
+  `execute_duration` INT,
   PRIMARY KEY (`id`)
 );
 CREATE TABLE `snapshots` (

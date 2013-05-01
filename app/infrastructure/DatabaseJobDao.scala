@@ -12,9 +12,9 @@ class DatabaseJobDao extends JobDao {
 
   protected[this] def convertRowToJob(row: Row): Job = {
     row match {
-      case Row(id: String, projectId: String, userId: String, task: String, exitCode: Int, log: Clob, executeTime: Timestamp, executeDuration: Int) =>
+      case Row(id: String, projectId: String, userId: String, task: String, exitCode: Option[Int], log: Option[Clob], executeTime: Timestamp, executeDuration: Option[Int]) =>
         Job(UUID.fromString(id), UUID.fromString(projectId), UUID.fromString(userId), task, exitCode,
-            log.getSubString(1, log.length.toInt), new Date(executeTime.getTime), executeDuration.toLong)
+            log.map(log => log.getSubString(1, log.length.toInt)), new Date(executeTime.getTime), executeDuration.map(_.toLong))
     }
   }
 
@@ -49,18 +49,19 @@ class DatabaseJobDao extends JobDao {
     }
   }
 
-  override def save(id: UUID, projectId: UUID, userId: UUID, task: String, exitCode: Int, log: String, executeDate: Date, executeDuration: Long): Unit = {
+  override def save(job: Job): Unit = {
     DB.withConnection{ implicit c =>
       val rowCount =
         SQL("""UPDATE `jobs` SET `project_id` = {projectId}, `user_id` = {userId}, `task` = {task}, `exit_code` = {exitCode},
               |`log` = {log}, `execute_time` = {executeTime}, `execute_duration` = {executeDuration} WHERE `id` = {id}""".stripMargin)
-          .on('id -> id.toString, 'projectId -> projectId.toString, 'userId -> userId.toString, 'task -> task,
-              'exitCode -> exitCode, 'log -> log, 'executeTime -> executeDate, 'executeDuration -> executeDuration).executeUpdate()
+          .on('id -> job.id.toString, 'projectId -> job.projectId.toString, 'userId -> job.userId.toString, 'task -> job.task,
+              'exitCode -> job.exitCode.map(_.toString), 'log -> job.log, 'executeTime -> job.executeDate, 'executeDuration -> job.executeDuration).executeUpdate()
       if (rowCount == 0)
         SQL("""INSERT INTO `jobs` (`id`, `project_id`, `user_id`, `task`, `exit_code`, `log`, `execute_time`, `execute_duration`)
               |VALUES ({id},{projectId},{userId},{task},{exitCode},{log},{executeTime},{executeDuration})""".stripMargin)
-          .on('id -> id.toString, 'projectId -> projectId.toString, 'userId -> userId.toString, 'task -> task, 'exitCode -> exitCode, 'log -> log,
-              'executeTime -> executeDate, 'executeDuration -> executeDuration).executeInsert()
+          .on('id -> job.id.toString, 'projectId -> job.projectId.toString, 'userId -> job.userId.toString,
+              'task -> job.task, 'exitCode -> job.exitCode.map(_.toString), 'log -> job.log,
+              'executeTime -> job.executeDate, 'executeDuration -> job.executeDuration).executeInsert()
     }
   }
 
