@@ -9,7 +9,7 @@ import scala.sys.process.{Process, ProcessLogger}
 
 trait TaskService {
   def getAllTasks(project: Project): Seq[Task]
-  def execute(project: Project, taskName: String, repositoryUri: URI, branchType: BranchType.Value, branchName: String): Future[(Int, String, TimePoint, Duration)]
+  def execute(job: Job, project: Project, taskName: String, repositoryUri: URI, branchType: BranchType.Value, branchName: String): Future[(Int, String, TimePoint, Duration)]
   def getAllBranches(project: Project): Future[Seq[String]]
   def getAllTags(project: Project): Future[Seq[String]]
 }
@@ -40,7 +40,7 @@ class DefaultTaskService(workspacePath: String) extends TaskService {
     }
   }
 
-  override def execute(project: Project, taskName: String, repositoryUri: URI, branchType: BranchType.Value, branchName: String): Future[(Int, String, TimePoint, Duration)] = {
+  override def execute(job: Job, project: Project, taskName: String, repositoryUri: URI, branchType: BranchType.Value, branchName: String): Future[(Int, String, TimePoint, Duration)] = {
     createProjectWorkspace(project)
     future {
       val outputBuilder = new StringBuilder
@@ -60,6 +60,7 @@ class DefaultTaskService(workspacePath: String) extends TaskService {
           }, line => {
             errorBuilder ++= line
             errorBuilder ++= System.lineSeparator
+            LogBroadcaster.broadcast(job.identity, errorBuilder.toString)
           }))
       val exitCode = process.exitValue
       val executeDuration = Duration.milliseconds(Clock.now.breachEncapsulationOfMillisecondsFromEpoc - startTimePoint.breachEncapsulationOfMillisecondsFromEpoc)

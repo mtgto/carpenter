@@ -1,7 +1,24 @@
-@(job: net.mtgto.carpenter.domain.Job)(implicit lang: Lang, flash: Flash)
+@(job: net.mtgto.carpenter.domain.Job)(implicit request: RequestHeader, lang: Lang, flash: Flash)
 
 @headers = {}
-@footers = {}
+@footers = {
+<script>
+  var con = new WebSocket('@net.mtgto.carpenter.controllers.routes.JobController.log(job.identity.value.uuid.toString).webSocketURL()');
+  con.onopen = function() {
+    console.log('WebSocket Open');
+  };
+  con.onclose = function() {
+    console.log('WebSocket Close');
+  };
+  con.onerror = function (error) {
+    console.log('WebSocket Error ' + error);
+  };
+  con.onmessage = function (e) {
+    //console.log('WebSocket message ' + e.data);
+    $('code#log').html(JSON.parse(e.data)['log']);
+  }
+</script>
+}
 @main(Messages("views.jobs.header"), headers, footers) {
     <section>
         <h2>@Messages("views.jobs.header")</h2>
@@ -14,7 +31,7 @@
         <h3>@Messages("views.jobs.header.task")</h3>
         @job.taskName
         <h3>@Messages("views.header.result")</h3>
-            @if(job.exitCode == Some(0)){
+            @if(job.isSuccess){
               <span class="label label-success">@Messages("views.projects.job.success")</span>
             }else{
               <span class="label label-important">@Messages("views.projects.job.failure")</span>
@@ -24,7 +41,7 @@
         <h3>@Messages("views.header.date")</h3>
         @job.executeTimePoint
         <h3>@Messages("views.projects.index.log")</h3>
-        <pre><code>@job.log</code></pre>
+        <pre><code id="log">@job.log</code></pre>
     </section>
     <a class="btn btn-large" href="@net.mtgto.carpenter.controllers.routes.ProjectController.showProjectView(job.project.identity.uuid.toString)">@Messages("views.back")</a>
 }

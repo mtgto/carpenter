@@ -33,6 +33,8 @@ trait Job extends Entity[JobId] {
   val executeTimePoint: TimePoint
   val executeDuration: Option[Duration]
 
+  def isSuccess: Boolean = exitCode == Some(0)
+
   override def toString: String = Seq(identity, project, user, snapshot, taskName, exitCode).mkString("Job(", ", ",")")
 }
 

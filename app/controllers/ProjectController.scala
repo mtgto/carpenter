@@ -184,12 +184,14 @@ object ProjectController extends Controller with BaseController {
                 val currentTimePoint = Clock.now
                 val job = JobFactory(project, user, snapshot, taskName, currentTimePoint)
                 jobRepository.store(job)
-                taskService.execute(project, taskName, repositoryUri, branchType, branchName).map( result =>
+                LogBroadcaster.start(job.identity)
+                taskService.execute(job, project, taskName, repositoryUri, branchType, branchName).map { result =>
+                  LogBroadcaster.stop(job.identity)
                   result match {
                     case (exitCode, log, executeTimePoint, executeDuration) => {
                       val executedJob = JobFactory(job, exitCode, log, executeDuration)
                       jobRepository.store(executedJob)
-                      val message = if (exitCode == Some(0))
+                      val message = if (executedJob.isSuccess)
                         Messages("messages.notification.success", user.name, project.name, taskName)
                       else
                         Messages("messages.notification.failure", user.name, project.name, taskName)
@@ -197,7 +199,7 @@ object ProjectController extends Controller with BaseController {
                       Ok(Json.obj("status" -> "ok", "task" -> Json.toJson(taskName), "exitCode" -> exitCode, "log" -> log))
                     }
                   }
-                )
+                }
               }
             case Failure(_) =>
               BadRequest(Json.obj("status" -> "fail"))

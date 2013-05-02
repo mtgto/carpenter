@@ -1,17 +1,32 @@
 package net.mtgto.carpenter.controllers
 
-import play.api._
 import play.api.mvc._
 import play.api.i18n.Messages
-import net.mtgto.carpenter.domain.{UserRepository, JobRepository, JobId, Job}
-import scala.util.{Failure, Success, Try}
+import net.mtgto.carpenter.domain.{LogBroadcaster, UserRepository, JobRepository, JobId, Job}
 import java.util.UUID
-import org.sisioh.dddbase.core.{EntityNotFoundException, Identity}
+import org.sisioh.dddbase.core.EntityNotFoundException
+import play.api.libs.iteratee.{Enumerator, Input, Done}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
+import play.api.libs.json.JsValue
 
 object JobController extends Controller with Secured {
   protected[this] val userRepository: UserRepository = UserRepository()
 
   protected[this] val jobRepository: JobRepository = JobRepository()
+
+  def log(id: String) = IsAuthenticatedWS { user => implicit request =>
+    val iteratee = Done[JsValue, Unit]((),Input.EOF)
+    getJobByIdString(id) match {
+      case Some(job) =>
+        val enumerator: Enumerator[JsValue] = LogBroadcaster.subscribe(job.identity).getOrElse(Enumerator.eof[JsValue])
+        Future((iteratee, enumerator))
+      case _ =>
+        val enumerator = Enumerator.eof[JsValue]
+        Future((iteratee, enumerator))
+    }
+  }
 
   def showJobView(id: String) = IsAuthenticated { user => implicit request =>
     getJobByIdString(id) match {

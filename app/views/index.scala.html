@@ -22,28 +22,27 @@
     }
   </div>
     <section id="projects" class="container">
-    <h2>@Messages("views.index.header.projects")</h2>
-    <table class="table table-condensed table-striped">
-      <thead>
-        <tr>
-          <th>@Messages("views.index.name")</th>
-          <th>@Messages("views.index.hostname")</th>
-          <th>&nbsp;</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for(project <- projects) {
+      <h2>@Messages("views.index.header.projects")</h2>
+      <table class="table table-condensed table-striped">
+        <thead>
           <tr>
-            <td><a href="@net.mtgto.carpenter.controllers.routes.ProjectController.showProjectView(project.identity.value.uuid.toString)">@project.name</a></td>
-            <td>@project.hostname</td>
-            <td><a href="@net.mtgto.carpenter.controllers.routes.ProjectController.edit(project.identity.value.uuid.toString)">@Messages("views.edit")</a></td>
+            <th>@Messages("views.index.name")</th>
+            <th>@Messages("views.index.hostname")</th>
+            <th>&nbsp;</th>
           </tr>
-        }
-      </tbody>
-    </table>
-    <a class="btn" href="@net.mtgto.carpenter.controllers.routes.ProjectController.create">@Messages("views.index.create_project")</a>
-  </section>
-  </section>
+        </thead>
+        <tbody>
+          @for(project <- projects) {
+            <tr>
+              <td><a href="@net.mtgto.carpenter.controllers.routes.ProjectController.showProjectView(project.identity.value.uuid.toString)">@project.name</a></td>
+              <td>@project.hostname</td>
+              <td><a href="@net.mtgto.carpenter.controllers.routes.ProjectController.edit(project.identity.value.uuid.toString)">@Messages("views.edit")</a></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <a class="btn" href="@net.mtgto.carpenter.controllers.routes.ProjectController.create">@Messages("views.index.create_project")</a>
+    </section>
     <section id="users" class="container">
     <h2>@Messages("views.index.header.users")</h2>
       <table class="table table-condensed table-striped">

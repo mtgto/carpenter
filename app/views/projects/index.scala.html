@@ -54,7 +54,7 @@
       </thead>
       <tbody>
       @for(job <- jobs) {
-        @defining(job.exitCode == Some(0)){ isSuccess =>
+        @defining(job.isSuccess){ isSuccess =>
           @defining(if(isSuccess)"success" else "error"){ trClassName =>
             <tr class="@trClassName">
               <td>@job.taskName</td>
