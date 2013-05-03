@@ -1,8 +1,7 @@
 package net.mtgto.carpenter.domain
 
-import java.util.UUID
 import net.mtgto.carpenter.infrastructure.{UserDao, DatabaseUserDao, Authority => InfraAuthority, User => InfraUser}
-import org.sisioh.dddbase.core.{Identity, EntityNotFoundException, Repository}
+import org.sisioh.dddbase.core.{EntityNotFoundException, Repository}
 import scala.util.Try
 
 trait UserRepository extends Repository[UserId, User] with BaseEntityResolver[UserId, User] {

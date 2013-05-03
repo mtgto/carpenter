@@ -1,12 +1,12 @@
 package net.mtgto.carpenter.domain
 
 import play.api.libs.iteratee.Concurrent.Channel
-import play.api.libs.iteratee.{Concurrent, Enumerator, Iteratee}
-import scala.collection.mutable.Map
+import play.api.libs.iteratee.{Concurrent, Enumerator}
 import play.api.libs.json.{Json, JsValue}
+import scala.collection.mutable.{Map => MutableMap}
 
 object LogBroadcaster {
-  private val channels = Map.empty[JobId, (Enumerator[JsValue], Channel[JsValue])]
+  private val channels = MutableMap.empty[JobId, (Enumerator[JsValue], Channel[JsValue])]
 
   def start(jobId: JobId) = {
     channels += jobId -> Concurrent.broadcast
@@ -21,6 +21,6 @@ object LogBroadcaster {
   }
 
   def broadcast(jobId: JobId, message: String) = {
-    channels.get(jobId).map(_._2.push(Json.toJson(scala.collection.immutable.Map("log" -> message))))
+    channels.get(jobId).map(_._2.push(Json.toJson(Map("log" -> message))))
   }
 }

@@ -1,9 +1,9 @@
 package net.mtgto.carpenter.infrastructure
 
-import java.util.UUID
-import play.api.db.DB
 import anorm._
+import java.util.UUID
 import java.net.URI
+import play.api.db.DB
 
 class DatabaseSourceRepositoryDao extends SourceRepositoryDao {
   import play.api.Play.current

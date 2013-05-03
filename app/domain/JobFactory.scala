@@ -1,8 +1,8 @@
 package net.mtgto.carpenter.domain
 
 import java.util.UUID
-import org.sisioh.baseunits.scala.time.{Duration, TimePoint}
 import net.mtgto.carpenter.domain.vcs.Snapshot
+import org.sisioh.baseunits.scala.time.{Duration, TimePoint}
 
 trait JobFactory {
   def apply(project: Project, user: User, snapshot: Snapshot, taskName: String,

@@ -1,10 +1,8 @@
 package net.mtgto.carpenter.infrastructure
 
 import anorm._
-import anorm.SqlParser._
 import java.sql.{Clob, Timestamp}
-import java.util.UUID
-import java.util.Date
+import java.util.{Date, UUID}
 import play.api.db.DB
 
 class DatabaseJobDao extends JobDao {

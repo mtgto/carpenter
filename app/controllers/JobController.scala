@@ -1,15 +1,15 @@
 package net.mtgto.carpenter.controllers
 
+import java.util.UUID
+import net.mtgto.carpenter.domain.{LogBroadcaster, UserRepository, JobRepository, JobId, Job}
+import org.sisioh.dddbase.core.EntityNotFoundException
 import play.api.mvc._
 import play.api.i18n.Messages
-import net.mtgto.carpenter.domain.{LogBroadcaster, UserRepository, JobRepository, JobId, Job}
-import java.util.UUID
-import org.sisioh.dddbase.core.EntityNotFoundException
 import play.api.libs.iteratee.{Enumerator, Input, Done}
+import play.api.libs.json.JsValue
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-import play.api.libs.json.JsValue
 
 object JobController extends Controller with Secured {
   protected[this] val userRepository: UserRepository = UserRepository()

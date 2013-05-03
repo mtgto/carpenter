@@ -4,7 +4,6 @@ import java.net.URI
 import net.mtgto.carpenter.infrastructure.{SourceRepository => InfraSourceRepository, SourceRepositoryDao, DatabaseSourceRepositoryDao}
 import net.mtgto.carpenter.domain.vcs.{GitTagSnapshot, GitBranchSnapshot, SubversionSnapshot, Snapshot}
 import net.mtgto.carpenter.infrastructure.vcs.{GitRevision, GitService, SubversionRevision, SubversionService}
-import scala.concurrent.Future
 import scala.util.Try
 
 trait SourceRepositoryService {

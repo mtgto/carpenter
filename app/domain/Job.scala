@@ -1,9 +1,9 @@
 package net.mtgto.carpenter.domain
 
 import java.util.UUID
+import net.mtgto.carpenter.domain.vcs.Snapshot
 import org.sisioh.dddbase.core.{Identity, Entity}
 import org.sisioh.baseunits.scala.time.{Duration, TimePoint}
-import net.mtgto.carpenter.domain.vcs.Snapshot
 
 case class JobId(uuid: UUID) extends Identity[JobId] {
   override def value = this

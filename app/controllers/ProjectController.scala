@@ -12,7 +12,6 @@ import java.util.UUID
 import net.mtgto.carpenter.domain._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Try, Success, Failure}
-import org.sisioh.dddbase.core.Identity
 import org.sisioh.baseunits.scala.timeutil.Clock
 
 object ProjectController extends Controller with BaseController {
