@@ -78,6 +78,8 @@ messages.not_found_project_to_edit=編集しようとしたプロジェクトが
 messages.wrong_password=パスワードが違います
 # message of wrong name or password
 messages.wrong_name_or_password=ユーザ名かパスワードが違います
+# message of no job found
+messages.not_found_job=ジョブがありません
 # header of project task
 views.projects.index.task=タスク
 # header of project task log

@@ -78,6 +78,8 @@ messages.not_found_project_to_edit=Not found project to edit!
 messages.wrong_password=Password is incorrect!
 # message of wrong name or password
 messages.wrong_name_or_password=Name or password is wrong
+# message of no job found
+messages.not_found_job=Job is not found
 # header of project task
 views.projects.index.task=Task
 # header of project task log
