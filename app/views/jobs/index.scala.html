@@ -1,9 +1,16 @@
 @(job: net.mtgto.carpenter.domain.Job)(implicit request: RequestHeader, lang: Lang, flash: Flash)
 
-@headers = {}
+@headers = {
+  @javascriptRouter("jsRoutes")(
+    net.mtgto.carpenter.controllers.routes.javascript.JobController.log
+  )
+  <script>
+    var jobId = '@job.identity.uuid.toString';
+  </script>
+}
 @footers = {
 <script>
-  var con = new WebSocket('@net.mtgto.carpenter.controllers.routes.JobController.log(job.identity.value.uuid.toString).webSocketURL()');
+  var con = new WebSocket(jsRoutes.net.mtgto.carpenter.controllers.JobController.log(jobId).webSocketURL());
   con.onopen = function() {
     console.log('WebSocket Open');
   };

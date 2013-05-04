@@ -1,6 +1,14 @@
-@(project: net.mtgto.carpenter.domain.Project, taskName: String, branches: Seq[String], tags: Seq[String])(implicit lang: Lang, flash: Flash)
+@(project: net.mtgto.carpenter.domain.Project, taskName: String, branches: Seq[String], tags: Seq[String])(implicit requestHeader: RequestHeader, lang: Lang, flash: Flash)
 
-@headers = {}
+@headers = {
+@javascriptRouter("jsRoutes")(
+  net.mtgto.carpenter.controllers.routes.javascript.ProjectController.executeTask
+)
+<script>
+var projectId = '@project.identity.value.uuid.toString';
+var taskName = '@taskName';
+</script>
+}
 @footers = {
 <script>
   $(function(){
@@ -9,20 +17,20 @@
       function(){
         runLink.addClass("disabled");
         var branchType = $('input[name="branch-types"]:checked').val();
-        var branchName = ""
+        var branchName = "";
         if (branchType == "branch") {
           branchName = $('#branch-names option:selected').val();
         } else if (branchType == "tag") {
           branchName = $('#tag-names option:selected').val();
         }
-        console.log("branchType = " + branchType + ", branchName = " + branchName)
-        $.post('@net.mtgto.carpenter.controllers.routes.ProjectController.executeTask(project.identity.value.uuid.toString, taskName)', {type: branchType, name: branchName}, function(data) {
-          log = data['log'];
-          exitCode = data['exitCode'];
-          console.log("exitCode = " + exitCode);
-          $('#log').val(log);
-          runLink.removeClass("disabled");
-        });
+        jsRoutes.net.mtgto.carpenter.controllers.ProjectController.executeTask(projectId, taskName).ajax(
+          {data:{type:branchType, name:branchName},
+           success:function(data) {
+            log = data['log'];
+            exitCode = data['exitCode'];
+            $('#log').val(log);
+            runLink.removeClass("disabled");
+          }});
       }
     );
   });

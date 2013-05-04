@@ -1,27 +1,36 @@
-@(project: net.mtgto.carpenter.domain.Project, jobs: Seq[net.mtgto.carpenter.domain.Job])(implicit lang: Lang, flash: Flash)
+@(project: net.mtgto.carpenter.domain.Project, jobs: Seq[net.mtgto.carpenter.domain.Job])(implicit requestHeader: RequestHeader, lang: Lang, flash: Flash)
 
-@headers = {}
+@headers = {
+@javascriptRouter("jsRoutes")(
+  net.mtgto.carpenter.controllers.routes.javascript.ProjectController.tasks,
+  net.mtgto.carpenter.controllers.routes.javascript.ProjectController.showExecuteTaskView
+)
+<script>
+  var projectId = '@project.identity.value.uuid.toString';
+</script>
+}
 @footers = {
 <script>
-  $.get('@net.mtgto.carpenter.controllers.routes.ProjectController.tasks(project.identity.value.uuid.toString)', function(data) {
-    var status = data['status']
-    console.log("tasks.status: " + status)
-    if (status == 'ok') {
-      var select = $("#task-select")
-      select.children().remove()
-      var tasks = data['tasks']
-      for (var i=0; i<tasks.length; i++) {
-        select.append($("<option>").html(tasks[i]['name']))
+  jsRoutes.net.mtgto.carpenter.controllers.ProjectController.tasks(projectId).ajax(
+    {success:function(data) {
+      var status = data['status']
+      console.log("tasks.status: " + status)
+      if (status == 'ok') {
+        var select = $("#task-select")
+        select.children().remove()
+        var tasks = data['tasks']
+        for (var i=0; i<tasks.length; i++) {
+          select.append($("<option>").html(tasks[i]['name']))
+        }
       }
-    }  
-  });
+    }});
   $(function(){
     var runLink = $('a.run_task');
     runLink.click(
       function(){
         runLink.addClass("disabled");
         var taskName = $('#task-select option:selected').val();
-        window.location = '/projects/@project.identity.value.uuid.toString/tasks/' + encodeURIComponent(taskName);
+        window.location = jsRoutes.net.mtgto.carpenter.controllers.ProjectController.showExecuteTaskView(projectId, taskName).url;
       }
     );
   });
