@@ -8,7 +8,7 @@ class SubversionServiceSpec extends Specification {
     "convert xml into revisions" in {
       val service = new SubversionService
       val nodeSeq = XML.load(getClass.getResource("/svn-branches.xml"))
-      val revisions = service.convertNodeSeqToSubversionRevisions(nodeSeq)
+      val revisions = service.convertListNodeSeqToSubversionRevisions(nodeSeq)
       revisions.size === 3
     }
   }
