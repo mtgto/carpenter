@@ -30,7 +30,7 @@ class DatabaseUserDao extends UserDao {
     DB.withConnection{ implicit c =>
       SQL("""SELECT `users`.`id`, `users`.`name`, `authorities`.`can_login`, `authorities`.`can_create_user` 
             |FROM `users` INNER JOIN `authorities` ON `users`.`id` = `authorities`.`user_id` 
-            |WHERE `name` = {name} AND `password` = {password}""".stripMargin)
+            |WHERE `users`.`name` = {name} AND `users`.`password` = {password}""".stripMargin)
       .on('name -> name, 'password -> password)()
       .headOption.map(convertRowToUser)
     }
