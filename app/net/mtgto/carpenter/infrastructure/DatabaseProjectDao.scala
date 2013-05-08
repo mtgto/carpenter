@@ -18,7 +18,7 @@ class DatabaseProjectDao extends ProjectDao {
 
   override def findById(id: UUID): Option[Project] = {
     DB.withConnection{ implicit c =>
-      SQL("SELECT `id`, `name`, `hostname`, `recipe` FROM `projects` WHERE `id` = {id}").on("id" -> id)()
+      SQL("SELECT `id`, `name`, `hostname`, `recipe` FROM `projects` WHERE `id` = {id}").on("id" -> id.toString)()
       .headOption.map(convertRowToProject)
     }
   }
