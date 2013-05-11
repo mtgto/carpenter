@@ -54,7 +54,7 @@
         <tbody>
           @for(user <- users) {
             <tr>
-              <td>@user.name</td>
+              <td><a href="@net.mtgto.carpenter.controllers.routes.UserController.jobs(user.identity.value.uuid.toString)">@user.name</a></td>
             </tr>
           }
         </tbody>

@@ -67,7 +67,7 @@
           @defining(if(isSuccess)"success" else "error"){ trClassName =>
             <tr class="@trClassName">
               <td>@job.taskName</td>
-              <td>@job.user.name</td>
+              <td><a href="@net.mtgto.carpenter.controllers.routes.UserController.jobs(job.user.identity.uuid.toString)">@job.user.name</a></td>
               <td>[@job.snapshot.branchType.toString] @job.snapshot.name</td>
               <td>@job.executeDuration</td>
               <td>@job.executeTimePoint</td>

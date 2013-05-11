@@ -1,0 +1,49 @@
+@(user: net.mtgto.carpenter.domain.User, jobs: Seq[net.mtgto.carpenter.domain.Job])(implicit lang: Lang, flash: Flash)
+
+@headers = {}
+@footers = {}
+@main(Messages("views.users.jobs.header", user.name), headers, footers) {
+    <section>
+        <h2>@Messages("views.users.jobs.header", user.name)</h2>
+    </section>
+    <section>
+        <h2>@Messages("views.users.jobs.header.jobs")</h2>
+        <table class="table table-condensed table-striped">
+            <thead>
+                <tr>
+                    <th>@Messages("views.jobs.header.project")</th>
+                    <th>@Messages("views.task")</th>
+                    <th>@Messages("views.header.snapshot")</th>
+                    <th>@Messages("views.header.duration")</th>
+                    <th>@Messages("views.header.date")</th>
+                    <th>@Messages("views.header.result")</th>
+                    <th>&nbsp;</th>
+                </tr>
+            </thead>
+            <tbody>
+            @for(job <- jobs) {
+                @defining(job.isSuccess){ isSuccess =>
+                    @defining(if(isSuccess)"success" else "error"){ trClassName =>
+                        <tr class="@trClassName">
+                            <td><a href="@net.mtgto.carpenter.controllers.routes.ProjectController.showProjectView(job.project.identity.value.uuid.toString)">@job.project.name</a></td>
+                            <td>@job.taskName</td>
+                            <td>[@job.snapshot.branchType.toString] @job.snapshot.name</td>
+                            <td>@job.executeDuration</td>
+                            <td>@job.executeTimePoint</td>
+                            <td>
+                            @if(isSuccess){
+                                <span class="label label-success">@Messages("views.projects.job.success")</span>
+                            }else{
+                                <span class="label label-important">@Messages("views.projects.job.failure")</span>
+                            }
+                            </td>
+                            <td><a href="@net.mtgto.carpenter.controllers.routes.JobController.showJobView(job.identity.uuid.toString)">@Messages("views.header.detail")</a></td>
+                        </tr>
+                    }
+                }
+            }
+            </tbody>
+        </table>
+    </section>
+    <a class="btn btn-large" href="@net.mtgto.carpenter.controllers.routes.Application.index">@Messages("views.back")</a>
+}

@@ -21,6 +21,7 @@ GET     /projects/:id                      net.mtgto.carpenter.controllers.Proje
 GET     /users/create                      net.mtgto.carpenter.controllers.UserController.showCreateView
 POST    /users/create                      net.mtgto.carpenter.controllers.UserController.create
 POST    /users/password                    net.mtgto.carpenter.controllers.UserController.changePassword
+GET     /users/:id/jobs                    net.mtgto.carpenter.controllers.UserController.jobs(id)
 GET     /jobs/:id/log                      net.mtgto.carpenter.controllers.JobController.log(id)
 GET     /jobs/:id                          net.mtgto.carpenter.controllers.JobController.showJobView(id)
 

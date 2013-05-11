@@ -7,6 +7,7 @@ trait JobDao {
   def findAll: Seq[Job]
   def findAllByProject(projectId: UUID): Seq[Job]
   def findAllByProjectOrderByDateDesc(projectId: UUID): Seq[Job]
+  def findAllByUser(userId: UUID): Seq[Job]
   def save(job: Job): Unit
   def delete(id: UUID): Int
 }

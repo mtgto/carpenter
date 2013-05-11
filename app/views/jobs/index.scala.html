@@ -34,7 +34,7 @@
         <h3>@Messages("views.jobs.header.project")</h3>
         <a href="@net.mtgto.carpenter.controllers.routes.ProjectController.showProjectView(job.project.identity.uuid.toString)">@job.project.name</a>
         <h3>@Messages("views.header.user")</h3>
-        @job.user.name
+        <a href="@net.mtgto.carpenter.controllers.routes.UserController.jobs(job.user.identity.uuid.toString)">@job.user.name</a>
         <h3>@Messages("views.jobs.header.task")</h3>
         @job.taskName
         <h3>@Messages("views.header.result")</h3>

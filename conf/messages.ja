@@ -6,6 +6,8 @@ views.edit=編集
 views.submit=送信
 # back
 views.back=戻る
+# task
+views.task=タスク
 
 views.users.login.title=サインインが必要です
 # input field placeholder of user name
@@ -26,6 +28,10 @@ views.users.user.name=ユーザ名
 views.users.user.password=パスワード
 # checkbox header of authority to create new user
 views.users.create.can_create_user=新しいユーザの作成が可能
+# header of user jobs
+views.users.jobs.header={0} の実行ジョブ一覧
+# header of job list in user jobs page
+views.users.jobs.header.jobs=ジョブ一覧
 
 # header of projects
 views.index.header.projects=プロジェクト
@@ -80,6 +86,8 @@ messages.wrong_password=パスワードが違います
 messages.wrong_name_or_password=ユーザ名かパスワードが違います
 # message of no job found
 messages.not_found_job=ジョブがありません
+# message of no user found
+messages.not_found_user=ユーザが見つかりません
 # header of project task
 views.projects.index.task=タスク
 # header of project task log

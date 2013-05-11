@@ -10,9 +10,12 @@ class DatabaseJobDao extends JobDao {
 
   protected[this] def convertRowToJob(row: Row): Job = {
     row match {
-      case Row(id: String, projectId: String, userId: String, task: String, exitCode: Option[Int], log: Option[Clob], executeTime: Timestamp, executeDuration: Option[Int]) =>
-        Job(UUID.fromString(id), UUID.fromString(projectId), UUID.fromString(userId), task, exitCode,
-            log.map(log => log.getSubString(1, log.length.toInt)), new Date(executeTime.getTime), executeDuration.map(_.toLong))
+      case Row(id: String, projectId: String, userId: String, task: String, Some(exitCode: Int), Some(log: Clob), executeTime: Timestamp, Some(executeDuration: Int)) =>
+        Job(UUID.fromString(id), UUID.fromString(projectId), UUID.fromString(userId), task, Some(exitCode),
+            Some(log.getSubString(1, log.length.toInt)), new Date(executeTime.getTime), Some(executeDuration.toLong))
+      case Row(id: String, projectId: String, userId: String, task: String, None, None, executeTime: Timestamp, None) =>
+        Job(UUID.fromString(id), UUID.fromString(projectId), UUID.fromString(userId), task, None,
+          None, new Date(executeTime.getTime), None)
     }
   }
 
@@ -44,6 +47,14 @@ class DatabaseJobDao extends JobDao {
       SQL("SELECT `id`, `project_id`, `user_id`, `task`, `exit_code`, `log`, `execute_time`, `execute_duration` FROM `jobs` WHERE `project_id` = {projectId} ORDER BY `execute_time` DESC")
       .on('projectId -> projectId.toString)()
       .map(convertRowToJob).toList
+    }
+  }
+
+  override def findAllByUser(userId: UUID): Seq[Job] = {
+    DB.withConnection{ implicit c =>
+      SQL("SELECT `id`, `project_id`, `user_id`, `task`, `exit_code`, `log`, `execute_time`, `execute_duration` FROM `jobs` WHERE `user_id` = {userId}")
+        .on('userId -> userId.toString)()
+        .map(convertRowToJob).toList
     }
   }
 

@@ -6,6 +6,8 @@ views.edit=Edit
 views.submit=Submit
 # back
 views.back=Back
+# task
+views.task=Task
 
 views.users.login.title=Please sign-in
 # input field placeholder of user name
@@ -26,6 +28,10 @@ views.users.user.name=name
 views.users.user.password=password
 # checkbox header of authority to create new user
 views.users.create.can_create_user=Can create new user
+# header of user jobs
+views.users.jobs.header=jobs executed by {0}
+# header of job list in user jobs page
+views.users.jobs.header.jobs=jobs
 
 # header of projects
 views.index.header.projects=Projects
@@ -80,6 +86,8 @@ messages.wrong_password=Password is incorrect!
 messages.wrong_name_or_password=Name or password is wrong
 # message of no job found
 messages.not_found_job=Job is not found
+# message of no user found
+messages.not_found_user=User is not found
 # header of project task
 views.projects.index.task=Task
 # header of project task log

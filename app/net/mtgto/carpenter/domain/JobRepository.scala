@@ -13,6 +13,8 @@ trait JobRepository extends Repository[JobId, Job] with BaseEntityResolver[JobId
   def findAllByProject(project: Project): Try[Seq[Job]]
 
   def findAllByProjectOrderByTimePointDesc(project: Project): Try[Seq[Job]]
+
+  def findAllByUser(user: User): Try[Seq[Job]]
 }
 
 object JobRepository {
@@ -48,6 +50,12 @@ object JobRepository {
         jobDao.findAllByProjectOrderByDateDesc(project.identity.uuid).map {
           convertInfraToDomain(_).get
         }
+      }
+    }
+
+    override def findAllByUser(user: User): Try[Seq[Job]] = {
+      Try {
+        jobDao.findAllByUser(user.identity.value.uuid).map(convertInfraToDomain(_).get)
       }
     }
 

@@ -6,10 +6,16 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.Messages
 
-import net.mtgto.carpenter.domain.{Authority, User, UserRepository, UserFactory}
+import net.mtgto.carpenter.domain._
+import scala.util.{Failure, Success, Try}
+import java.util.UUID
+import net.mtgto.carpenter.domain.Authority
+import scala.Some
 
 object UserController extends Controller with BaseController {
   protected[this] val userRepository: UserRepository = UserRepository()
+
+  protected[this] val jobRepository: JobRepository = JobRepository()
 
   private val (adminName, adminPassword) = (getConfiguration("carpenter.admin_name"), getConfiguration("carpenter.admin_password"))
 
@@ -122,5 +128,25 @@ object UserController extends Controller with BaseController {
           }
       }
     )
+  }
+
+  def jobs(id: String) = IsAuthenticated { user => implicit request =>
+    getUserByIdString(id) match {
+      case Success(targetUser) =>
+        jobRepository.findAllByUser(targetUser) match {
+          case Success(jobs) =>
+            Ok(views.html.users.jobs(user, jobs))
+          case Failure(_) =>
+            Redirect(routes.Application.index).flashing("error" -> Messages("messages.not_found_job"))
+        }
+
+      case Failure(_) =>
+        Redirect(routes.Application.index).flashing("error" -> Messages("messages.not_found_user"))
+    }
+
+  }
+
+  protected[this] def getUserByIdString(id: String): Try[User] = {
+    Try(UUID.fromString(id)).flatMap(uuid => userRepository.resolve(UserId(uuid)))
   }
 }
