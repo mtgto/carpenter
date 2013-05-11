@@ -8,6 +8,8 @@ views.submit=Submit
 views.back=Back
 # task
 views.task=Task
+# time format
+views.time_format=EEEE MMM d yyyy at HH:mm:ss
 
 views.users.login.title=Please sign-in
 # input field placeholder of user name

@@ -8,6 +8,8 @@ views.submit=送信
 views.back=戻る
 # task
 views.task=タスク
+# time format
+views.time_format=yy/MM/dd (E) HH:mm:ss
 
 views.users.login.title=サインインが必要です
 # input field placeholder of user name

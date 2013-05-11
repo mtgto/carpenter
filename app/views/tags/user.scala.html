@@ -1,0 +1,2 @@
+@(user: net.mtgto.carpenter.domain.User)
+<a href="@net.mtgto.carpenter.controllers.routes.UserController.jobs(user.identity.uuid.toString)">@user.name</a>

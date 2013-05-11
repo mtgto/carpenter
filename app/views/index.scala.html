@@ -34,7 +34,7 @@
         <tbody>
           @for(project <- projects) {
             <tr>
-              <td><a href="@net.mtgto.carpenter.controllers.routes.ProjectController.showProjectView(project.identity.value.uuid.toString)">@project.name</a></td>
+              <td>@tags.project(project)</td>
               <td>@project.hostname</td>
               <td><a href="@net.mtgto.carpenter.controllers.routes.ProjectController.edit(project.identity.value.uuid.toString)">@Messages("views.edit")</a></td>
             </tr>
@@ -54,7 +54,7 @@
         <tbody>
           @for(user <- users) {
             <tr>
-              <td><a href="@net.mtgto.carpenter.controllers.routes.UserController.jobs(user.identity.value.uuid.toString)">@user.name</a></td>
+              <td>@tags.user(user)</td>
             </tr>
           }
         </tbody>
