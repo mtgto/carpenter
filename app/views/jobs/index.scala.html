@@ -37,6 +37,8 @@
         @tags.user(job.user)
         <h3>@Messages("views.jobs.header.task")</h3>
         @job.taskName
+        <h3>@Messages("views.header.snapshot")</h3>
+        @tags.snapshot(job.snapshot)
         <h3>@Messages("views.header.result")</h3>
             @if(job.isSuccess){
               <span class="label label-success">@Messages("views.projects.job.success")</span>

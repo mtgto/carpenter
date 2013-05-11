@@ -27,7 +27,7 @@
                         <tr class="@trClassName">
                             <td>@tags.project(job.project)</td>
                             <td>@job.taskName</td>
-                            <td>[@job.snapshot.branchType.toString] @job.snapshot.name</td>
+                            <td>@tags.snapshot(job.snapshot)</td>
                             <td>@job.executeDuration</td>
                             <td>@tags.timepoint(job.executeTimePoint)</td>
                             <td>
