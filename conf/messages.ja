@@ -140,3 +140,32 @@ views.jobs.header.task=タスク
 messages.notification.success=プロジェクト {1} のタスク {2} の実行に成功しました。実行したのは {0} です。
 # notification message on failure
 messages.notification.failure=プロジェクト {1} のタスク {2} の実行に失敗しました。実行したのは {0} です。
+
+# play framework original
+# --- Constraints
+constraint.required=必須
+constraint.min=最小値: {0}
+constraint.max=最大値: {0}
+constraint.minLength=最低 {0} 文字
+constraint.maxLength=最大 {0} 文字
+constraint.email=メールアドレス
+
+# --- Formats
+format.date=Date (''{0}'')
+format.numeric=Numeric
+format.real=Real
+
+# --- Errors
+error.invalid=不正な値です
+error.required=必須の値です
+error.number=数値を入れてください
+error.real=実数(小数)を入れてください
+error.real.precision=実数(小数)を入れてください (最大{0}桁の整数、小数点以下は{1}位まで)
+error.min={0}以上の値を入れてください
+error.min.strict={0}より大きい値を入れてください
+error.max={0}以下の値を入れてください
+error.max.strict={0}未満の値を入れてください
+error.minLength={0}文字以上必要です
+error.maxLength=最大{0}文字です
+error.email=正しいメールアドレスが必要です
+error.pattern={0} となるように入れてください
