@@ -47,21 +47,21 @@ var taskName = '@taskName';
     <label class="radio">
       <input type="radio" name="branch-types" id="branch" value="branch" checked></input>
         @Messages("views.projects.execute.choose_branch")
-        <select id="branch-names">
-          @for(branch <- branches){
-            <option>@branch</option>
-          }
-        </select>
     </label>
+    <select id="branch-names">
+    @for(branch <- branches){
+        <option>@branch</option>
+    }
+    </select>
     <label class="radio">
       <input type="radio" name="branch-types" id="tag" value="tag"></input>
         @Messages("views.projects.execute.choose_tag")
-        <select id="tag-names">
-          @for(tag <- tags){
-            <option>@tag</option>
-          }
-        </select>
     </label>
+    <select id="tag-names">
+    @for(tag <- tags){
+        <option>@tag</option>
+    }
+    </select>
     <label class="radio">
       <input type="radio" name="branch-types" id="trunk" value="trunk"></input>
         @Messages("views.projects.execute.choose_trunk")
