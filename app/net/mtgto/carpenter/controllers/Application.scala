@@ -4,8 +4,11 @@ import play.api._
 import play.api.mvc._
 
 import net.mtgto.carpenter.domain.{UserRepository, ProjectRepository}
+import views.html.helper.FieldConstructor
 
 object Application extends Controller with BaseController {
+  implicit val fieldConstructor = FieldConstructor(views.html.twitterBootstrapFieldConstructor.f)
+
   protected[this] val userRepository: UserRepository = UserRepository()
 
   protected[this] val projectRepository: ProjectRepository = ProjectRepository()
