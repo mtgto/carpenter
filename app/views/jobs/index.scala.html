@@ -6,6 +6,8 @@
   )
   <script>
     var jobId = '@job.identity.uuid.toString';
+    var successMessage = '@Messages("views.projects.job.success")';
+    var failureMessage = '@Messages("views.projects.job.failure")';
   </script>
 }
 @footers = {
@@ -21,8 +23,16 @@
     console.log('WebSocket Error ' + error);
   };
   con.onmessage = function (e) {
-    //console.log('WebSocket message ' + e.data);
-    $('code#log').html(JSON.parse(e.data)['log']);
+    console.log('WebSocket message ' + e.data);
+    var json = JSON.parse(e.data);
+    $('code#log').html(json['log']);
+    if (!json['running']) {
+      if (json['success']) {
+        $('#status').removeClass('label-warning').addClass('label-success').text(successMessage);
+      } else {
+        $('#status').removeClass('label-warning').addClass('label-important').text(failureMessage);
+      }
+    }
   }
 </script>
 }
@@ -40,13 +50,17 @@
         <h3>@Messages("views.header.snapshot")</h3>
         @tags.snapshot(job.snapshot)
         <h3>@Messages("views.header.result")</h3>
-            @if(job.isSuccess){
-              <span class="label label-success">@Messages("views.projects.job.success")</span>
-            }else{
-              <span class="label label-important">@Messages("views.projects.job.failure")</span>
-            }
+        @if(job.isRunning){
+          <span id="status" class="label label-warning">@Messages("views.projects.job.running")</span>
+        }else{
+          @if(job.isSuccess){
+            <span id="status" class="label label-success">@Messages("views.projects.job.success")</span>
+          }else{
+            <span id="status" class="label label-important">@Messages("views.projects.job.failure")</span>
+          }
+        }
         <h3>@Messages("views.header.duration")</h3>
-        @job.executeDuration
+        @job.executeDuration.map(tags.duration(_))
         <h3>@Messages("views.header.date")</h3>
         @tags.timepoint(job.executeTimePoint)
         <h3>@Messages("views.projects.index.log")</h3>

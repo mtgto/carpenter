@@ -35,6 +35,8 @@ trait Job extends Entity[JobId] {
 
   def isSuccess: Boolean = exitCode == Some(0)
 
+  def isRunning: Boolean = exitCode.isEmpty
+
   override def toString: String = Seq(identity, project, user, snapshot, taskName, exitCode).mkString("Job(", ", ",")")
 }
 

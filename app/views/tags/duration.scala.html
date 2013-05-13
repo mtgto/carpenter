@@ -1,0 +1,3 @@
+@(duration: org.sisioh.baseunits.scala.time.Duration)(implicit lang: Lang)
+@import org.sisioh.baseunits.scala.time.Duration
+@Messages("views.duration_format", duration.dividedBy(Duration.seconds(1)).decimalValue(2, BigDecimal.RoundingMode.HALF_UP))

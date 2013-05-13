@@ -69,7 +69,7 @@
               <td>@job.taskName</td>
               <td>@tags.user(job.user)</td>
               <td>[@job.snapshot.branchType.toString] @job.snapshot.name</td>
-              <td>@job.executeDuration</td>
+              <td>@job.executeDuration.map(tags.duration(_))</td>
               <td>@tags.timepoint(job.executeTimePoint)</td>
               <td>
                   @if(isSuccess){

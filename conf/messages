@@ -10,6 +10,8 @@ views.back=Back
 views.task=Task
 # time format
 views.time_format=EEEE MMM d yyyy at HH:mm:ss
+# duration format
+views.duration_format={0} sec
 
 views.users.login.title=Please sign-in
 # input field placeholder of user name
@@ -82,6 +84,8 @@ messages.create_user=Succeeded to create new user {0}!
 messages.wrong_input=Inputs has something wrong
 # message of no project found to edit
 messages.not_found_project_to_edit=Not found project to edit!
+# message of no project found to execute
+messages.not_found_project_to_execute=Not found project to execute!
 # message of wrong password
 messages.wrong_password=Password is incorrect!
 # message of wrong name or password
@@ -116,6 +120,8 @@ views.header.detail=Detail...
 views.projects.job.success=Success
 # failure of job execution
 views.projects.job.failure=Failure
+# job is running
+views.projects.job.running=Running
 # loading the jobs
 views.projects.index.loading=Loading...
 # header of execute a task

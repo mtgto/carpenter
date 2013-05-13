@@ -58,8 +58,8 @@ object ProjectController extends Controller with BaseController {
 
   protected[this] val executeForm = Form(
     tuple(
-      "type" -> nonEmptyText,
-      "name" -> text
+      "branchType" -> nonEmptyText,
+      "branchName" -> text
     )
   )
 
@@ -172,36 +172,35 @@ object ProjectController extends Controller with BaseController {
         case (branchTypeString, branchName) => {
           getProjectByIdString(id) match {
             case Success(project) =>
-              Async {
-                val branchType = branchTypeString match {
-                  case "branch" => BranchType.Branch
-                  case "tag" => BranchType.Tag
-                  case "trunk" => BranchType.Trunk
-                }
-                val snapshot = sourceRepositoryService.resolveSnapshot(project.sourceRepository, branchType, branchName).get
-                val repositoryUri = sourceRepositoryService.resolveURIByBranch(project.sourceRepository, branchType, branchName)
-                val currentTimePoint = Clock.now
-                val job = JobFactory(project, user, snapshot, taskName, currentTimePoint)
-                jobRepository.store(job)
-                LogBroadcaster.start(job.identity)
-                taskService.execute(job, project, taskName, repositoryUri, branchType, branchName).map { result =>
-                  LogBroadcaster.stop(job.identity)
-                  result match {
-                    case (exitCode, log, executeTimePoint, executeDuration) => {
-                      val executedJob = JobFactory(job, exitCode, log, executeDuration)
-                      jobRepository.store(executedJob)
-                      val message = if (executedJob.isSuccess)
-                        Messages("messages.notification.success", user.name, project.name, taskName)
-                      else
-                        Messages("messages.notification.failure", user.name, project.name, taskName)
-                      NotificationService.notify(notification, message)
-                      Ok(Json.obj("status" -> "ok", "task" -> Json.toJson(taskName), "exitCode" -> exitCode, "log" -> log))
-                    }
+              val branchType = branchTypeString match {
+                case "branch" => BranchType.Branch
+                case "tag" => BranchType.Tag
+                case "trunk" => BranchType.Trunk
+              }
+              val snapshot = sourceRepositoryService.resolveSnapshot(project.sourceRepository, branchType, branchName).get
+              val repositoryUri = sourceRepositoryService.resolveURIByBranch(project.sourceRepository, branchType, branchName)
+              val currentTimePoint = Clock.now
+              val job = JobFactory(project, user, snapshot, taskName, currentTimePoint)
+              jobRepository.store(job)
+              LogBroadcastService.start(job.identity)
+              taskService.execute(job, project, taskName, repositoryUri, branchType, branchName).map { result =>
+                result match {
+                  case (exitCode, log, executeTimePoint, executeDuration) => {
+                    val executedJob = JobFactory(job, exitCode, log, executeDuration)
+                    jobRepository.store(executedJob)
+                    LogBroadcastService.broadcast(executedJob, log)
+                    LogBroadcastService.stop(job.identity)
+                    val message = if (executedJob.isSuccess)
+                      Messages("messages.notification.success", user.name, project.name, taskName)
+                    else
+                      Messages("messages.notification.failure", user.name, project.name, taskName)
+                    NotificationService.notify(notification, message)
                   }
                 }
               }
+              Redirect(routes.JobController.showJobView(job.identity.uuid.toString))
             case Failure(_) =>
-              BadRequest(Json.obj("status" -> "fail"))
+              Redirect(routes.Application.index).flashing("error" -> Messages("messages.not_found_project_to_execute"))
           }
         }
       }

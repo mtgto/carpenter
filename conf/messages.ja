@@ -10,6 +10,8 @@ views.back=戻る
 views.task=タスク
 # time format
 views.time_format=yy/MM/dd (E) HH:mm:ss
+# duration format
+views.duration_format={0} 秒
 
 views.users.login.title=サインインが必要です
 # input field placeholder of user name
@@ -82,6 +84,8 @@ messages.create_user=ユーザ {0} の作成に成功しました
 messages.wrong_input=入力項目におかしなところがあります
 # message of no project found to edit
 messages.not_found_project_to_edit=編集しようとしたプロジェクトがありません
+# message of no project found to execute
+messages.not_found_project_to_execute=実行しようとしたプロジェクトがありません
 # message of wrong password
 messages.wrong_password=パスワードが違います
 # message of wrong name or password
@@ -116,6 +120,8 @@ views.header.detail=詳細...
 views.projects.job.success=成功
 # failure of job execution
 views.projects.job.failure=失敗
+# job is running
+views.projects.job.running=実行中
 # loading the jobs
 views.projects.index.loading=読み込み中...
 # header of execute a task

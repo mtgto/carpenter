@@ -60,7 +60,7 @@ class DefaultTaskService(workspacePath: String) extends TaskService {
           }, line => {
             errorBuilder ++= line
             errorBuilder ++= System.lineSeparator
-            LogBroadcaster.broadcast(job.identity, errorBuilder.toString)
+            LogBroadcastService.broadcast(job, errorBuilder.toString)
           }))
       val exitCode = process.exitValue
       val executeDuration = Duration.milliseconds(Clock.now.breachEncapsulationOfMillisecondsFromEpoc - startTimePoint.breachEncapsulationOfMillisecondsFromEpoc)

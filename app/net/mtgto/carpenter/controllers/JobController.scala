@@ -1,7 +1,7 @@
 package net.mtgto.carpenter.controllers
 
 import java.util.UUID
-import net.mtgto.carpenter.domain.{LogBroadcaster, UserRepository, JobRepository, JobId, Job}
+import net.mtgto.carpenter.domain.{LogBroadcastService, UserRepository, JobRepository, JobId, Job}
 import org.sisioh.dddbase.core.EntityNotFoundException
 import play.api.mvc._
 import play.api.i18n.Messages
@@ -20,7 +20,7 @@ object JobController extends Controller with Secured {
     val iteratee = Done[JsValue, Unit]((),Input.EOF)
     getJobByIdString(id) match {
       case Some(job) =>
-        val enumerator: Enumerator[JsValue] = LogBroadcaster.subscribe(job.identity).getOrElse(Enumerator.eof[JsValue])
+        val enumerator: Enumerator[JsValue] = LogBroadcastService.subscribe(job.identity).getOrElse(Enumerator.eof[JsValue])
         Future((iteratee, enumerator))
       case _ =>
         val enumerator = Enumerator.eof[JsValue]

@@ -44,26 +44,27 @@ var taskName = '@taskName';
   </section>
   <section>
     <h3>@Messages("views.projects.execute.choose_branch_tag")</h3>
+    @helper.form(action = net.mtgto.carpenter.controllers.routes.ProjectController.executeTask(project.identity.value.uuid.toString, taskName), 'class -> "form-horizontal") {
     <label class="radio">
-      <input type="radio" name="branch-types" id="branch" value="branch" checked />
+      <input type="radio" name="branchType" id="branch" value="branch" checked />
         @Messages("views.projects.execute.choose_branch")
     </label>
-    <select id="branch-names">
+    <select id="branch-names" name="branchName">
     @for(branch <- branches){
         <option>@branch</option>
     }
     </select>
     <label class="radio">
-      <input type="radio" name="branch-types" id="tag" value="tag"/>
+      <input type="radio" name="branchType" id="tag" value="tag"/>
         @Messages("views.projects.execute.choose_tag")
     </label>
-    <select id="tag-names">
+    <select id="tag-names" name="branchName">
     @for(tag <- tags){
         <option>@tag</option>
     }
     </select>
     <label class="radio">
-      <input type="radio" name="branch-types" id="trunk" value="trunk" />
+      <input type="radio" name="branchType" id="trunk" value="trunk" />
         @Messages("views.projects.execute.choose_trunk")
     </label>
     <section>
@@ -71,10 +72,11 @@ var taskName = '@taskName';
         TODO
     </section>
     <a class="btn btn-large" href="@net.mtgto.carpenter.controllers.routes.ProjectController.showProjectView(project.identity.value.uuid.toString)">@Messages("views.back")</a>
-    <button class="btn-large btn-primary run_task" type="button">@Messages("views.projects.run")</button>
+    <button class="btn-large btn-primary run_task" type="submit">@Messages("views.projects.run")</button>
     <section>
       <h3>@Messages("views.projects.index.log")</h3>
       <textarea rows="10" id="log" class="span9"></textarea>
     </section>
   </section>
+  }
 }
