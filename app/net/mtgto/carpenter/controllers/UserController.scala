@@ -135,7 +135,7 @@ object UserController extends Controller with BaseController {
       case Success(targetUser) =>
         jobRepository.findAllByUser(targetUser) match {
           case Success(jobs) =>
-            Ok(views.html.users.jobs(user, jobs))
+            Ok(views.html.users.jobs(targetUser, jobs))
           case Failure(_) =>
             Redirect(routes.Application.index).flashing("error" -> Messages("messages.not_found_job"))
         }
