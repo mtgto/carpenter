@@ -59,7 +59,8 @@ object ProjectController extends Controller with BaseController {
   protected[this] val executeForm = Form(
     tuple(
       "branchType" -> nonEmptyText,
-      "branchName" -> text
+      "branchName" -> text,
+      "tagName" -> text
     )
   )
 
@@ -169,21 +170,21 @@ object ProjectController extends Controller with BaseController {
     executeForm.bindFromRequest.fold(
       formWithErrors => BadRequest(Json.obj("status" -> "fail")),
       success => success match {
-        case (branchTypeString, branchName) => {
+        case (branchTypeString, branchName, tagName) => {
           getProjectByIdString(id) match {
             case Success(project) =>
-              val branchType = branchTypeString match {
-                case "branch" => BranchType.Branch
-                case "tag" => BranchType.Tag
-                case "trunk" => BranchType.Trunk
+              val (branchType, snapshotBranchName) = branchTypeString match {
+                case "branch" => (BranchType.Branch, branchName)
+                case "tag" => (BranchType.Tag, tagName)
+                case "trunk" => (BranchType.Trunk, "trunk")
               }
-              val snapshot = sourceRepositoryService.resolveSnapshot(project.sourceRepository, branchType, branchName).get
-              val repositoryUri = sourceRepositoryService.resolveURIByBranch(project.sourceRepository, branchType, branchName)
+              val snapshot = sourceRepositoryService.resolveSnapshot(project.sourceRepository, branchType, snapshotBranchName).get
+              val repositoryUri = sourceRepositoryService.resolveURIByBranch(project.sourceRepository, branchType, snapshotBranchName)
               val currentTimePoint = Clock.now
               val job = JobFactory(project, user, snapshot, taskName, currentTimePoint)
               jobRepository.store(job)
               LogBroadcastService.start(job.identity)
-              taskService.execute(job, project, taskName, repositoryUri, branchType, branchName).map { result =>
+              taskService.execute(job, project, taskName, repositoryUri, branchType, snapshotBranchName).map { result =>
                 result match {
                   case (exitCode, log, executeTimePoint, executeDuration) => {
                     val executedJob = JobFactory(job, exitCode, log, executeDuration)
