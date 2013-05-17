@@ -1,0 +1,77 @@
+@(project: net.mtgto.carpenter.domain.Project,
+  taskName: String,
+  parents: Map[String, Seq[net.mtgto.carpenter.domain.vcs.SubversionPath]],
+  children: Seq[net.mtgto.carpenter.domain.vcs.SubversionPath]
+)(implicit requestHeader: RequestHeader, lang: Lang, flash: Flash)
+
+@headers = {
+@javascriptRouter("jsRoutes")(
+  net.mtgto.carpenter.controllers.routes.javascript.ProjectController.executeTask
+)
+<script>
+var projectId = '@project.identity.value.uuid.toString';
+var taskName = '@taskName';
+</script>
+}
+@footers = {
+<script>
+  $(function(){
+    var runLink = $('button.run_task');
+    runLink.click(
+      function(){
+        runLink.addClass("disabled");
+        var branchType = $('input[name="branch-types"]:checked').val();
+        var branchName = "";
+        if (branchType == "branch") {
+          branchName = $('#branch-names option:selected').val();
+        } else if (branchType == "tag") {
+          branchName = $('#tag-names option:selected').val();
+        }
+        jsRoutes.net.mtgto.carpenter.controllers.ProjectController.executeTask(projectId, taskName).ajax(
+          {data:{type:branchType, name:branchName},
+           success:function(data) {
+            log = data['log'];
+            exitCode = data['exitCode'];
+            $('#log').val(log);
+            runLink.removeClass("disabled");
+          }});
+      }
+    );
+  });
+</script>
+}
+@main(Messages("views.projects.execute.header"), headers, footers) {
+  <section>
+    <h2>@Messages("views.projects.execute.header")</h2>
+    Project: @project.name
+    Task： @taskName
+  </section>
+  <section>
+    <h3>@Messages("views.projects.execute.choose_branch_tag")</h3>
+    @helper.form(action = net.mtgto.carpenter.controllers.routes.ProjectController.executeTask(project.identity.value.uuid.toString, taskName), 'class -> "form-horizontal") {
+    @for(parent <- parents){
+      <label class="radio">
+        <input type="radio" name="branchType" id="@parent" value="parent"/>
+        @Messages("views.projects.execute.choose_subversion_branch", parent._1)
+      </label>
+      <select id="branch-names" name="branchName">
+      @for(branch <- parent._2){
+        <option>@branch.name</option>
+      }
+      </select>
+    }
+    @for(child <- children){
+      <label class="radio">
+        <input type="radio" name="branchType" id="@child.name" value="child" />
+        @Messages("views.projects.execute.choose_subversion_child", child.name)
+      </label>
+    }
+    <section>
+      <h3>IRC notification</h3>
+        TODO
+    </section>
+    <a class="btn btn-large" href="@net.mtgto.carpenter.controllers.routes.ProjectController.showProjectView(project.identity.value.uuid.toString)">@Messages("views.back")</a>
+    <button class="btn-large btn-primary run_task" type="submit">@Messages("views.projects.run")</button>
+  </section>
+  }
+}

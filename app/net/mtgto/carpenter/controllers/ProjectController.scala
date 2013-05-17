@@ -10,9 +10,10 @@ import play.api.libs.json._
 import java.net.URI
 import java.util.UUID
 import net.mtgto.carpenter.domain._
+import net.mtgto.carpenter.domain.vcs._
+import org.sisioh.baseunits.scala.timeutil.Clock
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Try, Success, Failure}
-import org.sisioh.baseunits.scala.timeutil.Clock
 
 object ProjectController extends Controller with BaseController {
   protected[this] val userRepository: UserRepository = UserRepository()
@@ -42,6 +43,7 @@ object ProjectController extends Controller with BaseController {
       "hostname" -> nonEmptyText,
       "recipe" -> nonEmptyText,
       "sourceRepositoryType" -> nonEmptyText,
+      "subversionPaths" -> text,
       "url" -> nonEmptyText
     )
   )
@@ -52,6 +54,7 @@ object ProjectController extends Controller with BaseController {
       "hostname" -> nonEmptyText,
       "recipe" -> nonEmptyText,
       "sourceRepositoryType" -> nonEmptyText,
+      "subversionPaths" -> nonEmptyText,
       "url" -> nonEmptyText
     )
   )
@@ -59,8 +62,8 @@ object ProjectController extends Controller with BaseController {
   protected[this] val executeForm = Form(
     tuple(
       "branchType" -> nonEmptyText,
-      "branchName" -> text,
-      "tagName" -> text
+      "branchName" -> optional(text),
+      "tagName" -> optional(text)
     )
   )
 
@@ -75,9 +78,9 @@ object ProjectController extends Controller with BaseController {
           .flashing("error" -> Messages("messages.wrong_input")),
       success => {
         success match {
-          case (name, hostname, recipe, sourceRepositoryTypeString, url) =>
+          case (name, hostname, recipe, sourceRepositoryTypeString, subversionPaths, url) =>
             val sourceRepositoryType = sourceRepositoryService.resolveSourceRepositoryType(sourceRepositoryTypeString)
-            val sourceRepository = SourceRepository(sourceRepositoryType, new URI(url))
+            val sourceRepository = convertToSourceRepository(new URI(url), sourceRepositoryType, subversionPaths)
             val project = ProjectFactory(name, hostname, sourceRepository, recipe)
             projectRepository.store(project)
             Redirect(routes.Application.index).flashing("success" -> Messages("messages.create_project"))
@@ -89,9 +92,13 @@ object ProjectController extends Controller with BaseController {
   def showEditView(id: String) = IsAuthenticated { user => implicit request =>
     getProjectByIdString(id) match {
       case Success(project) =>
+        val subversionPaths = project.sourceRepository match {
+          case sourceRepository: SubversionSourceRepository => sourceRepository.getPathsString
+          case _: GitSourceRepository => ""
+        }
         Ok(views.html.projects.edit(id, editForm.fill(
           (project.name, project.hostname, project.recipe, project.sourceRepository.sourceRepositoryType.toString,
-            project.sourceRepository.uri.toString)), sourceRepositoryTypes))
+            subversionPaths, project.sourceRepository.uri.toString)), sourceRepositoryTypes))
       case _ =>
         Redirect(routes.Application.index).flashing("error" -> Messages("messages.not_found_project_to_edit"))
     }
@@ -105,9 +112,9 @@ object ProjectController extends Controller with BaseController {
         getProjectByIdString(id) match {
           case Success(project) => {
             success match {
-              case (name, hostname, recipe, sourceRepositoryTypeString, url) =>
+              case (name, hostname, recipe, sourceRepositoryTypeString, subversionPaths, url) =>
                 val sourceRepositoryType = sourceRepositoryService.resolveSourceRepositoryType(sourceRepositoryTypeString)
-                val sourceRepository = SourceRepository(sourceRepositoryType, new URI(url))
+                val sourceRepository = convertToSourceRepository(new URI(url), sourceRepositoryType, subversionPaths)
                 projectRepository.store(
                   Project(project.identity, name, hostname, sourceRepository, recipe))
                 Redirect(routes.Application.index).flashing("success" -> Messages("messages.edit_project"))
@@ -153,13 +160,24 @@ object ProjectController extends Controller with BaseController {
     getProjectByIdString(id) match {
       case Success(project) =>
         Async {
-          val branchAndTags = for {
-            branches <- taskService.getAllBranches(project)
-            tags <- taskService.getAllTags(project)
-          } yield (branches, tags)
-          branchAndTags.map( result => result match {
-            case (branches, tags) => Ok(views.html.projects.execute(project, taskName, branches, tags))
-          })
+          project.sourceRepository match {
+            case sourceRepository: GitSourceRepository => {
+              val branchAndTags = for {
+                branches <- taskService.getAllBranches(project)
+                tags <- taskService.getAllTags(project)
+              } yield (branches, tags)
+              branchAndTags.map( result => result match {
+                case (branches, tags) => Ok(views.html.projects.executeGit(project, taskName, branches, tags))
+              })
+            }
+            case sourceRepository: SubversionSourceRepository => {
+              taskService.getAllSubversionBranches(project, sourceRepository.paths.withFilter(_.pathType == SubversionPathType.Parent).map(_.name)).map {
+                parents =>
+                  val children: Seq[SubversionPath] = sourceRepository.paths.filter(_.pathType == SubversionPathType.Child)
+                  Ok(views.html.projects.executeSubversion(project, taskName, parents, children))
+              }
+            }
+          }
         }
       case _ =>
         BadRequest("")
@@ -173,10 +191,10 @@ object ProjectController extends Controller with BaseController {
         case (branchTypeString, branchName, tagName) => {
           getProjectByIdString(id) match {
             case Success(project) =>
-              val (branchType, snapshotBranchName) = branchTypeString match {
-                case "branch" => (BranchType.Branch, branchName)
-                case "tag" => (BranchType.Tag, tagName)
-                case "trunk" => (BranchType.Trunk, "trunk")
+              val (branchType, snapshotBranchName) = (project.sourceRepository.sourceRepositoryType, branchTypeString) match {
+                case (SourceRepositoryType.Git, "branch") => (BranchType.Branch, branchName.get)
+                case (SourceRepositoryType.Git, "tag") => (BranchType.Tag, tagName.get)
+                case (SourceRepositoryType.Subversion, _) => (BranchType.Branch, branchName.get)
               }
               val snapshot = sourceRepositoryService.resolveSnapshot(project.sourceRepository, branchType, snapshotBranchName).get
               val repositoryUri = sourceRepositoryService.resolveURIByBranch(project.sourceRepository, branchType, snapshotBranchName)
@@ -238,5 +256,21 @@ object ProjectController extends Controller with BaseController {
 
   protected[this] def getProjectByIdString(id: String): Try[Project] = {
     Try(UUID.fromString(id)).flatMap(uuid => projectRepository.resolve(ProjectId(uuid)))
+  }
+
+  protected[this] def convertToSourceRepository(uri: URI, sourceRepositoryType: SourceRepositoryType.Value, subversionPathsString: String): SourceRepository = {
+    sourceRepositoryType match {
+      case SourceRepositoryType.Git => GitSourceRepository(uri)
+      case SourceRepositoryType.Subversion => SubversionSourceRepository(uri, parseSubversionPathsString(subversionPathsString))
+    }
+  }
+
+  protected[this] def parseSubversionPathsString(pathsString: String): Seq[SubversionPath] = {
+    pathsString.lines.map { line =>
+      line.lastOption match {
+        case Some('/') => SubversionPath(SubversionPathType.Parent, line.dropRight(1))
+        case _ => SubversionPath(SubversionPathType.Child, line)
+      }
+    }.toSeq
   }
 }

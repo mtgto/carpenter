@@ -70,6 +70,10 @@ views.projects.recipe=レシピ
 views.projects.source_repository_type=リポジトリの種別
 # input header and placeholder of repository url
 views.projects.source_repository_url=リポジトリURL
+# input header of description of subversion paths
+views.projects.subversion_paths_description=リポジトリURLからの相対パスを一行ずつ記述してください。ブランチのようにサブディレクトリを含む場合は最後にスラッシュで終わるように記述してください（例："branches/" "trunk"）。
+# placeholder of subversion paths
+views.projects.subversion_paths_placeholder=リポジトリURLからの相対パス
 # header of new project
 views.projects.create.header=新規プロジェクト
 # header of edit project
@@ -132,8 +136,10 @@ views.projects.execute.choose_branch_tag=ブランチ・タグの選択
 views.projects.execute.choose_branch=ブランチから選択:
 # header of choosing from tag
 views.projects.execute.choose_tag=タグから選択:
-# header of choosing trunk
-views.projects.execute.choose_trunk=trunkを選択
+# header of choosing from subversion child
+views.projects.execute.choose_subversion_child={0}を選択
+# header of choosing subversion branches
+views.projects.execute.choose_subversion_branch={0}から選択:
 
 # header of job
 views.jobs.header=ジョブ実行結果

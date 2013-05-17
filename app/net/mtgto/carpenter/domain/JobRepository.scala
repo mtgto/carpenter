@@ -1,11 +1,16 @@
 package net.mtgto.carpenter.domain
 
-import net.mtgto.carpenter.domain.vcs.{Snapshot, SubversionSnapshot, GitTagSnapshot, GitBranchSnapshot}
+import net.mtgto.carpenter.domain.vcs._
 import net.mtgto.carpenter.infrastructure.{Job => InfraJob, JobDao, DatabaseJobDao}
 import net.mtgto.carpenter.infrastructure.vcs.{Snapshot => InfraSnapshot, SnapshotDao, DatabaseSnapshotDao}
 import org.sisioh.baseunits.scala.time.{Duration, TimePoint}
 import org.sisioh.dddbase.core.{Repository, EntityNotFoundException}
 import scala.util.Try
+import net.mtgto.carpenter.domain.vcs.SubversionSnapshot
+import net.mtgto.carpenter.domain.vcs.Snapshot
+import net.mtgto.carpenter.domain.vcs.GitTagSnapshot
+import net.mtgto.carpenter.domain.vcs.GitBranchSnapshot
+import org.sisioh.dddbase.core.EntityNotFoundException
 
 trait JobRepository extends Repository[JobId, Job] with BaseEntityResolver[JobId, Job] {
   def findAll: Try[Seq[Job]]
@@ -93,7 +98,7 @@ object JobRepository {
           case snapshot: GitTagSnapshot => (snapshot.name, snapshot.revision, "tag")
           case snapshot: SubversionSnapshot => (snapshot.name, snapshot.revision.toString, snapshot.branchType.toString)
         }
-        snapshotDao.save(entity.identity.uuid, name = snapshotName, revision = snapshotRevision, branchType)
+        snapshotDao.save(entity.identity.uuid, name = snapshotName, revision = snapshotRevision.toString, branchType)
         this
       }
     }
@@ -140,8 +145,6 @@ object JobRepository {
           BranchType.Branch
         case "tag" =>
           BranchType.Tag
-        case "trunk" =>
-          BranchType.Trunk
       }
       sourceRepositoryService.resolveSnapshot(sourceRepository, branchType, snapshot.name)
     }

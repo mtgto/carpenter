@@ -1,11 +1,11 @@
 package net.mtgto.carpenter.infrastructure
 
+import anorm._
 import java.util.UUID
-import org.specs2.mutable.Specification
 import play.api.test.WithApplication
 import org.specs2.execute.{AsResult, Result}
+import org.specs2.mutable.Specification
 import play.api.db.DB
-import anorm._
 
 class DatabaseUserDaoSpec extends Specification {
   trait Setup extends WithApplication {

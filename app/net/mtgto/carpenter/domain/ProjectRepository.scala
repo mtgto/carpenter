@@ -3,6 +3,7 @@ package net.mtgto.carpenter.domain
 import net.mtgto.carpenter.infrastructure.{Project => InfraProject, ProjectDao, DatabaseProjectDao}
 import org.sisioh.dddbase.core.{EntityNotFoundException, Repository}
 import scala.util.Try
+import net.mtgto.carpenter.domain.vcs.SourceRepositoryService
 
 trait ProjectRepository extends Repository[ProjectId, Project] with BaseEntityResolver[ProjectId, Project] {
   def findAll: Seq[Project]

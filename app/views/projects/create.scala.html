@@ -1,14 +1,25 @@
-@(createForm: Form[(String, String, String, String, String)], sourceRepositoryTypes: Seq[(String, String)])(implicit lang: Lang, flash: Flash)
+@(createForm: Form[(String, String, String, String, String, String)], sourceRepositoryTypes: Seq[(String, String)])(implicit lang: Lang, flash: Flash)
 
 @headers = {}
-@footers = {}
+@footers = {
+<script>
+  $('#subversionPaths').parent().parent().hide();
+  $('#sourceRepositoryType_git').change(function(){
+    $('#subversionPaths').parent().parent().hide('fast');
+  });
+  $('#sourceRepositoryType_subversion').change(function(){
+    $('#subversionPaths').parent().parent().show('fast');
+  });
+</script>
+}
 @main(Messages("views.projects.create.header"), headers, footers) {
   <h2>@Messages("views.projects.create.header")</h2>
-  @helper.form(action = net.mtgto.carpenter.controllers.routes.ProjectController.create, 'class -> "form-horizontal") {
+  @helper.form(action = net.mtgto.carpenter.controllers.routes.ProjectController.create) {
     @inputText(createForm("name"), '_label -> Messages("views.projects.project_name"), 'placeholder -> Messages("views.projects.project_name"), 'class -> "span9")
     @inputText(createForm("hostname"), '_label -> Messages("views.projects.hostname"), 'placeholder -> Messages("views.projects.hostname"), 'class -> "span9")
-    @inputRadioGroup(createForm("sourceRepositoryType"), options = sourceRepositoryTypes, '_label -> Messages("views.projects.source_repository_type"), 'placeholder -> Messages("views.projects.source_repository_type"), 'placeholder -> Messages("views.projects.source_repository_type"))
     @inputText(createForm("url"), '_label -> Messages("views.projects.source_repository_url"), 'class -> "span9")
+    @inputRadioGroup(createForm("sourceRepositoryType"), options = sourceRepositoryTypes, '_label -> Messages("views.projects.source_repository_type"), 'placeholder -> Messages("views.projects.source_repository_type"))
+    @textarea(createForm("subversionPaths"), '_label -> Messages("views.projects.subversion_paths_description"), 'placeholder -> Messages("views.projects.subversion_paths_placeholder"), 'rows -> 4, 'class -> "span9")
     @textarea(createForm("recipe"), '_label -> Messages("views.projects.recipe"), 'placeholder -> Messages("views.projects.recipe"), 'rows -> 10, 'class -> "span9")
     <a class="btn btn-large" href="@net.mtgto.carpenter.controllers.routes.Application.index">@Messages("views.back")</a>
     <button class="btn btn-large btn-primary" type="submit">@Messages("views.submit")</button>

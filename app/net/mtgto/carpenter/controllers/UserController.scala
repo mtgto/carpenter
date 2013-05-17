@@ -6,11 +6,9 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.i18n.Messages
 
+import java.util.UUID
 import net.mtgto.carpenter.domain._
 import scala.util.{Failure, Success, Try}
-import java.util.UUID
-import net.mtgto.carpenter.domain.Authority
-import scala.Some
 
 object UserController extends Controller with BaseController {
   protected[this] val userRepository: UserRepository = UserRepository()

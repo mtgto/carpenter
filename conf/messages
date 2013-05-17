@@ -70,6 +70,10 @@ views.projects.recipe=Recipe
 views.projects.source_repository_type=Repository Type
 # input header and placeholder of repository url
 views.projects.source_repository_url=Repository URL
+# input header of description of subversion branches
+views.projects.subversion_branches_description=Describe relative paths from repository URL line-by-line. If the path contains subdirectories, you need to write slash at end of line (ex: "branches/" "trunk").
+# placeholder of subversion paths
+views.projects.subversion_paths_placeholder=Subversion relative paths from repository URL
 # header of new project
 views.projects.create.header=New Project
 # header of edit project
@@ -132,8 +136,10 @@ views.projects.execute.choose_branch_tag=Choose branch / tag
 views.projects.execute.choose_branch=Choose branch:
 # header of choosing from tag
 views.projects.execute.choose_tag=Choose tag:
-# header of choosing trunk
-views.projects.execute.choose_trunk=Choose trunk
+# header of choosing from subversion child
+views.projects.execute.choose_subversion_child=Choose {0}
+# header of choosing subversion branches
+views.projects.execute.choose_subversion_branch=Choose {0}:
 
 # header of job
 views.jobs.header=Job result

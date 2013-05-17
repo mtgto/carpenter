@@ -1,6 +1,7 @@
 package net.mtgto.carpenter.domain
 
 import java.util.UUID
+import net.mtgto.carpenter.domain.vcs.SourceRepository
 
 trait ProjectFactory {
   def apply(name: String, hostname: String, sourceRepository: SourceRepository, recipe: String): Project

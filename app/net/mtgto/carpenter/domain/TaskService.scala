@@ -6,12 +6,14 @@ import org.sisioh.baseunits.scala.timeutil.Clock
 import scala.concurrent.{Future, future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.sys.process.{Process, ProcessLogger}
+import net.mtgto.carpenter.domain.vcs.{SubversionPathType, SubversionPath, BranchType, SourceRepositoryType}
 
 trait TaskService {
   def getAllTasks(project: Project): Seq[Task]
   def execute(job: Job, project: Project, taskName: String, repositoryUri: URI, branchType: BranchType.Value, branchName: String): Future[(Int, String, TimePoint, Duration)]
   def getAllBranches(project: Project): Future[Seq[String]]
   def getAllTags(project: Project): Future[Seq[String]]
+  def getAllSubversionBranches(project: Project, parents: Seq[String]): Future[Map[String, Seq[SubversionPath]]]
 }
 
 class DefaultTaskService(workspacePath: String) extends TaskService {
@@ -97,6 +99,16 @@ class DefaultTaskService(workspacePath: String) extends TaskService {
             line => line.split("""\s+""")(1).stripPrefix("refs/tags/")
           }
       }
+    }
+  }
+
+  override def getAllSubversionBranches(project: Project, parents: Seq[String]): Future[Map[String, Seq[SubversionPath]]] = {
+    future {
+      parents.map { parent =>
+        val branchUri = project.sourceRepository.uri.toString.stripSuffix("/") + "/" + parent
+        parent -> Process(Seq("svn", "ls", branchUri)).lines.map( fileName =>
+          SubversionPath(SubversionPathType.Parent, parent + "/" + fileName.stripSuffix("/")))
+      }.toMap
     }
   }
 }
