@@ -1,7 +1,7 @@
 package net.mtgto.carpenter.domain
 
 import net.mtgto.carpenter.domain.vcs._
-import net.mtgto.carpenter.infrastructure.{Job => InfraJob, JobDao, DatabaseJobDao}
+import net.mtgto.carpenter.infrastructure.{Job => InfraJob, JobDao, DatabaseJobDao, Project => InfraProject, User => InfraUser, Authority => InfraAuthority}
 import net.mtgto.carpenter.infrastructure.vcs.{Snapshot => InfraSnapshot, SnapshotDao, DatabaseSnapshotDao}
 import org.sisioh.baseunits.scala.time.{Duration, TimePoint}
 import org.sisioh.dddbase.core.{Repository, EntityNotFoundException}
@@ -91,7 +91,10 @@ object JobRepository {
      */
     override def store(entity: Job): Try[JobRepository] = {
       Try {
-        jobDao.save(InfraJob(entity.identity.uuid, entity.project.identity.uuid, entity.user.identity.value.uuid,
+        val infraProject = InfraProject(entity.project.identity.uuid, entity.project.name, entity.project.hostname, entity.project.recipe)
+        val infraAuthority = InfraAuthority(canLogin = entity.user.authority.canLogin, canCreateUser = entity.user.authority.canCreateUser)
+        val infraUser = InfraUser(entity.user.identity.uuid, entity.user.name, infraAuthority)
+        jobDao.save(InfraJob(entity.identity.uuid, infraProject, infraUser,
           entity.taskName, entity.exitCode, entity.log, entity.executeTimePoint.asJavaUtilDate, entity.executeDuration.map(_.quantity)))
         val (snapshotName, snapshotRevision, branchType) = entity.snapshot match {
           case snapshot: GitBranchSnapshot => (snapshot.name, snapshot.revision, "branch")
@@ -122,20 +125,18 @@ object JobRepository {
     }
 
     protected[this] def convertInfraToDomain(infraJob: InfraJob): Try[Job] = {
-      projectRepository.resolve(ProjectId(infraJob.projectId)).flatMap { project =>
-        userRepository.resolve(UserId(infraJob.userId)).flatMap { user =>
-          convertInfraSnapshotToDomain(project.sourceRepository, snapshotDao.findByJobId(infraJob.id).get).map { snapshot =>
-            (infraJob.exitCode, infraJob.log, infraJob.executeDuration) match {
-              case (Some(exitCode), Some(log), Some(executeDuration)) =>
-                Job(JobId(infraJob.id), project, user, snapshot, infraJob.task, exitCode, log,
-                  TimePoint.from(infraJob.executeDate), Duration.milliseconds(executeDuration))
-              case _ =>
-                Job(JobId(infraJob.id), project, user, snapshot, infraJob.task,
-                  TimePoint.from(infraJob.executeDate))
-            }
-
-          }
+      val project = ProjectFactory(infraJob.project)
+      val user = UserFactory(infraJob.user)
+      convertInfraSnapshotToDomain(project.sourceRepository, snapshotDao.findByJobId(infraJob.id).get).map { snapshot =>
+        (infraJob.exitCode, infraJob.log, infraJob.executeDuration) match {
+          case (Some(exitCode), Some(log), Some(executeDuration)) =>
+            Job(JobId(infraJob.id), project, user, snapshot, infraJob.task, exitCode, log,
+              TimePoint.from(infraJob.executeDate), Duration.milliseconds(executeDuration))
+          case _ =>
+            Job(JobId(infraJob.id), project, user, snapshot, infraJob.task,
+              TimePoint.from(infraJob.executeDate))
         }
+
       }
     }
 

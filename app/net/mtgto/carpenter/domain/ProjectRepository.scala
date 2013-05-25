@@ -15,14 +15,8 @@ object ProjectRepository {
 
     private val sourceRepositoryService: SourceRepositoryService = SourceRepositoryService
 
-    private def convertInfraProjectToDomain(infraProject: InfraProject): Project = {
-      Project(
-        ProjectId(infraProject.id), infraProject.name, infraProject.hostname,
-        sourceRepositoryService.get(ProjectId(infraProject.id)), infraProject.recipe)
-    }
-
     override def findAll: Seq[Project] = {
-      projectDao.findAll.map(convertInfraProjectToDomain)
+      projectDao.findAll.map(ProjectFactory.apply)
     }
 
     /**
@@ -36,7 +30,7 @@ object ProjectRepository {
      *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
     override def resolveOption(identity: ProjectId): Try[Option[Project]] = {
-      Try(projectDao.findById(identity.value.uuid).map(convertInfraProjectToDomain))
+      Try(projectDao.findById(identity.value.uuid).map(ProjectFactory.apply))
     }
 
     /**

@@ -13,20 +13,12 @@ object UserRepository {
   def apply(): UserRepository = new UserRepository {
     private val userDao: UserDao = new DatabaseUserDao
 
-    protected[this] def convertInfraAuthorityToDomain(infraAuthority: InfraAuthority): Authority = {
-      Authority(canLogin = infraAuthority.canLogin, canCreateUser = infraAuthority.canCreateUser)
-    }
-
-    protected[this] def convertInfraToDomain(infraUser: InfraUser): User = {
-      User(UserId(infraUser.id), infraUser.name, None, convertInfraAuthorityToDomain(infraUser.authority))
-    }
-
     override def findByNameAndPassword(name: String, password: String): Option[User] = {
-      userDao.findByNameAndPassword(name, password).map(convertInfraToDomain)
+      userDao.findByNameAndPassword(name, password).map(UserFactory.apply)
     }
 
     override def findAll: Seq[User] = {
-      userDao.findAll.map(convertInfraToDomain)
+      userDao.findAll.map(UserFactory.apply)
     }
 
     /**
@@ -40,7 +32,7 @@ object UserRepository {
      *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
     override def resolveOption(identity: UserId): Try[Option[User]] = {
-      Try(userDao.findById(identity.value.uuid).map(convertInfraToDomain))
+      Try(userDao.findById(identity.value.uuid).map(UserFactory.apply))
     }
 
     /**
