@@ -25,8 +25,8 @@ object ApplicationBuild extends Build {
 
   val main = play.Project(appName, appVersion, appDependencies).settings(
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-Xlint", "-encoding", "UTF8"),
-    resolvers ++= Seq("scala-dddbase Repository" at "http://sisioh.github.com/scala-dddbase/repos/release/",
-                      "baseunits-scala Repository" at "http://sisioh.github.com/baseunits-scala/repos/release/"),
+    resolvers ++= Seq("scala-dddbase Repository" at "http://sisioh.github.io/scala-dddbase/repos/release/",
+                      "baseunits-scala Repository" at "http://sisioh.github.io/baseunits-scala/repos/release/"),
     templatesImport ++= Seq("views.html.helper._", "net.mtgto.carpenter.controllers.Application.fieldConstructor", "play.api.i18n.Messages"),
     lessEntryPoints <<= baseDirectory(customLessEntryPoints)
   )
