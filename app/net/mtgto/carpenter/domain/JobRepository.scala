@@ -99,7 +99,7 @@ object JobRepository {
         val (snapshotName, snapshotRevision, branchType) = entity.snapshot match {
           case snapshot: GitBranchSnapshot => (snapshot.name, snapshot.revision, "branch")
           case snapshot: GitTagSnapshot => (snapshot.name, snapshot.revision, "tag")
-          case snapshot: SubversionSnapshot => (snapshot.name, snapshot.revision.toString, snapshot.branchType.toString)
+          case snapshot: SubversionSnapshot => (snapshot.name, snapshot.revision.revision.toString, snapshot.branchType.toString)
         }
         snapshotDao.save(entity.identity.uuid, name = snapshotName, revision = snapshotRevision.toString, branchType)
         this
@@ -141,13 +141,18 @@ object JobRepository {
     }
 
     protected[this] def convertInfraSnapshotToDomain(sourceRepository: SourceRepository, snapshot: InfraSnapshot): Try[Snapshot] = {
-      val branchType = (snapshot.branchType) match {
-        case "branch" =>
-          BranchType.Branch
-        case "tag" =>
-          BranchType.Tag
+      Try {
+        (sourceRepository.sourceRepositoryType, BranchType.withName(snapshot.branchType)) match {
+          case (SourceRepositoryType.Git, BranchType.Branch) =>
+            GitBranchSnapshot(snapshot.name, GitRevision(snapshot.revision))
+          case (SourceRepositoryType.Git, BranchType.Tag) =>
+            GitTagSnapshot(snapshot.name, GitRevision(snapshot.revision))
+          case (SourceRepositoryType.Subversion, branchType) =>
+            val uri = sourceRepositoryService.resolveURIByBranch(sourceRepository, branchType, snapshot.name)
+            val revision = SubversionRevision(snapshot.revision.toLong)
+            SubversionSnapshot(snapshot.name, branchType, uri, revision)
+        }
       }
-      sourceRepositoryService.resolveSnapshot(sourceRepository, branchType, snapshot.name)
     }
   }
 }

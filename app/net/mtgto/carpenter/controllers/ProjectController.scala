@@ -191,10 +191,11 @@ object ProjectController extends Controller with BaseController {
         case (branchTypeString, branchName, tagName) => {
           getProjectByIdString(id) match {
             case Success(project) =>
-              val (branchType, snapshotBranchName) = (project.sourceRepository.sourceRepositoryType, branchTypeString) match {
-                case (SourceRepositoryType.Git, "branch") => (BranchType.Branch, branchName.get)
-                case (SourceRepositoryType.Git, "tag") => (BranchType.Tag, tagName.get)
-                case (SourceRepositoryType.Subversion, _) => (BranchType.Branch, branchName.get)
+              val (branchType, snapshotBranchName) = (project.sourceRepository.sourceRepositoryType, branchTypeString, branchName) match {
+                case (SourceRepositoryType.Git, "branch", _) => (BranchType.Branch, branchName.get)
+                case (SourceRepositoryType.Git, "tag", _) => (BranchType.Tag, tagName.get)
+                case (SourceRepositoryType.Subversion, _, None) => (BranchType.Branch, branchTypeString)
+                case (SourceRepositoryType.Subversion, _, Some(branchName)) => (BranchType.Branch, branchName)
               }
               val snapshot = sourceRepositoryService.resolveSnapshot(project.sourceRepository, branchType, snapshotBranchName).get
               val repositoryUri = sourceRepositoryService.resolveURIByBranch(project.sourceRepository, branchType, snapshotBranchName)

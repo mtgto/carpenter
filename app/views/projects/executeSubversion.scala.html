@@ -15,29 +15,9 @@ var taskName = '@taskName';
 }
 @footers = {
 <script>
-  $(function(){
-    var runLink = $('button.run_task');
-    runLink.click(
-      function(){
-        runLink.addClass("disabled");
-        var branchType = $('input[name="branch-types"]:checked').val();
-        var branchName = "";
-        if (branchType == "branch") {
-          branchName = $('#branch-names option:selected').val();
-        } else if (branchType == "tag") {
-          branchName = $('#tag-names option:selected').val();
-        }
-        jsRoutes.net.mtgto.carpenter.controllers.ProjectController.executeTask(projectId, taskName).ajax(
-          {data:{type:branchType, name:branchName},
-           success:function(data) {
-            log = data['log'];
-            exitCode = data['exitCode'];
-            $('#log').val(log);
-            runLink.removeClass("disabled");
-          }});
-      }
-    );
-  });
+    $('input[name="branchType"]:radio').change(function() {
+      $("select").val(0); // remove selection from all select boxes.
+    });
 </script>
 }
 @main(Messages("views.projects.execute.header"), headers, footers) {
@@ -51,7 +31,7 @@ var taskName = '@taskName';
     @helper.form(action = net.mtgto.carpenter.controllers.routes.ProjectController.executeTask(project.identity.value.uuid.toString, taskName), 'class -> "form-horizontal") {
     @for(parent <- parents){
       <label class="radio">
-        <input type="radio" name="branchType" id="@parent" value="parent"/>
+        <input type="radio" name="branchType" id="@parent._1" value="parent"/>
         @Messages("views.projects.execute.choose_subversion_branch", parent._1)
       </label>
       <select id="branch-names" name="branchName">
@@ -62,7 +42,7 @@ var taskName = '@taskName';
     }
     @for(child <- children){
       <label class="radio">
-        <input type="radio" name="branchType" id="@child.name" value="child" />
+        <input type="radio" name="branchType" id="@child.name" value="@child.name"/>
         @Messages("views.projects.execute.choose_subversion_child", child.name)
       </label>
     }
