@@ -11,7 +11,7 @@ object ApplicationBuild extends Build {
     jdbc,
     anorm,
     "org.sisioh" %% "scala-dddbase-core" % "0.1.14",
-    "org.sisioh" %% "baseunits-scala" % "0.0.1",
+    "org.sisioh" %% "baseunits-scala" % "0.1.3",
     "org.pircbotx" % "pircbotx" % "1.9"
   )
 
@@ -26,7 +26,8 @@ object ApplicationBuild extends Build {
   val main = play.Project(appName, appVersion, appDependencies).settings(
     scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-Xlint", "-encoding", "UTF8"),
     resolvers ++= Seq("scala-dddbase Repository" at "http://sisioh.github.io/scala-dddbase/repos/release/",
-                      "baseunits-scala Repository" at "http://sisioh.github.io/baseunits-scala/repos/release/"),
+                      "baseunits-scala Repository" at "http://sisioh.github.io/baseunits-scala/repos/release/",
+                      "Sisioh Scala Toolbox Release Repository" at "http://sisioh.github.io/scala-toolbox/repos/release/"),
     templatesImport ++= Seq("views.html.helper._", "net.mtgto.carpenter.controllers.Application.fieldConstructor", "play.api.i18n.Messages"),
     lessEntryPoints <<= baseDirectory(customLessEntryPoints)
   )
