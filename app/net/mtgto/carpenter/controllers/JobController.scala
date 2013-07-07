@@ -2,7 +2,7 @@ package net.mtgto.carpenter.controllers
 
 import java.util.UUID
 import net.mtgto.carpenter.domain.{LogBroadcastService, UserRepository, JobRepository, JobId, Job}
-import org.sisioh.dddbase.core.EntityNotFoundException
+import org.sisioh.dddbase.core.lifecycle.EntityNotFoundException
 import play.api.mvc._
 import play.api.i18n.Messages
 import play.api.libs.iteratee.{Enumerator, Input, Done}
@@ -40,7 +40,7 @@ object JobController extends Controller with Secured {
   protected[this] def getJobByIdString(id: String): Option[Job] = {
     Try(UUID.fromString(id)) match {
       case Success(uuid) =>
-        jobRepository.resolveOption(JobId(uuid)).getOrElse(throw new EntityNotFoundException)
+        jobRepository.resolve(JobId(uuid)).toOption
       case Failure(e) =>
         None
     }

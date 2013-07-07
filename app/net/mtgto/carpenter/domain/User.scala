@@ -1,7 +1,7 @@
 package net.mtgto.carpenter.domain
 
 import java.util.UUID
-import org.sisioh.dddbase.core.{Identity, Entity}
+import org.sisioh.dddbase.core.model.{Identity, Entity}
 
 case class UserId(uuid: UUID) extends Identity[UserId] {
   override def value = this
@@ -12,6 +12,8 @@ case class UserId(uuid: UUID) extends Identity[UserId] {
  *
  * @param identity identity
  * @param name name
+ * @param password password. Non-empty when user is logging in. Empty after user is logged in.
+ * @param authority user's authority
  */
 trait User extends Entity[UserId] {
   override val identity: UserId

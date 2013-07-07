@@ -5,7 +5,7 @@ import net.mtgto.carpenter.domain.{ProjectId}
 import net.mtgto.carpenter.infrastructure.vcs.{GitService, GitRevision => InfraGitRevision, SubversionRevision => InfraSubversionRevision, SubversionService, SubversionPath => InfraSubversionPath}
 import net.mtgto.carpenter.infrastructure.{SourceRepository => InfraSourceRepository, SourceRepositoryDao, DatabaseSourceRepositoryDao, GitSourceRepository => InfraGitSourceRepository, SubversionSourceRepository => InfraSubversionSourceRepository}
 import scala.util.Try
-import org.sisioh.dddbase.core.EntityNotFoundException
+import org.sisioh.dddbase.core.lifecycle.EntityNotFoundException
 
 trait SourceRepositoryService {
   def get(projectId: ProjectId): SourceRepository

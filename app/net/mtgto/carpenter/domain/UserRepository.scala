@@ -1,10 +1,10 @@
 package net.mtgto.carpenter.domain
 
 import net.mtgto.carpenter.infrastructure.{UserDao, DatabaseUserDao, Authority => InfraAuthority, User => InfraUser}
-import org.sisioh.dddbase.core.{EntityNotFoundException, Repository}
+import org.sisioh.dddbase.core.lifecycle.{RepositoryWithEntity, EntityNotFoundException, Repository}
 import scala.util.Try
 
-trait UserRepository extends Repository[UserId, User] with BaseEntityResolver[UserId, User] {
+trait UserRepository extends Repository[UserRepository, UserId, User] with BaseEntityReader[UserId, User] {
   def findByNameAndPassword(name: String, password: String): Option[User]
   def findAll: Seq[User]
 }
@@ -26,27 +26,30 @@ object UserRepository {
      *
      * @param identity 識別子
      * @return Success:
-     *          Some: エンティティが存在する場合
-     *          None: エンティティが存在しない場合
+     *         エンティティ
      *         Failure:
-     *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
+     *         EntityNotFoundExceptionは、エンティティが見つからなかった場合
+     *         RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    override def resolveOption(identity: UserId): Try[Option[User]] = {
-      Try(userDao.findById(identity.value.uuid).map(UserFactory.apply))
+    override def resolve(identity: UserId): Try[User] = {
+      Try(userDao.findById(identity.value.uuid).map(UserFactory.apply).getOrElse(throw new EntityNotFoundException))
     }
 
     /**
      * エンティティを保存する。
      *
      * @param entity 保存する対象のエンティティ
-     * @throws RepositoryException リポジトリにアクセスできない場合
+     * @return Success:
+     *         リポジトリインスタンス
+     *         Failure
+     *         RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    override def store(entity: User): Try[UserRepository] = {
+    def store(entity: User): Try[RepositoryWithEntity[UserRepository, User]] = {
       Try {
         assert(entity.password.isDefined)
         val infraAuthority = InfraAuthority(canLogin = entity.authority.canLogin, canCreateUser = entity.authority.canCreateUser)
         userDao.save(entity.identity.value.uuid, entity.name, entity.password.get, infraAuthority)
-        this
+        RepositoryWithEntity(this, entity)
       }
     }
 
@@ -67,5 +70,7 @@ object UserRepository {
         this
       }
     }
+
+    override def contains(identity: UserId): Try[Boolean] = ???
   }
 }

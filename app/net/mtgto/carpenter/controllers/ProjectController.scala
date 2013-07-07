@@ -196,6 +196,7 @@ object ProjectController extends Controller with BaseController {
                 case (SourceRepositoryType.Git, "tag", _) => (BranchType.Tag, tagName.get)
                 case (SourceRepositoryType.Subversion, _, None) => (BranchType.Branch, branchTypeString)
                 case (SourceRepositoryType.Subversion, _, Some(branchName)) => (BranchType.Branch, branchName)
+                case _ => throw new IllegalStateException
               }
               val snapshot = sourceRepositoryService.resolveSnapshot(project.sourceRepository, branchType, snapshotBranchName).get
               val repositoryUri = sourceRepositoryService.resolveURIByBranch(project.sourceRepository, branchType, snapshotBranchName)

@@ -1,11 +1,11 @@
 package net.mtgto.carpenter.domain
 
 import net.mtgto.carpenter.infrastructure.{Project => InfraProject, ProjectDao, DatabaseProjectDao}
-import org.sisioh.dddbase.core.{EntityNotFoundException, Repository}
+import org.sisioh.dddbase.core.lifecycle.{RepositoryWithEntity, EntityNotFoundException, Repository}
 import scala.util.Try
 import net.mtgto.carpenter.domain.vcs.SourceRepositoryService
 
-trait ProjectRepository extends Repository[ProjectId, Project] with BaseEntityResolver[ProjectId, Project] {
+trait ProjectRepository extends Repository[ProjectRepository, ProjectId, Project] with BaseEntityReader[ProjectId, Project] {
   def findAll: Seq[Project]
 }
 
@@ -24,13 +24,13 @@ object ProjectRepository {
      *
      * @param identity 識別子
      * @return Success:
-     *          Some: エンティティが存在する場合
-     *          None: エンティティが存在しない場合
+     *         エンティティ
      *         Failure:
-     *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
+     *         EntityNotFoundExceptionは、エンティティが見つからなかった場合
+     *         RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    override def resolveOption(identity: ProjectId): Try[Option[Project]] = {
-      Try(projectDao.findById(identity.value.uuid).map(ProjectFactory.apply))
+    override def resolve(identity: ProjectId): Try[Project] = {
+      Try(projectDao.findById(identity.value.uuid).map(ProjectFactory.apply).getOrElse(throw new EntityNotFoundException))
     }
 
     /**
@@ -38,15 +38,15 @@ object ProjectRepository {
      *
      * @param entity 保存する対象のエンティティ
      * @return Success:
-     *          リポジトリインスタンス
-     *         Failure:
-     *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
+     *         リポジトリインスタンス
+     *         Failure
+     *         RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    override def store(entity: Project): Try[ProjectRepository] = {
+    def store(entity: Project): Try[RepositoryWithEntity[ProjectRepository, Project]] = {
       Try {
         projectDao.save(entity.identity.uuid, entity.name, entity.hostname, entity.recipe)
         sourceRepositoryService.save(entity.identity, entity.sourceRepository)
-        this
+        RepositoryWithEntity(this, entity)
       }
     }
 

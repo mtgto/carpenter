@@ -4,15 +4,14 @@ import net.mtgto.carpenter.domain.vcs._
 import net.mtgto.carpenter.infrastructure.{Job => InfraJob, JobDao, DatabaseJobDao, Project => InfraProject, User => InfraUser, Authority => InfraAuthority}
 import net.mtgto.carpenter.infrastructure.vcs.{Snapshot => InfraSnapshot, SnapshotDao, DatabaseSnapshotDao}
 import org.sisioh.baseunits.scala.time.{Duration, TimePoint}
-import org.sisioh.dddbase.core.{Repository, EntityNotFoundException}
+import org.sisioh.dddbase.core.lifecycle.{RepositoryWithEntity, Repository, EntityNotFoundException}
 import scala.util.Try
 import net.mtgto.carpenter.domain.vcs.SubversionSnapshot
 import net.mtgto.carpenter.domain.vcs.Snapshot
 import net.mtgto.carpenter.domain.vcs.GitTagSnapshot
 import net.mtgto.carpenter.domain.vcs.GitBranchSnapshot
-import org.sisioh.dddbase.core.EntityNotFoundException
 
-trait JobRepository extends Repository[JobId, Job] with BaseEntityResolver[JobId, Job] {
+trait JobRepository extends Repository[JobRepository, JobId, Job] with BaseEntityReader[JobId, Job] {
   def findAll: Try[Seq[Job]]
 
   def findAllByProject(project: Project): Try[Seq[Job]]
@@ -69,15 +68,13 @@ object JobRepository {
      *
      * @param identity 識別子
      * @return Success:
-     *          Some: エンティティが存在する場合
-     *          None: エンティティが存在しない場合
+     *         エンティティ
      *         Failure:
-     *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
+     *         EntityNotFoundExceptionは、エンティティが見つからなかった場合
+     *         RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    override def resolveOption(identity: JobId): Try[Option[Job]] = {
-      Try(jobDao.findById(identity.value.uuid).flatMap {
-        convertInfraToDomain(_).toOption
-      })
+    override def resolve(identity: JobId): Try[Job] = {
+      jobDao.findById(identity.value.uuid).map(convertInfraToDomain).getOrElse(throw new EntityNotFoundException)
     }
 
     /**
@@ -85,11 +82,11 @@ object JobRepository {
      *
      * @param entity 保存する対象のエンティティ
      * @return Success:
-     *          リポジトリインスタンス
-     *         Failure:
-     *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
+     *         リポジトリインスタンス
+     *         Failure
+     *         RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    override def store(entity: Job): Try[JobRepository] = {
+    def store(entity: Job): Try[RepositoryWithEntity[JobRepository, Job]] = {
       Try {
         val infraProject = InfraProject(entity.project.identity.uuid, entity.project.name, entity.project.hostname, entity.project.recipe)
         val infraAuthority = InfraAuthority(canLogin = entity.user.authority.canLogin, canCreateUser = entity.user.authority.canCreateUser)
@@ -102,7 +99,7 @@ object JobRepository {
           case snapshot: SubversionSnapshot => (snapshot.name, snapshot.revision.revision.toString, snapshot.branchType.toString)
         }
         snapshotDao.save(entity.identity.uuid, name = snapshotName, revision = snapshotRevision.toString, branchType)
-        this
+        RepositoryWithEntity(this, entity)
       }
     }
 
