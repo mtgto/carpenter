@@ -1,16 +1,19 @@
 package net.mtgto.carpenter.domain
 
 import net.mtgto.carpenter.infrastructure.{Project => InfraProject, ProjectDao, DatabaseProjectDao}
-import org.sisioh.dddbase.core.lifecycle.{RepositoryWithEntity, EntityNotFoundException, Repository}
+import org.sisioh.dddbase.core.lifecycle.{ResultWithEntity, EntityNotFoundException}
+import org.sisioh.dddbase.core.lifecycle.sync.{SyncResultWithEntity, SyncRepository}
 import scala.util.Try
 import net.mtgto.carpenter.domain.vcs.SourceRepositoryService
 
-trait ProjectRepository extends Repository[ProjectRepository, ProjectId, Project] with BaseEntityReader[ProjectId, Project] {
+trait ProjectRepository extends SyncRepository[ProjectId, Project] with BaseEntityReader[ProjectId, Project] {
   def findAll: Seq[Project]
 }
 
 object ProjectRepository {
   def apply(): ProjectRepository = new ProjectRepository {
+    override type This = ProjectRepository
+
     private val projectDao: ProjectDao = new DatabaseProjectDao
 
     private val sourceRepositoryService: SourceRepositoryService = SourceRepositoryService
@@ -42,11 +45,11 @@ object ProjectRepository {
      *         Failure
      *         RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    def store(entity: Project): Try[RepositoryWithEntity[ProjectRepository, Project]] = {
+    def store(entity: Project): Try[ResultWithEntity[This, ProjectId, Project, Try]] = {
       Try {
         projectDao.save(entity.identity.uuid, entity.name, entity.hostname, entity.recipe)
         sourceRepositoryService.save(entity.identity, entity.sourceRepository)
-        RepositoryWithEntity(this, entity)
+        SyncResultWithEntity(this, entity)
       }
     }
 
@@ -59,7 +62,7 @@ object ProjectRepository {
      *         Failure:
      *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    override def delete(identity: ProjectId): Try[ProjectRepository] = {
+    override def delete(identity: ProjectId): Try[This] = {
       Try {
         if (projectDao.delete(identity.value.uuid) == 0) {
           throw new EntityNotFoundException

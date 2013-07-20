@@ -4,7 +4,7 @@ import org.sisioh.dddbase.core.lifecycle.EntityReader
 import org.sisioh.dddbase.core.model.{Entity, Identity}
 import scala.util.Try
 
-trait BaseEntityReader[ID <: Identity[_], T <: Entity[ID]] extends EntityReader[ID, T] {
+trait BaseEntityReader[ID <: Identity[_], T <: Entity[ID]] extends EntityReader[ID, T, Try] {
   /**
    * 指定した識別子のエンティティが存在するかを返す。
    *

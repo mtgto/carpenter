@@ -1,16 +1,19 @@
 package net.mtgto.carpenter.domain
 
 import net.mtgto.carpenter.infrastructure.{UserDao, DatabaseUserDao, Authority => InfraAuthority, User => InfraUser}
-import org.sisioh.dddbase.core.lifecycle.{RepositoryWithEntity, EntityNotFoundException, Repository}
+import org.sisioh.dddbase.core.lifecycle.{ResultWithEntity, EntityNotFoundException}
+import org.sisioh.dddbase.core.lifecycle.sync.{SyncResultWithEntity, SyncRepository}
 import scala.util.Try
 
-trait UserRepository extends Repository[UserRepository, UserId, User] with BaseEntityReader[UserId, User] {
+trait UserRepository extends SyncRepository[UserId, User] with BaseEntityReader[UserId, User] {
   def findByNameAndPassword(name: String, password: String): Option[User]
   def findAll: Seq[User]
 }
 
 object UserRepository {
   def apply(): UserRepository = new UserRepository {
+    type This = UserRepository
+
     private val userDao: UserDao = new DatabaseUserDao
 
     override def findByNameAndPassword(name: String, password: String): Option[User] = {
@@ -44,12 +47,12 @@ object UserRepository {
      *         Failure
      *         RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    def store(entity: User): Try[RepositoryWithEntity[UserRepository, User]] = {
+    def store(entity: User): Try[ResultWithEntity[This, UserId, User, Try]] = {
       Try {
         assert(entity.password.isDefined)
         val infraAuthority = InfraAuthority(canLogin = entity.authority.canLogin, canCreateUser = entity.authority.canCreateUser)
         userDao.save(entity.identity.value.uuid, entity.name, entity.password.get, infraAuthority)
-        RepositoryWithEntity(this, entity)
+        SyncResultWithEntity(this, entity)
       }
     }
 
@@ -62,7 +65,7 @@ object UserRepository {
      *         Failure:
      *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    override def delete(identity: UserId): Try[UserRepository] = {
+    override def delete(identity: UserId): Try[This] = {
       Try {
         if (userDao.delete(identity.value.uuid) == 0) {
           throw new EntityNotFoundException

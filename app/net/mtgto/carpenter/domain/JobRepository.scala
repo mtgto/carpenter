@@ -4,14 +4,15 @@ import net.mtgto.carpenter.domain.vcs._
 import net.mtgto.carpenter.infrastructure.{Job => InfraJob, JobDao, DatabaseJobDao, Project => InfraProject, User => InfraUser, Authority => InfraAuthority}
 import net.mtgto.carpenter.infrastructure.vcs.{Snapshot => InfraSnapshot, SnapshotDao, DatabaseSnapshotDao}
 import org.sisioh.baseunits.scala.time.{Duration, TimePoint}
-import org.sisioh.dddbase.core.lifecycle.{RepositoryWithEntity, Repository, EntityNotFoundException}
+import org.sisioh.dddbase.core.lifecycle.{ResultWithEntity, EntityNotFoundException}
+import org.sisioh.dddbase.core.lifecycle.sync.{SyncResultWithEntity, SyncRepository}
 import scala.util.Try
 import net.mtgto.carpenter.domain.vcs.SubversionSnapshot
 import net.mtgto.carpenter.domain.vcs.Snapshot
 import net.mtgto.carpenter.domain.vcs.GitTagSnapshot
 import net.mtgto.carpenter.domain.vcs.GitBranchSnapshot
 
-trait JobRepository extends Repository[JobRepository, JobId, Job] with BaseEntityReader[JobId, Job] {
+trait JobRepository extends SyncRepository[JobId, Job] with BaseEntityReader[JobId, Job] {
   def findAll: Try[Seq[Job]]
 
   def findAllByProject(project: Project): Try[Seq[Job]]
@@ -23,6 +24,8 @@ trait JobRepository extends Repository[JobRepository, JobId, Job] with BaseEntit
 
 object JobRepository {
   def apply(): JobRepository = new JobRepository {
+    override type This = JobRepository
+
     private val jobDao: JobDao = new DatabaseJobDao
 
     protected[this] val projectRepository: ProjectRepository = ProjectRepository()
@@ -86,7 +89,7 @@ object JobRepository {
      *         Failure
      *         RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    def store(entity: Job): Try[RepositoryWithEntity[JobRepository, Job]] = {
+    def store(entity: Job): Try[ResultWithEntity[This, JobId, Job, Try]] = {
       Try {
         val infraProject = InfraProject(entity.project.identity.uuid, entity.project.name, entity.project.hostname, entity.project.recipe)
         val infraAuthority = InfraAuthority(canLogin = entity.user.authority.canLogin, canCreateUser = entity.user.authority.canCreateUser)
@@ -99,7 +102,7 @@ object JobRepository {
           case snapshot: SubversionSnapshot => (snapshot.name, snapshot.revision.revision.toString, snapshot.branchType.toString)
         }
         snapshotDao.save(entity.identity.uuid, name = snapshotName, revision = snapshotRevision.toString, branchType)
-        RepositoryWithEntity(this, entity)
+        SyncResultWithEntity(this, entity)
       }
     }
 
@@ -112,7 +115,7 @@ object JobRepository {
      *         Failure:
      *          RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
-    override def delete(identity: JobId): Try[JobRepository] = {
+    override def delete(identity: JobId): Try[This] = {
       Try {
         if (jobDao.delete(identity.value.uuid) == 0) {
           throw new EntityNotFoundException
