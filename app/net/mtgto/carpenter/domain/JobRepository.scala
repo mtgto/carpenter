@@ -118,7 +118,7 @@ object JobRepository {
     override def delete(identity: JobId): Try[This] = {
       Try {
         if (jobDao.delete(identity.value.uuid) == 0) {
-          throw new EntityNotFoundException
+          throw new EntityNotFoundException(s"Failed to delete Job which id is ${identity.toString}")
         }
         this
       }

@@ -10,7 +10,7 @@ object ApplicationBuild extends Build {
   val appDependencies = Seq(
     jdbc,
     anorm,
-    "org.sisioh" %% "scala-dddbase-core" % "0.1.19",
+    "org.sisioh" %% "scala-dddbase-core" % "0.1.20",
     "org.sisioh" %% "baseunits-scala" % "0.1.6",
     "org.pircbotx" % "pircbotx" % "1.9"
   )
@@ -33,3 +33,4 @@ object ApplicationBuild extends Build {
   )
 
 }
+
