@@ -113,7 +113,7 @@ object UserController extends Controller with BaseController {
   def changePassword = IsAuthenticated { user => implicit request =>
     changePasswordForm.bindFromRequest.fold(
       formWithErrors =>
-        Redirect(routes.Application.index).flashing("error" -> (Messages("messages.wrong_input"))),
+        Redirect(routes.Application.index).flashing("error" -> Messages("messages.wrong_input")),
       success => success match {
         case (oldPassword, newPassword) =>
           val oldHashedPassword = getHashedPassword(user.name, oldPassword)

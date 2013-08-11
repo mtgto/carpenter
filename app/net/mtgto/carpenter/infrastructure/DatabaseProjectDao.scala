@@ -1,49 +1,55 @@
 package net.mtgto.carpenter.infrastructure
 
-import anorm._
-import anorm.SqlParser._
-import play.api.db.DB
+import play.api.db.slick.Config.driver.simple._
+import play.api.db.slick.DB
 
 import java.util.UUID
 
 class DatabaseProjectDao extends ProjectDao {
   import play.api.Play.current
 
-  protected[this] def convertRowToProject(row: Row): Project = {
-    row match {
-      case Row(id: String, name: String, hostname: String, recipe: java.sql.Clob) =>
-        Project(UUID.fromString(id), name, hostname, recipe.getSubString(1, recipe.length.toInt))
-    }
-  }
+//  protected[this] def convertRowToProject(row: Row): Project = {
+//    row match {
+//      case Row(id: String, name: String, hostname: String, recipe: java.sql.Clob) =>
+//        Project(UUID.fromString(id), name, hostname, recipe.getSubString(1, recipe.length.toInt))
+//    }
+//  }
 
-  override def findById(id: UUID): Option[Project] = {
-    DB.withConnection{ implicit c =>
-      SQL("SELECT `id`, `name`, `hostname`, `recipe` FROM `projects` WHERE `id` = {id}").on("id" -> id.toString)()
-      .headOption.map(convertRowToProject)
+  override def findById(id: String): Option[Project] = {
+    DB.withSession { implicit session =>
+      val query = for {
+        project <- Projects if project.id === id
+      } yield project
+      query.firstOption
     }
   }
 
   override def findAll: Seq[Project] = {
-    DB.withConnection{ implicit c =>
-      SQL("SELECT `id`, `name`, `hostname`, `recipe` FROM `projects`")().map(convertRowToProject).toList
+    DB.withSession { implicit session =>
+      val query = for {
+        project <- Projects
+      } yield project
+      query.list
     }
   }
 
-  override def save(id: UUID, name: String, hostname: String, recipe: String): Unit = {
-    DB.withConnection{ implicit c =>
-      val rowCount =
-        SQL("UPDATE `projects` SET `name` = {name}, `hostname` = {hostname}, `recipe` = {recipe} WHERE `id` = {id}")
-          .on('id -> id.toString, 'name -> name, 'hostname -> hostname, 'recipe -> recipe).executeUpdate()
-      if (rowCount == 0)
-        SQL("INSERT INTO `projects` (`id`, `name`, `hostname`, `recipe`) VALUES ({id},{name},{hostname},{recipe})")
-          .on('id -> id.toString, 'name -> name, 'hostname -> hostname, 'recipe -> recipe).executeInsert()
+  override def save(id: String, name: String, hostname: String, recipe: String) {
+    DB.withSession { implicit session: Session =>
+      val rowCount = Projects.where(_.id === id)
+        .map(p => p.name ~ p.hostname ~ p.recipe)
+        .update((name, hostname, recipe))
+      if (rowCount == 0) {
+        Projects.insert(Project(id, name, hostname, recipe))
+      }
     }
   }
 
-  override def delete(id: UUID): Int = {
-    DB.withConnection{ implicit c =>
-      SQL("DELETE `projects` WHERE `id` = {id}")
-        .on('id -> id.toString).executeUpdate()
+  override def delete(id: String): Int = {
+    DB.withSession { implicit session =>
+      val query = for {
+        project <- Projects if project.id === id
+      } yield project
+      query.delete
     }
   }
 }

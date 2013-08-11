@@ -1,11 +1,12 @@
 package net.mtgto.carpenter.infrastructure
 
 import java.util.UUID
+import net.mtgto.carpenter.infrastructure.vcs.SubversionPath
 
 trait SourceRepositoryDao {
-  def findByProjectId(id: UUID): Option[SourceRepository]
+  def findByProjectId(id: String): Option[(SourceRepository, Seq[SubversionPath])]
 
-  def save(projectId: UUID, sourceRepository: SourceRepository): Unit
+  def save(sourceRepository: SourceRepository, subversionPath: Seq[SubversionPath]): Unit
 
-  def deleteByProjectId(projectId: UUID): Int
+  def deleteByProjectId(projectId: String): Int
 }

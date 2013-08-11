@@ -33,7 +33,7 @@ object ProjectRepository {
      *         RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
     override def resolve(identity: ProjectId): Try[Project] = {
-      Try(projectDao.findById(identity.value.uuid).map(ProjectFactory.apply).getOrElse(throw new EntityNotFoundException))
+      Try(projectDao.findById(identity.uuid.toString).map(ProjectFactory.apply).getOrElse(throw new EntityNotFoundException))
     }
 
     /**
@@ -47,7 +47,7 @@ object ProjectRepository {
      */
     def store(entity: Project): Try[ResultWithEntity[This, ProjectId, Project, Try]] = {
       Try {
-        projectDao.save(entity.identity.uuid, entity.name, entity.hostname, entity.recipe)
+        projectDao.save(entity.identity.uuid.toString, entity.name, entity.hostname, entity.recipe)
         sourceRepositoryService.save(entity.identity, entity.sourceRepository)
         SyncResultWithEntity(this, entity)
       }
@@ -64,7 +64,7 @@ object ProjectRepository {
      */
     override def delete(identity: ProjectId): Try[This] = {
       Try {
-        if (projectDao.delete(identity.value.uuid) == 0) {
+        if (projectDao.delete(identity.uuid.toString) == 0) {
           throw new EntityNotFoundException
         }
         this

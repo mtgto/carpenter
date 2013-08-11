@@ -35,7 +35,7 @@ object UserRepository {
      *         RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
     override def resolve(identity: UserId): Try[User] = {
-      Try(userDao.findById(identity.value.uuid).map(UserFactory.apply).getOrElse(throw new EntityNotFoundException))
+      Try(userDao.findById(identity.uuid.toString).map(UserFactory.apply).getOrElse(throw new EntityNotFoundException))
     }
 
     /**
@@ -50,8 +50,9 @@ object UserRepository {
     def store(entity: User): Try[ResultWithEntity[This, UserId, User, Try]] = {
       Try {
         assert(entity.password.isDefined)
-        val infraAuthority = InfraAuthority(canLogin = entity.authority.canLogin, canCreateUser = entity.authority.canCreateUser)
-        userDao.save(entity.identity.value.uuid, entity.name, entity.password.get, infraAuthority)
+        val infraAuthority = InfraAuthority(entity.identity.uuid.toString, canLogin = entity.authority.canLogin,
+          canCreateUser = entity.authority.canCreateUser)
+        userDao.save(entity.identity.uuid.toString, entity.name, entity.password.get, infraAuthority)
         SyncResultWithEntity(this, entity)
       }
     }
@@ -67,7 +68,7 @@ object UserRepository {
      */
     override def delete(identity: UserId): Try[This] = {
       Try {
-        if (userDao.delete(identity.value.uuid) == 0) {
+        if (userDao.delete(identity.uuid.toString) == 0) {
           throw new EntityNotFoundException
         }
         this

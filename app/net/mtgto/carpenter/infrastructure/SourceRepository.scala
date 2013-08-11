@@ -1,17 +1,15 @@
 package net.mtgto.carpenter.infrastructure
 
-import java.net.URI
-import net.mtgto.carpenter.infrastructure.vcs.SubversionPath
+import java.util.UUID
+import play.api.db.slick.Config.driver.simple._
 
-trait SourceRepository {
-  val software: String
-  val uri: URI
-}
+case class SourceRepository(projectId: String, software: String, url: String)
 
-case class GitSourceRepository(uri: URI) extends SourceRepository {
-  override val software: String = "git"
-}
-
-case class SubversionSourceRepository(uri: URI, paths: Seq[SubversionPath]) extends SourceRepository {
-  override val software: String = "subversion"
+object SourceRepositories extends Table[SourceRepository]("source_repositories") {
+  def projectId = column[String]("project_id", O.NotNull)
+  def software = column[String]("software", O.NotNull)
+  def url = column[String]("url", O.NotNull)
+  def * = projectId ~ software ~ url <> (SourceRepository.apply _, SourceRepository.unapply _)
+  def project = foreignKey("project_id", projectId, Projects)(_.id)
+  def idx = index("project_id", projectId, unique = true)
 }

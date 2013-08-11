@@ -16,8 +16,9 @@ object ProjectFactory extends ProjectFactory {
   }
 
   override def apply(infraProject: InfraProject): Project = {
+    val projectId = ProjectId(UUID.fromString(infraProject.id))
     Project(
-      ProjectId(infraProject.id), infraProject.name, infraProject.hostname,
-      SourceRepositoryService.get(ProjectId(infraProject.id)), infraProject.recipe)
+      projectId, infraProject.name, infraProject.hostname,
+      SourceRepositoryService.get(projectId), infraProject.recipe)
   }
 }

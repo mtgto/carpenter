@@ -5,7 +5,7 @@ import net.mtgto.carpenter.infrastructure.{User => InfraUser, Authority => Infra
 
 trait UserFactory {
   def createUser(name: String, password: String, authority: Authority): User
-  def apply(infraProject: InfraUser): User
+  def apply(infraUserWithAuthority: (InfraUser, InfraAuthority)): User
 }
 
 object UserFactory extends UserFactory {
@@ -13,8 +13,9 @@ object UserFactory extends UserFactory {
     User(UserId(UUID.randomUUID), name, Some(password), authority)
   }
 
-  override def apply(infraUser: InfraUser): User = {
-    User(UserId(infraUser.id), infraUser.name, None, convertInfraAuthorityToDomain(infraUser.authority))
+  override def apply(infraUserWithAuthority: (InfraUser, InfraAuthority)): User = {
+    val (infraUser, infraAuthority) = infraUserWithAuthority
+    User(UserId(UUID.fromString(infraUser.id)), infraUser.name, None, convertInfraAuthorityToDomain(infraAuthority))
   }
 
   protected[this] def convertInfraAuthorityToDomain(infraAuthority: InfraAuthority): Authority = {

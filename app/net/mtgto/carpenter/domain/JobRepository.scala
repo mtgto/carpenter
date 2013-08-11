@@ -11,6 +11,8 @@ import net.mtgto.carpenter.domain.vcs.SubversionSnapshot
 import net.mtgto.carpenter.domain.vcs.Snapshot
 import net.mtgto.carpenter.domain.vcs.GitTagSnapshot
 import net.mtgto.carpenter.domain.vcs.GitBranchSnapshot
+import java.sql.Date
+import java.util.UUID
 
 trait JobRepository extends SyncRepository[JobId, Job] with BaseEntityReader[JobId, Job] {
   def findAll: Try[Seq[Job]]
@@ -46,7 +48,7 @@ object JobRepository {
 
     override def findAllByProject(project: Project): Try[Seq[Job]] = {
       Try {
-        jobDao.findAllByProject(project.identity.uuid).map {
+        jobDao.findAllByProject(project.identity.uuid.toString).map {
           convertInfraToDomain(_).get
         }
       }
@@ -54,7 +56,7 @@ object JobRepository {
 
     override def findAllByProjectOrderByTimePointDesc(project: Project): Try[Seq[Job]] = {
       Try {
-        jobDao.findAllByProjectOrderByDateDesc(project.identity.uuid).map {
+        jobDao.findAllByProjectOrderByDateDesc(project.identity.uuid.toString).map {
           convertInfraToDomain(_).get
         }
       }
@@ -62,7 +64,7 @@ object JobRepository {
 
     override def findAllByUser(user: User): Try[Seq[Job]] = {
       Try {
-        jobDao.findAllByUser(user.identity.value.uuid).map(convertInfraToDomain(_).get)
+        jobDao.findAllByUser(user.identity.uuid.toString).map(convertInfraToDomain(_).get)
       }
     }
 
@@ -77,7 +79,7 @@ object JobRepository {
      *         RepositoryExceptionは、リポジトリにアクセスできなかった場合。
      */
     override def resolve(identity: JobId): Try[Job] = {
-      jobDao.findById(identity.value.uuid).map(convertInfraToDomain).getOrElse(throw new EntityNotFoundException)
+      jobDao.findById(identity.uuid.toString).map(convertInfraToDomain).getOrElse(throw new EntityNotFoundException)
     }
 
     /**
@@ -91,17 +93,15 @@ object JobRepository {
      */
     def store(entity: Job): Try[ResultWithEntity[This, JobId, Job, Try]] = {
       Try {
-        val infraProject = InfraProject(entity.project.identity.uuid, entity.project.name, entity.project.hostname, entity.project.recipe)
-        val infraAuthority = InfraAuthority(canLogin = entity.user.authority.canLogin, canCreateUser = entity.user.authority.canCreateUser)
-        val infraUser = InfraUser(entity.user.identity.uuid, entity.user.name, infraAuthority)
-        jobDao.save(InfraJob(entity.identity.uuid, infraProject, infraUser,
-          entity.taskName, entity.exitCode, entity.log, entity.executeTimePoint.asJavaUtilDate, entity.executeDuration.map(_.quantity)))
+        jobDao.save(InfraJob(entity.identity.uuid.toString, entity.project.identity.uuid.toString, entity.user.identity.uuid.toString,
+          entity.taskName, entity.exitCode, entity.log, new Date(entity.executeTimePoint.asJavaUtilDate.getTime),
+          entity.executeDuration.map(_.quantity)))
         val (snapshotName, snapshotRevision, branchType) = entity.snapshot match {
           case snapshot: GitBranchSnapshot => (snapshot.name, snapshot.revision, "branch")
           case snapshot: GitTagSnapshot => (snapshot.name, snapshot.revision, "tag")
           case snapshot: SubversionSnapshot => (snapshot.name, snapshot.revision.revision.toString, snapshot.branchType.toString)
         }
-        snapshotDao.save(entity.identity.uuid, name = snapshotName, revision = snapshotRevision.toString, branchType)
+        snapshotDao.save(entity.identity.uuid.toString, name = snapshotName, revision = snapshotRevision.toString, branchType)
         SyncResultWithEntity(this, entity)
       }
     }
@@ -117,26 +117,26 @@ object JobRepository {
      */
     override def delete(identity: JobId): Try[This] = {
       Try {
-        if (jobDao.delete(identity.value.uuid) == 0) {
-          throw new EntityNotFoundException(s"Failed to delete Job which id is ${identity.toString}")
+        if (jobDao.delete(identity.uuid.toString) == 0) {
+          throw new EntityNotFoundException(Some(s"Failed to delete Job which id is ${identity.toString}"))
         }
         this
       }
     }
 
-    protected[this] def convertInfraToDomain(infraJob: InfraJob): Try[Job] = {
-      val project = ProjectFactory(infraJob.project)
-      val user = UserFactory(infraJob.user)
+    protected[this] def convertInfraToDomain(jobAndProjectAndUserWithAuthority: (InfraJob, InfraProject, (InfraUser, InfraAuthority))): Try[Job] = {
+      val (infraJob, infraProject, (infraUser, infraAuthority)) = jobAndProjectAndUserWithAuthority
+      val project = ProjectFactory(infraProject)
+      val user = UserFactory((infraUser, infraAuthority))
       convertInfraSnapshotToDomain(project.sourceRepository, snapshotDao.findByJobId(infraJob.id).get).map { snapshot =>
         (infraJob.exitCode, infraJob.log, infraJob.executeDuration) match {
           case (Some(exitCode), Some(log), Some(executeDuration)) =>
-            Job(JobId(infraJob.id), project, user, snapshot, infraJob.task, exitCode, log,
-              TimePoint.from(infraJob.executeDate), Duration.milliseconds(executeDuration))
+            Job(JobId(UUID.fromString(infraJob.id)), project, user, snapshot, infraJob.task, exitCode, log,
+              TimePoint.from(infraJob.executeTime), Duration.milliseconds(executeDuration))
           case _ =>
-            Job(JobId(infraJob.id), project, user, snapshot, infraJob.task,
-              TimePoint.from(infraJob.executeDate))
+            Job(JobId(UUID.fromString(infraJob.id)), project, user, snapshot, infraJob.task,
+              TimePoint.from(infraJob.executeTime))
         }
-
       }
     }
 

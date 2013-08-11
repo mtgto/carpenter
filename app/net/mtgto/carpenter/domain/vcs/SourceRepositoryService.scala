@@ -1,9 +1,9 @@
 package net.mtgto.carpenter.domain.vcs
 
 import java.net.URI
-import net.mtgto.carpenter.domain.{ProjectId}
+import net.mtgto.carpenter.domain.ProjectId
 import net.mtgto.carpenter.infrastructure.vcs.{GitService, GitRevision => InfraGitRevision, SubversionRevision => InfraSubversionRevision, SubversionService, SubversionPath => InfraSubversionPath}
-import net.mtgto.carpenter.infrastructure.{SourceRepository => InfraSourceRepository, SourceRepositoryDao, DatabaseSourceRepositoryDao, GitSourceRepository => InfraGitSourceRepository, SubversionSourceRepository => InfraSubversionSourceRepository}
+import net.mtgto.carpenter.infrastructure.{SourceRepository => InfraSourceRepository, SourceRepositoryDao, DatabaseSourceRepositoryDao}
 import scala.util.Try
 import org.sisioh.dddbase.core.lifecycle.EntityNotFoundException
 
@@ -24,28 +24,30 @@ object SourceRepositoryService extends SourceRepositoryService {
   private val gitService: GitService = new GitService
 
   override def get(projectId: ProjectId): SourceRepository = {
-    val infraSourceRepository = sourceRepositoryDao.findByProjectId(projectId.uuid)
-    infraSourceRepository match {
-      case Some(infraSourceRepository: InfraGitSourceRepository) =>
-        GitSourceRepository(infraSourceRepository.uri)
-      case Some(infraSourceRepository: InfraSubversionSourceRepository) =>
-        SubversionSourceRepository(infraSourceRepository.uri, infraSourceRepository.paths.map(convertInfraSubversionPathToDomain))
+    sourceRepositoryDao.findByProjectId(projectId.uuid.toString) match {
+      case Some((infraSourceRepository, paths)) =>
+        if (infraSourceRepository.software == "git")
+          GitSourceRepository(new URI(infraSourceRepository.url))
+        else
+          SubversionSourceRepository(new URI(infraSourceRepository.url), paths.map(convertInfraSubversionPathToDomain))
       case _ => throw new EntityNotFoundException
     }
   }
 
   override def save(projectId: ProjectId, sourceRepository: SourceRepository): Unit = {
-    val infraSourceRepository = sourceRepository match {
+    val (infraSourceRepository, paths) = sourceRepository match {
       case sourceRepository: GitSourceRepository =>
-        InfraGitSourceRepository(sourceRepository.uri)
+        (InfraSourceRepository(projectId.value.uuid.toString, "git", sourceRepository.uri.toString),
+          Seq.empty[InfraSubversionPath])
       case sourceRepository: SubversionSourceRepository =>
-        InfraSubversionSourceRepository(sourceRepository.uri, sourceRepository.paths.map(convertSubversionPathToInfra))
+        (InfraSourceRepository(projectId.value.uuid.toString, "subversion", sourceRepository.uri.toString),
+          sourceRepository.paths.map(path => convertSubversionPathToInfra(projectId, path)))
     }
-    sourceRepositoryDao.save(projectId.uuid, infraSourceRepository)
+    sourceRepositoryDao.save(infraSourceRepository, paths)
   }
 
   override def delete(projectId: ProjectId): Boolean = {
-    sourceRepositoryDao.deleteByProjectId(projectId.uuid) == 1
+    sourceRepositoryDao.deleteByProjectId(projectId.uuid.toString) == 1
   }
 
   override def resolveSourceRepositoryType(software: String): SourceRepositoryType.Value = {
@@ -104,10 +106,10 @@ object SourceRepositoryService extends SourceRepositoryService {
     SubversionPath(pathType, path.path)
   }
 
-  protected[this] def convertSubversionPathToInfra(path: SubversionPath): InfraSubversionPath = {
+  protected[this] def convertSubversionPathToInfra(projectId: ProjectId, path: SubversionPath): InfraSubversionPath = {
     path.pathType match {
-      case SubversionPathType.Parent => InfraSubversionPath(path.name, true)
-      case SubversionPathType.Child => InfraSubversionPath(path.name, false)
+      case SubversionPathType.Parent => InfraSubversionPath(projectId.uuid.toString, path.name, true)
+      case SubversionPathType.Child => InfraSubversionPath(projectId.uuid.toString, path.name, false)
     }
   }
 }
