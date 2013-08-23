@@ -12,7 +12,7 @@ class DatabaseUserDao extends UserDao {
     DB.withSession { implicit session =>
       val query = for {
         user <- Users if user.id === id
-        authority <- Authorities if authority.userId === id
+        authority <- Authorities if authority.userId === user.id
       } yield (user, authority)
       query.firstOption
     }
@@ -41,14 +41,10 @@ class DatabaseUserDao extends UserDao {
   override def save(id: String, name: String, password: String, authority: Authority): Unit = {
     DB.withTransaction { implicit session: Session =>
       val query = Query(Users).where(_.id === id)
-    try {
       val rowCount = query.map(user => user.name ~ user.password).update((name, password))
       if (rowCount == 0) {
         Users.insert(User(id, name, password))
       }
-    } catch {
-      case e: Throwable => println(e.printStackTrace())
-    }
       val subQuery = Authorities.where(_.userId === id)
       val subRowCount = subQuery.map(authority => authority.canLogin ~ authority.canCreateUser)
       .update((authority.canLogin, authority.canCreateUser))

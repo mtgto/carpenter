@@ -1,53 +1,52 @@
 package net.mtgto.carpenter.infrastructure
 
-import anorm._
 import java.util.UUID
 import play.api.test.WithApplication
 import org.specs2.execute.{AsResult, Result}
 import org.specs2.mutable.Specification
-import play.api.db.DB
+import play.api.db.slick.Config.driver.simple._
+import play.api.db.slick.DB
 
 class DatabaseUserDaoSpec extends Specification {
-  trait Setup extends WithApplication {
-    override def around[T: AsResult](t: => T): Result = super.around {
+  abstract class Setup extends WithApplication {
+    override def around[T](t : => T)(implicit evidence : AsResult[T]): Result = super.around {
       // do something
       prepareDatabase
       t
     }
 
-    val databaseUserDao: DatabaseUserDao = new DatabaseUserDao
+    lazy val databaseUserDao: DatabaseUserDao = new DatabaseUserDao
 
-    val testId: UUID = UUID.randomUUID
+    lazy val testId: UUID = UUID.randomUUID
 
-    val testNoExistId: UUID = UUID.randomUUID
+    lazy val testNoExistId: UUID = UUID.randomUUID
 
-    val testName = "test-user"
+    lazy val testName = "test-user"
 
-    val testPassword = "test-password"
+    lazy val testPassword = "test-password"
 
-    val testCanLogin = true
+    lazy val testCanLogin = true
 
-    val testCanCreateUser = true
+    lazy val testCanCreateUser = true
 
     def prepareDatabase = {
-      DB.withTransaction{ implicit c =>
-        SQL("INSERT INTO `users` (`id`, `name`, `password`) VALUES ({id},{name},{password})")
-          .on('id -> testId.toString, 'name -> testName, 'password -> testPassword).executeInsert()
-        SQL("INSERT INTO `authorities` (`user_id`, `can_login`, `can_create_user`) VALUES ({userId},{canLogin},{canCreateUser})")
-          .on('userId -> testId.toString, 'canLogin -> testCanLogin, 'canCreateUser -> testCanCreateUser).executeInsert()
+      DB.withTransaction{ implicit session: Session =>
+        Users.insert(User(testId.toString, testName, testPassword))
+        Authorities.insert(Authority(testId.toString, testCanLogin, testCanCreateUser))
       }
     }
   }
 
   "findById" should {
     "get None if there is no user which has specified id" in new Setup {
-      databaseUserDao.findById(testNoExistId) must beNone
+      databaseUserDao.findById(testNoExistId.toString) must beNone
     }
 
     "get one user record if there is one which has specified id" in new Setup {
-      databaseUserDao.findById(testId) must beSome.which( user =>
-        user.id == testId && user.name == testName && user.authority.canLogin == testCanLogin && user.authority.canCreateUser == testCanCreateUser
-      )
+      databaseUserDao.findById(testId.toString) must beSome.which {
+        case (user, authority) =>
+          user.id == testId.toString && user.name == testName && authority.canLogin == testCanLogin && authority.canCreateUser == testCanCreateUser
+        }
     }
   }
 
@@ -58,9 +57,10 @@ class DatabaseUserDaoSpec extends Specification {
     }
 
     "get one user record if there is one which has specified name and password" in new Setup {
-      databaseUserDao.findByNameAndPassword(testName, testPassword) must beSome.which( user =>
-        user.id == testId && user.name == testName && user.authority.canLogin == testCanLogin && user.authority.canCreateUser == testCanCreateUser
-      )
+      databaseUserDao.findByNameAndPassword(testName, testPassword) must beSome.which {
+        case (user, authority) =>
+          user.name == testName && authority.canLogin == testCanLogin && authority.canCreateUser == testCanCreateUser
+      }
     }
   }
 }
