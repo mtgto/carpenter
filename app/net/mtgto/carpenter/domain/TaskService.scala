@@ -29,7 +29,7 @@ class DefaultTaskService(workspacePath: String) extends TaskService {
     val file = new java.io.File(projectDirectory, "Capfile")
     val writer = new java.io.PrintWriter(file)
     writer.print(project.recipe)
-    writer.close
+    writer.close()
   }
 
   override def getAllTasks(project: Project): Seq[Task] = {
@@ -62,11 +62,11 @@ class DefaultTaskService(workspacePath: String) extends TaskService {
           }, line => {
             errorBuilder ++= line
             errorBuilder ++= System.lineSeparator
-            LogBroadcastService.broadcast(job, errorBuilder.toString)
+            LogBroadcastService.broadcast(job, errorBuilder.toString())
           }))
-      val exitCode = process.exitValue
+      val exitCode = process.exitValue()
       val executeDuration = Duration.milliseconds(Clock.now.breachEncapsulationOfMillisecondsFromEpoc - startTimePoint.breachEncapsulationOfMillisecondsFromEpoc)
-      (exitCode, errorBuilder.toString, startTimePoint, executeDuration)
+      (exitCode, errorBuilder.toString(), startTimePoint, executeDuration)
     }
   }
 

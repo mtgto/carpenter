@@ -108,8 +108,8 @@ object SourceRepositoryService extends SourceRepositoryService {
 
   protected[this] def convertSubversionPathToInfra(projectId: ProjectId, path: SubversionPath): InfraSubversionPath = {
     path.pathType match {
-      case SubversionPathType.Parent => InfraSubversionPath(projectId.uuid.toString, path.name, true)
-      case SubversionPathType.Child => InfraSubversionPath(projectId.uuid.toString, path.name, false)
+      case SubversionPathType.Parent => InfraSubversionPath(projectId.uuid.toString, path.name, isDirectory = true)
+      case SubversionPathType.Child => InfraSubversionPath(projectId.uuid.toString, path.name, isDirectory = false)
     }
   }
 }

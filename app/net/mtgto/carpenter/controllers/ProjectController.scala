@@ -188,11 +188,11 @@ object ProjectController extends Controller with BaseController {
     executeForm.bindFromRequest.fold(
       formWithErrors => BadRequest(Json.obj("status" -> "fail")),
       success => success match {
-        case (branchTypeString, branchName, tagName) => {
+        case (branchTypeString, branchNameOption, tagName) => {
           getProjectByIdString(id) match {
             case Success(project) =>
-              val (branchType, snapshotBranchName) = (project.sourceRepository.sourceRepositoryType, branchTypeString, branchName) match {
-                case (SourceRepositoryType.Git, "branch", _) => (BranchType.Branch, branchName.get)
+              val (branchType, snapshotBranchName) = (project.sourceRepository.sourceRepositoryType, branchTypeString, branchNameOption) match {
+                case (SourceRepositoryType.Git, "branch", _) => (BranchType.Branch, branchNameOption.get)
                 case (SourceRepositoryType.Git, "tag", _) => (BranchType.Tag, tagName.get)
                 case (SourceRepositoryType.Subversion, _, None) => (BranchType.Branch, branchTypeString)
                 case (SourceRepositoryType.Subversion, _, Some(branchName)) => (BranchType.Branch, branchName)

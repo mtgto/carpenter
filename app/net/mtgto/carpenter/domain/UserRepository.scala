@@ -74,7 +74,5 @@ object UserRepository {
         this
       }
     }
-
-    override def contains(identity: UserId): Try[Boolean] = ???
   }
 }
