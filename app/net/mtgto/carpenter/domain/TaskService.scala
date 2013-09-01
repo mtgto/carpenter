@@ -18,7 +18,7 @@ trait TaskService {
 
 class DefaultTaskService(workspacePath: String) extends TaskService {
   protected[this] def getProjectWorkspace(project: Project): java.io.File = {
-    new java.io.File(workspacePath, project.identity.value.uuid.toString)
+    new java.io.File(workspacePath, project.identity.value.toString)
   }
 
   protected[this] def createProjectWorkspace(project: Project): Unit = {

@@ -5,7 +5,7 @@
   net.mtgto.carpenter.controllers.routes.javascript.ProjectController.executeTask
 )
 <script>
-var projectId = '@project.identity.value.uuid.toString';
+var projectId = '@project.identity.value.toString';
 var taskName = '@taskName';
 </script>
 }
@@ -44,7 +44,7 @@ var taskName = '@taskName';
   </section>
   <section>
     <h3>@Messages("views.projects.execute.choose_branch_tag")</h3>
-    @helper.form(action = net.mtgto.carpenter.controllers.routes.ProjectController.executeTask(project.identity.value.uuid.toString, taskName), 'class -> "form-horizontal") {
+    @helper.form(action = net.mtgto.carpenter.controllers.routes.ProjectController.executeTask(project.identity.value.toString, taskName), 'class -> "form-horizontal") {
     <label class="radio">
       <input type="radio" name="branchType" id="branch" value="branch" checked />
         @Messages("views.projects.execute.choose_branch")
@@ -71,7 +71,7 @@ var taskName = '@taskName';
       <h3>IRC notification</h3>
         TODO
     </section>
-    <a class="btn btn-large" href="@net.mtgto.carpenter.controllers.routes.ProjectController.showProjectView(project.identity.value.uuid.toString)">@Messages("views.back")</a>
+    <a class="btn btn-large" href="@net.mtgto.carpenter.controllers.routes.ProjectController.showProjectView(project.identity.value.toString)">@Messages("views.back")</a>
     <button class="btn-large btn-primary run_task" type="submit">@Messages("views.projects.run")</button>
     <section>
       <h3>@Messages("views.projects.index.log")</h3>

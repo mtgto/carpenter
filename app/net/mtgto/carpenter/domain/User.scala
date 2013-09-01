@@ -3,8 +3,8 @@ package net.mtgto.carpenter.domain
 import java.util.UUID
 import org.sisioh.dddbase.core.model.{Identity, Entity}
 
-case class UserId(uuid: UUID) extends Identity[UserId] {
-  override def value = this
+case class UserId(uuid: UUID) extends Identity[UUID] {
+  override def value = uuid
 }
 
 /**

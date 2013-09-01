@@ -4,8 +4,8 @@ import java.util.UUID
 import org.sisioh.dddbase.core.model.{Identity, Entity}
 import net.mtgto.carpenter.domain.vcs.SourceRepository
 
-case class ProjectId(uuid: UUID) extends Identity[ProjectId] {
-  override def value = this
+case class ProjectId(uuid: UUID) extends Identity[UUID] {
+  override def value = uuid
 }
 
 /**

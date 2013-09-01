@@ -83,7 +83,7 @@ object UserController extends Controller with BaseController {
         }
         user match {
           case Some(user) => 
-            Redirect(routes.Application.index).withSession("userId" -> user.identity.value.uuid.toString)
+            Redirect(routes.Application.index).withSession("userId" -> user.identity.value.toString)
           case None =>
             Redirect(routes.UserController.login).flashing("error" -> Messages("messages.wrong_name_or_password"))
         }
@@ -119,7 +119,7 @@ object UserController extends Controller with BaseController {
           val oldHashedPassword = getHashedPassword(user.name, oldPassword)
           userRepository.findByNameAndPassword(user.name, oldHashedPassword) match {
             case Some(user) =>
-              userRepository.store(User(user.identity.value, user.name, Some(getHashedPassword(user.name, newPassword)), user.authority))
+              userRepository.store(User(user.identity, user.name, Some(getHashedPassword(user.name, newPassword)), user.authority))
               Redirect(routes.Application.index).flashing("success" -> Messages("messages.users.changed_password"))
             case _ =>
               Redirect(routes.Application.index).flashing("error" -> Messages("messages.wrong_password"))

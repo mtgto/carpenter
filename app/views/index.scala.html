@@ -36,7 +36,7 @@
             <tr>
               <td>@tags.project(project)</td>
               <td>@project.hostname</td>
-              <td><a href="@net.mtgto.carpenter.controllers.routes.ProjectController.edit(project.identity.value.uuid.toString)">@Messages("views.edit")</a></td>
+              <td><a href="@net.mtgto.carpenter.controllers.routes.ProjectController.edit(project.identity.value.toString)">@Messages("views.edit")</a></td>
             </tr>
           }
         </tbody>

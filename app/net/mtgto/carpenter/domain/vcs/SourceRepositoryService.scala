@@ -37,10 +37,10 @@ object SourceRepositoryService extends SourceRepositoryService {
   override def save(projectId: ProjectId, sourceRepository: SourceRepository): Unit = {
     val (infraSourceRepository, paths) = sourceRepository match {
       case sourceRepository: GitSourceRepository =>
-        (InfraSourceRepository(projectId.value.uuid.toString, "git", sourceRepository.uri.toString),
+        (InfraSourceRepository(projectId.value.toString, "git", sourceRepository.uri.toString),
           Seq.empty[InfraSubversionPath])
       case sourceRepository: SubversionSourceRepository =>
-        (InfraSourceRepository(projectId.value.uuid.toString, "subversion", sourceRepository.uri.toString),
+        (InfraSourceRepository(projectId.value.toString, "subversion", sourceRepository.uri.toString),
           sourceRepository.paths.map(path => convertSubversionPathToInfra(projectId, path)))
     }
     sourceRepositoryDao.save(infraSourceRepository, paths)
