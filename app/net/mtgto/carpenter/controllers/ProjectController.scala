@@ -148,8 +148,11 @@ object ProjectController extends Controller with BaseController {
     }
     getProjectByIdString(id) match {
       case Success(project) => {
-        val tasks = taskService.getAllTasks(project)
-        Ok(Json.obj("status" -> "ok", "tasks" -> Json.toJson(tasks)))
+        Async {
+          taskService.getAllTasks(project).map { tasks =>
+            Ok(Json.obj("status" -> "ok", "tasks" -> Json.toJson(tasks)))
+          }
+        }
       }
       case _ =>
         BadRequest(Json.obj("status" -> "fail"))

@@ -9,7 +9,14 @@ import scala.sys.process.{Process, ProcessLogger}
 import net.mtgto.carpenter.domain.vcs.{SubversionPathType, SubversionPath, BranchType, SourceRepositoryType}
 
 trait TaskService {
-  def getAllTasks(project: Project): Seq[Task]
+  /**
+   * Retrieve all tasks of project.
+   *
+   * @param project the target to retrieve tasks
+   * @return When succeeded to retrieve project tasks, returns it.
+   *         Or else, return exit code and error message.
+   */
+  def getAllTasks(project: Project): Future[Seq[Task]]
   def execute(job: Job, project: Project, taskName: String, repositoryUri: URI, branchType: BranchType.Value, branchName: String): Future[(Int, String, TimePoint, Duration)]
   def getAllBranches(project: Project): Future[Seq[String]]
   def getAllTags(project: Project): Future[Seq[String]]
@@ -32,21 +39,41 @@ class DefaultTaskService(workspacePath: String) extends TaskService {
     writer.close()
   }
 
-  override def getAllTasks(project: Project): Seq[Task] = {
-    createProjectWorkspace(project)
-    val process: String = Process("cap -vT", getProjectWorkspace(project)).!!
-    process.split("\n").withFilter(_.contains("#")).map{ line =>
-      val index = line.lastIndexOf("#")
-      val (name, description) = line.splitAt(index)
-      Task(name.trim.stripPrefix("cap "), description.stripPrefix("#").trim)
+  /**
+   * Execute the external command and return the tuple of exit code, standard output and standard error.
+   */
+  protected[this] def executeProcessBuilder(processBuilder: scala.sys.process.ProcessBuilder): (Int, String, String) = {
+    val outputBuilder = new StringBuilder
+    val errorBuilder = new StringBuilder
+    val process = processBuilder.run(ProcessLogger(
+      line => {
+        outputBuilder ++= line + System.lineSeparator
+      }, line => {
+        errorBuilder ++= line + System.lineSeparator
+      })
+    )
+    (process.exitValue(), outputBuilder.toString(), errorBuilder.toString())
+  }
+
+  override def getAllTasks(project: Project): Future[Seq[Task]] = {
+    future {
+      createProjectWorkspace(project)
+      val (exitCode, output, error) = executeProcessBuilder(Process("cap -vT", getProjectWorkspace(project)))
+      if (exitCode == 0) {
+        output.split(System.lineSeparator).withFilter(_.contains("#")).map{ line =>
+          val index = line.lastIndexOf("#")
+          val (name, description) = line.splitAt(index)
+          Task(name.trim.stripPrefix("cap "), description.stripPrefix("#").trim)
+        }
+      } else {
+        throw new RuntimeException(s"Nonzero exit value: $exitCode, error: $error")
+      }
     }
   }
 
   override def execute(job: Job, project: Project, taskName: String, repositoryUri: URI, branchType: BranchType.Value, branchName: String): Future[(Int, String, TimePoint, Duration)] = {
     createProjectWorkspace(project)
     future {
-      val outputBuilder = new StringBuilder
-      val errorBuilder = new StringBuilder
       val startTimePoint = Clock.now
       val repositoryParams = project.sourceRepository.sourceRepositoryType match {
         case SourceRepositoryType.Subversion =>
@@ -54,19 +81,11 @@ class DefaultTaskService(workspacePath: String) extends TaskService {
         case SourceRepositoryType.Git =>
           Seq("--set", "scm=git", "--set", s"repository=${repositoryUri.toString}", "--set", s"branch=$branchName")
       }
-      val process: Process = Process(Seq("cap", taskName, "HOSTS="+project.hostname) ++ repositoryParams, getProjectWorkspace(project)).run(
-        ProcessLogger(
-          line => {
-            outputBuilder ++= line
-            outputBuilder ++= System.lineSeparator
-          }, line => {
-            errorBuilder ++= line
-            errorBuilder ++= System.lineSeparator
-            LogBroadcastService.broadcast(job, errorBuilder.toString())
-          }))
-      val exitCode = process.exitValue()
+      val (exitCode, _, errorOutput) =
+        executeProcessBuilder(
+          Process(Seq("cap", taskName, "HOSTS="+project.hostname) ++ repositoryParams, getProjectWorkspace(project)))
       val executeDuration = Duration.milliseconds(Clock.now.breachEncapsulationOfMillisecondsFromEpoc - startTimePoint.breachEncapsulationOfMillisecondsFromEpoc)
-      (exitCode, errorBuilder.toString(), startTimePoint, executeDuration)
+      (exitCode, errorOutput, startTimePoint, executeDuration)
     }
   }
 
