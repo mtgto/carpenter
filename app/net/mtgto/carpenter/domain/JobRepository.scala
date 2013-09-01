@@ -1,18 +1,13 @@
 package net.mtgto.carpenter.domain
 
+import java.util.UUID
 import net.mtgto.carpenter.domain.vcs._
 import net.mtgto.carpenter.infrastructure.{Job => InfraJob, JobDao, DatabaseJobDao, Project => InfraProject, User => InfraUser, Authority => InfraAuthority}
 import net.mtgto.carpenter.infrastructure.vcs.{Snapshot => InfraSnapshot, SnapshotDao, DatabaseSnapshotDao}
-import org.sisioh.baseunits.scala.time.{Duration, TimePoint}
+import org.sisioh.baseunits.scala.time.Duration
 import org.sisioh.dddbase.core.lifecycle.{ResultWithEntity, EntityNotFoundException}
 import org.sisioh.dddbase.core.lifecycle.sync.{SyncResultWithEntity, SyncRepository}
 import scala.util.Try
-import net.mtgto.carpenter.domain.vcs.SubversionSnapshot
-import net.mtgto.carpenter.domain.vcs.Snapshot
-import net.mtgto.carpenter.domain.vcs.GitTagSnapshot
-import net.mtgto.carpenter.domain.vcs.GitBranchSnapshot
-import java.sql.Date
-import java.util.UUID
 
 trait JobRepository extends SyncRepository[JobId, Job] with BaseEntityReader[JobId, Job] {
   def findAll: Try[Seq[Job]]
@@ -94,7 +89,7 @@ object JobRepository {
     def store(entity: Job): Try[ResultWithEntity[This, JobId, Job, Try]] = {
       Try {
         jobDao.save(InfraJob(entity.identity.uuid.toString, entity.project.identity.uuid.toString, entity.user.identity.uuid.toString,
-          entity.taskName, entity.exitCode, entity.log, new Date(entity.executeTimePoint.asJavaUtilDate.getTime),
+          entity.taskName, entity.exitCode, entity.log, entity.executeTimePoint,
           entity.executeDuration.map(_.quantity)))
         val (snapshotName, snapshotRevision, branchType) = entity.snapshot match {
           case snapshot: GitBranchSnapshot => (snapshot.name, snapshot.revision, "branch")
@@ -132,10 +127,10 @@ object JobRepository {
         (infraJob.exitCode, infraJob.log, infraJob.executeDuration) match {
           case (Some(exitCode), Some(log), Some(executeDuration)) =>
             Job(JobId(UUID.fromString(infraJob.id)), project, user, snapshot, infraJob.task, exitCode, log,
-              TimePoint.from(infraJob.executeTime), Duration.milliseconds(executeDuration))
+              infraJob.executeTime, Duration.milliseconds(executeDuration))
           case _ =>
             Job(JobId(UUID.fromString(infraJob.id)), project, user, snapshot, infraJob.task,
-              TimePoint.from(infraJob.executeTime))
+              infraJob.executeTime)
         }
       }
     }

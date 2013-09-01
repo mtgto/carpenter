@@ -1,11 +1,12 @@
 package net.mtgto.carpenter.infrastructure
 
 import java.util.UUID
-import java.sql.Date
 import play.api.db.slick.Config.driver.simple._
+import org.sisioh.baseunits.scala.time.TimePoint
+import net.mtgto.carpenter.infrastructure.slick.TimePointMapper._
 
 case class Job(id: String, projectId: String, userId: String, task: String, exitCode: Option[Int],
-               log: Option[String], executeTime: Date, executeDuration: Option[Long])
+               log: Option[String], executeTime: TimePoint, executeDuration: Option[Long])
 
 object Jobs extends Table[Job]("jobs") {
   def id = column[String]("id", O.PrimaryKey)
@@ -14,7 +15,7 @@ object Jobs extends Table[Job]("jobs") {
   def task = column[String]("task", O.NotNull)
   def exitCode = column[Option[Int]]("exit_code", O.Nullable)
   def log = column[Option[String]]("log", O.Nullable)
-  def executeTime = column[Date]("execute_time", O.NotNull)
+  def executeTime = column[TimePoint]("execute_time", O.NotNull)
   def executeDuration = column[Option[Long]]("execute_duration", O.Nullable)
   def * = id ~ projectId ~ userId ~ task ~ exitCode ~ log ~ executeTime ~ executeDuration <> (Job.apply _, Job.unapply _)
   def project = Projects.where(_.id === projectId)
