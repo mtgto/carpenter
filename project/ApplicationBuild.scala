@@ -9,7 +9,6 @@ object ApplicationBuild extends Build {
 
   val appDependencies = Seq(
     jdbc,
-    "com.typesafe.play" %% "play-slick" % "0.4.0",
     "org.sisioh" %% "scala-dddbase-core" % "0.1.20",
     "org.sisioh" %% "baseunits-scala" % "0.1.6",
     "org.pircbotx" % "pircbotx" % "1.9"
@@ -29,7 +28,8 @@ object ApplicationBuild extends Build {
                       "Sisioh Scala Toolbox Release Repository" at "http://sisioh.github.io/scala-toolbox/repos/release/"),
     templatesImport ++= Seq("views.html.helper._", "net.mtgto.carpenter.controllers.Application.fieldConstructor", "play.api.i18n.Messages"),
     lessEntryPoints <<= baseDirectory(customLessEntryPoints)
-  )
+  ).dependsOn(RootProject( uri("git://github.com/freekh/play-slick.git") ))
+
 
 }
 
