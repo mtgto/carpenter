@@ -20,12 +20,12 @@ trait Secured {
 
   private def onUnauthorized(request: RequestHeader) = Results.Redirect(routes.UserController.login)
 
-  def IsAuthenticated(f: => User => Request[AnyContent] => Result) = Security.Authenticated(getUser, onUnauthorized) { user =>
+  def IsAuthenticated(f: => User => Request[AnyContent] => SimpleResult) = Security.Authenticated(getUser, onUnauthorized) { user =>
     Action(request => f(user)(request))
   }
 
-  def IsAuthenticated[A](bodyParser: BodyParser[A])(f: => User => Request[A] => Result) = Security.Authenticated(getUser, onUnauthorized) { user =>
-    Action(bodyParser)(request => f(user)(request))
+  def IsAuthenticatedAsync(f: => User => Request[AnyContent] => Future[SimpleResult]) = Security.Authenticated(getUser, onUnauthorized) { user =>
+    Action.async(request => f(user)(request))
   }
 
   def IsAuthenticatedWS[A](f: => User => RequestHeader => Future[(Iteratee[A, _], Enumerator[A])])(implicit frameFormatter: FrameFormatter[A]) = {

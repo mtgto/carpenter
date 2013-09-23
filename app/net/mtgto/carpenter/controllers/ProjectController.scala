@@ -13,6 +13,7 @@ import net.mtgto.carpenter.domain._
 import net.mtgto.carpenter.domain.vcs._
 import org.sisioh.baseunits.scala.timeutil.Clock
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.util.{Try, Success, Failure}
 
 object ProjectController extends Controller with BaseController {
@@ -137,7 +138,7 @@ object ProjectController extends Controller with BaseController {
     }
   }
 
-  def tasks(id: String) = IsAuthenticated { user => implicit request =>
+  def tasks(id: String) = IsAuthenticatedAsync { user => implicit request =>
     implicit val taskWrites = new Writes[Task] {
       def writes(task: Task): JsValue = {
         Json.obj(
@@ -148,42 +149,38 @@ object ProjectController extends Controller with BaseController {
     }
     getProjectByIdString(id) match {
       case Success(project) => {
-        Async {
-          taskService.getAllTasks(project).map { tasks =>
-            Ok(Json.obj("status" -> "ok", "tasks" -> Json.toJson(tasks)))
-          }
+        taskService.getAllTasks(project).map { tasks =>
+          Ok(Json.obj("status" -> "ok", "tasks" -> Json.toJson(tasks)))
         }
       }
       case _ =>
-        BadRequest(Json.obj("status" -> "fail"))
+        Future.successful(BadRequest(Json.obj("status" -> "fail")))
     }
   }
 
-  def showExecuteTaskView(id: String, taskName: String) = IsAuthenticated { user => implicit request =>
+  def showExecuteTaskView(id: String, taskName: String) = IsAuthenticatedAsync { user => implicit request =>
     getProjectByIdString(id) match {
       case Success(project) =>
-        Async {
-          project.sourceRepository match {
-            case sourceRepository: GitSourceRepository => {
-              val branchAndTags = for {
-                branches <- taskService.getAllBranches(project)
-                tags <- taskService.getAllTags(project)
-              } yield (branches, tags)
-              branchAndTags.map( result => result match {
-                case (branches, tags) => Ok(views.html.projects.executeGit(project, taskName, branches, tags))
-              })
-            }
-            case sourceRepository: SubversionSourceRepository => {
-              taskService.getAllSubversionBranches(project, sourceRepository.paths.withFilter(_.pathType == SubversionPathType.Parent).map(_.name)).map {
-                parents =>
-                  val children: Seq[SubversionPath] = sourceRepository.paths.filter(_.pathType == SubversionPathType.Child)
-                  Ok(views.html.projects.executeSubversion(project, taskName, parents, children))
-              }
+        project.sourceRepository match {
+          case sourceRepository: GitSourceRepository => {
+            val branchAndTags = for {
+              branches <- taskService.getAllBranches(project)
+              tags <- taskService.getAllTags(project)
+            } yield (branches, tags)
+            branchAndTags.map( result => result match {
+              case (branches, tags) => Ok(views.html.projects.executeGit(project, taskName, branches, tags))
+            })
+          }
+          case sourceRepository: SubversionSourceRepository => {
+            taskService.getAllSubversionBranches(project, sourceRepository.paths.withFilter(_.pathType == SubversionPathType.Parent).map(_.name)).map {
+              parents =>
+                val children: Seq[SubversionPath] = sourceRepository.paths.filter(_.pathType == SubversionPathType.Child)
+                Ok(views.html.projects.executeSubversion(project, taskName, parents, children))
             }
           }
         }
       case _ =>
-        BadRequest("")
+        Future.successful(BadRequest(""))
     }
   }
 
@@ -231,31 +228,27 @@ object ProjectController extends Controller with BaseController {
     )
   }
 
-  def branches(id: String) = IsAuthenticated { user => implicit request =>
+  def branches(id: String) = IsAuthenticatedAsync { user => implicit request =>
     getProjectByIdString(id) match {
       case Success(project) => {
-        Async {
-          taskService.getAllBranches(project).map { branches =>
-            Ok(Json.obj("status" -> "ok", "branches" -> Json.toJson(branches)))
-          }
+        taskService.getAllBranches(project).map { branches =>
+          Ok(Json.obj("status" -> "ok", "branches" -> Json.toJson(branches)))
         }
       }
       case _ =>
-        BadRequest(Json.obj("status" -> "fail"))
+        Future.successful(BadRequest(Json.obj("status" -> "fail")))
     }
   }
 
-  def tags(id: String) = IsAuthenticated { user => implicit request =>
+  def tags(id: String) = IsAuthenticatedAsync { user => implicit request =>
     getProjectByIdString(id) match {
       case Success(project) => {
-        Async {
-          taskService.getAllTags(project).map { tags =>
-            Ok(Json.obj("status" -> "ok", "tags" -> Json.toJson(tags)))
-          }
+        taskService.getAllTags(project).map { tags =>
+          Ok(Json.obj("status" -> "ok", "tags" -> Json.toJson(tags)))
         }
       }
       case _ =>
-        BadRequest(Json.obj("status" -> "fail"))
+        Future.successful(BadRequest(Json.obj("status" -> "fail")))
     }
   }
 
