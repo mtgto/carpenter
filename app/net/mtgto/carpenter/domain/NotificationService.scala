@@ -1,6 +1,9 @@
 package net.mtgto.carpenter.domain
 
-import org.pircbotx.PircBotX
+import java.nio.charset.Charset
+import org.pircbotx.{MultiBotManager, Configuration, PircBotX}
+import org.pircbotx.hooks.{Event, Listener}
+import org.pircbotx.hooks.events.{ModeEvent, ConnectEvent}
 
 // // currently, support IRC notification only
 trait NotificationService {
@@ -9,12 +12,26 @@ trait NotificationService {
 
 object NotificationService extends NotificationService {
   override def notify(notification: Notification, message: String) = {
-    val bot = new PircBotX
-    bot.setName(notification.userName)
-    bot.setEncoding(notification.encoding)
-    bot.connect(notification.hostname, notification.port)
-    bot.joinChannel(notification.channelName)
-    bot.sendNotice(notification.channelName, message)
-    bot.disconnect()
+    val manager = new MultiBotManager[PircBotX]()
+    val config = new Configuration.Builder()
+      .setName(notification.userName)
+      .setEncoding(Charset.forName(notification.encoding))
+      .setAutoNickChange(true)
+      .addAutoJoinChannel(notification.channelName)
+      .setServer(notification.hostname, notification.port)
+      .addListener(new Listener[PircBotX]() {
+        def onEvent(e: Event[PircBotX]) {
+          e match {
+            case e: ModeEvent[PircBotX] =>
+              e.getBot.sendIRC().notice(notification.channelName, message)
+              manager.stopAndWait()
+              println("あああああああああああああああああああああああ")
+            case e => println(e.getClass.getSimpleName)
+          }
+        }
+      })
+      .buildConfiguration()
+    manager.addBot(config)
+    manager.start()
   }
 }
