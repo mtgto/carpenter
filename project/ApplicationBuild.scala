@@ -11,7 +11,8 @@ object ApplicationBuild extends Build {
     jdbc,
     "org.sisioh" %% "scala-dddbase-core" % "0.1.20",
     "org.sisioh" %% "baseunits-scala" % "0.1.6",
-    "org.pircbotx" % "pircbotx" % "1.9"
+    "org.pircbotx" % "pircbotx" % "1.9",
+    "com.typesafe.play" %% "play-slick" % "0.5.0.8"
   )
 
   // Only compile the bootstrap bootstrap.less file and any other *.less file in the stylesheets directory
@@ -28,7 +29,7 @@ object ApplicationBuild extends Build {
                       "Sisioh Scala Toolbox Release Repository" at "http://sisioh.github.io/scala-toolbox/repos/release/"),
     templatesImport ++= Seq("views.html.helper._", "net.mtgto.carpenter.controllers.Application.fieldConstructor", "play.api.i18n.Messages"),
     lessEntryPoints <<= baseDirectory(customLessEntryPoints)
-  ).dependsOn(RootProject( uri("git://github.com/freekh/play-slick.git") ))
+  )
 
 
 }
