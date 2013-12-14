@@ -11,7 +11,7 @@ object ApplicationBuild extends Build {
     jdbc,
     "org.sisioh" %% "scala-dddbase-core" % "0.1.20",
     "org.sisioh" %% "baseunits-scala" % "0.1.6",
-    "org.pircbotx" % "pircbotx" % "2.0",
+    "org.pircbotx" % "pircbotx" % "2.0.1",
     "com.typesafe.play" %% "play-slick" % "0.5.0.8"
   )
 
