@@ -31,8 +31,8 @@ class DatabaseUserDaoSpec extends Specification {
 
     def prepareDatabase = {
       DB.withTransaction{ implicit session: Session =>
-        Users.insert(User(testId.toString, testName, testPassword))
-        Authorities.insert(Authority(testId.toString, testCanLogin, testCanCreateUser))
+        TableQuery[Users] += User(testId.toString, testName, testPassword)
+        TableQuery[Authorities] += Authority(testId.toString, testCanLogin, testCanCreateUser)
       }
     }
   }

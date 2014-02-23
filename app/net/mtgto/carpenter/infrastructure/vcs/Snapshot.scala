@@ -6,12 +6,12 @@ import net.mtgto.carpenter.infrastructure.Jobs
 
 case class Snapshot(jobId: String, name: String, revision: String, branchType: String)
 
-object Snapshots extends Table[Snapshot]("snapshots") {
+class Snapshots(tag: Tag) extends Table[Snapshot](tag, "snapshots") {
   def jobId = column[String]("job_id", O.NotNull)
   def name = column[String]("name", O.NotNull)
   def revision = column[String]("revision", O.NotNull)
   def branchType = column[String]("branch_type", O.NotNull)
-  def * = jobId ~ name ~ revision ~ branchType <> (Snapshot.apply _, Snapshot.unapply _)
-  def job = foreignKey("job_id", jobId, Jobs)(_.id)
+  def * = (jobId, name, revision, branchType) <> (Snapshot.tupled, Snapshot.unapply)
+  def job = foreignKey("job_id", jobId, TableQuery[Jobs])(_.id)
   def idx = index("job_id", jobId, unique = true)
 }

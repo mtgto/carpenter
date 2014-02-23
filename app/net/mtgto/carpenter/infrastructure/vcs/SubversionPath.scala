@@ -16,11 +16,11 @@ case class SubversionPath(
   isDirectory: Boolean
 )
 
-object SubversionPaths extends Table[SubversionPath]("subversion_paths") {
+class SubversionPaths(tag: Tag) extends Table[SubversionPath](tag, "subversion_paths") {
   def projectId = column[String]("project_id", O.DBType("CHAR(36)"), O.NotNull)
   def path = column[String]("path", O.DBType("VARCHAR(255)"), O.NotNull)
   def isDirectory = column[Boolean]("directory", O.DBType("BOOLEAN"), O.NotNull)
-  def * = projectId ~ path ~ isDirectory <> (SubversionPath.apply _, SubversionPath.unapply _)
+  def * = (projectId, path, isDirectory) <> (SubversionPath.tupled, SubversionPath.unapply)
   def idx = index("project_id_and_path", (projectId, path), unique = true)
-  def project = foreignKey("project_id", projectId, Projects)(_.id)
+  def project = foreignKey("project_id", projectId, TableQuery[Projects])(_.id)
 }

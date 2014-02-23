@@ -8,6 +8,8 @@ import java.util.UUID
 class DatabaseProjectDao extends ProjectDao {
   import play.api.Play.current
 
+  private[this] val projects = TableQuery[Projects]
+
 //  protected[this] def convertRowToProject(row: Row): Project = {
 //    row match {
 //      case Row(id: String, name: String, hostname: String, recipe: java.sql.Clob) =>
@@ -18,7 +20,7 @@ class DatabaseProjectDao extends ProjectDao {
   override def findById(id: String): Option[Project] = {
     DB.withSession { implicit session =>
       val query = for {
-        project <- Projects if project.id === id
+        project <- projects if project.id === id
       } yield project
       query.firstOption
     }
@@ -27,7 +29,7 @@ class DatabaseProjectDao extends ProjectDao {
   override def findAll: Seq[Project] = {
     DB.withSession { implicit session =>
       val query = for {
-        project <- Projects
+        project <- projects
       } yield project
       query.list
     }
@@ -35,11 +37,11 @@ class DatabaseProjectDao extends ProjectDao {
 
   override def save(id: String, name: String, hostname: String, recipe: String) {
     DB.withSession { implicit session: Session =>
-      val rowCount = Projects.where(_.id === id)
-        .map(p => p.name ~ p.hostname ~ p.recipe)
+      val rowCount = projects.where(_.id === id)
+        .map(p => (p.name, p.hostname, p.recipe))
         .update((name, hostname, recipe))
       if (rowCount == 0) {
-        Projects.insert(Project(id, name, hostname, recipe))
+        projects += Project(id, name, hostname, recipe)
       }
     }
   }
@@ -47,7 +49,7 @@ class DatabaseProjectDao extends ProjectDao {
   override def delete(id: String): Int = {
     DB.withSession { implicit session =>
       val query = for {
-        project <- Projects if project.id === id
+        project <- projects if project.id === id
       } yield project
       query.delete
     }

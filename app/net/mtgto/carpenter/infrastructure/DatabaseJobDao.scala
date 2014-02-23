@@ -8,6 +8,14 @@ import play.api.db.slick.DB
 class DatabaseJobDao extends JobDao {
   import play.api.Play.current
 
+  private[this] val jobs = TableQuery[Jobs]
+
+  private[this] val projects = TableQuery[Projects]
+
+  private[this] val users = TableQuery[Users]
+
+  private[this] val authorities = TableQuery[Authorities]
+
 //  protected[this] def convertRowToJob(row: Row): Job = {
 //    row match {
 //      case Row(id: String, task: String, Some(exitCode: Int), Some(log: Clob), executeTime: Timestamp, Some(executeDuration: Int),
@@ -31,10 +39,10 @@ class DatabaseJobDao extends JobDao {
   override def findById(id: String): Option[(Job, Project, (User, Authority))] = {
     DB.withSession { implicit session =>
       val query = for {
-        job <- Jobs if job.id === id
-        project <- Projects if project.id === job.projectId
-        user <- Users if user.id === job.userId
-        authority <- Authorities if authority.userId === user.id
+        job <- jobs if job.id === id
+        project <- projects if project.id === job.projectId
+        user <- users if user.id === job.userId
+        authority <- authorities if authority.userId === user.id
       } yield (job, project, (user, authority))
       query.firstOption
 //    DB.withConnection{ implicit c =>
@@ -56,10 +64,10 @@ class DatabaseJobDao extends JobDao {
   override def findAll: Seq[(Job, Project, (User, Authority))] = {
     DB.withSession { implicit session =>
       val query = for {
-        job <- Jobs
-        project <- Projects if project.id === job.projectId
-        user <- Users if user.id === job.userId
-        authority <- Authorities if authority.userId === user.id
+        job <- jobs
+        project <- projects if project.id === job.projectId
+        user <- users if user.id === job.userId
+        authority <- authorities if authority.userId === user.id
       } yield (job, project, (user, authority))
       query.list
     }
@@ -80,10 +88,10 @@ class DatabaseJobDao extends JobDao {
   override def findAllByProject(projectId: String): Seq[(Job, Project, (User, Authority))] = {
     DB.withSession { implicit session =>
       val query = for {
-        job <- Jobs if job.projectId === projectId
-        project <- Projects if project.id === job.projectId
-        user <- Users if user.id === job.userId
-        authority <- Authorities if authority.userId === user.id
+        job <- jobs if job.projectId === projectId
+        project <- projects if project.id === job.projectId
+        user <- users if user.id === job.userId
+        authority <- authorities if authority.userId === user.id
       } yield (job, project, (user, authority))
       query.list
     }
@@ -107,10 +115,10 @@ class DatabaseJobDao extends JobDao {
   override def findAllByProjectOrderByDateDesc(projectId: String): Seq[(Job, Project, (User, Authority))] = {
     DB.withSession { implicit session =>
       val query = for {
-        job <- Jobs.sortBy(_.executeTime.desc) if job.projectId === projectId
-        project <- Projects if project.id === job.projectId
-        user <- Users if user.id === job.userId
-        authority <- Authorities if authority.userId === user.id
+        job <- jobs.sortBy(_.executeTime.desc) if job.projectId === projectId
+        project <- projects if project.id === job.projectId
+        user <- users if user.id === job.userId
+        authority <- authorities if authority.userId === user.id
       } yield (job, project, (user, authority))
       query.list
     }
@@ -135,10 +143,10 @@ class DatabaseJobDao extends JobDao {
   override def findAllByUser(userId: String): Seq[(Job, Project, (User, Authority))] = {
     DB.withSession { implicit session =>
       val query = for {
-        job <- Jobs if job.userId === userId
-        project <- Projects if project.id === job.projectId
-        user <- Users if user.id === userId
-        authority <- Authorities if authority.userId === userId
+        job <- jobs if job.userId === userId
+        project <- projects if project.id === job.projectId
+        user <- users if user.id === userId
+        authority <- authorities if authority.userId === userId
       } yield (job, project, (user, authority))
       query.list
     }
@@ -161,11 +169,11 @@ class DatabaseJobDao extends JobDao {
 
   override def save(job: Job) {
     DB.withTransaction { implicit session: Session =>
-      val rowCount = Jobs.where(_.id === job.id)
-        .map(j => j.projectId ~ j.userId ~ j.task ~ j.exitCode ~ j.log ~ j.executeTime ~ j.executeDuration)
+      val rowCount = jobs.where(_.id === job.id)
+        .map(j => (j.projectId, j.userId, j.task, j.exitCode, j.log, j.executeTime, j.executeDuration))
         .update((job.projectId, job.userId, job.task, job.exitCode, job.log, job.executeTime, job.executeDuration))
       if (rowCount == 0) {
-        Jobs.insert(job)
+        jobs += job
       }
     }
 //    DB.withConnection{ implicit c =>
@@ -185,7 +193,7 @@ class DatabaseJobDao extends JobDao {
 
   override def delete(id: String): Int = {
     DB.withSession { implicit session =>
-      Jobs.where(_.id === id).delete
+      jobs.where(_.id === id).delete
     }
 //    DB.withConnection{ implicit c =>
 //      SQL("DELETE `jobs` WHERE `id` = {id}")

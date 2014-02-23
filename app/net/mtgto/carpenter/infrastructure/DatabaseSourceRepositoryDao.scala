@@ -8,6 +8,10 @@ import net.mtgto.carpenter.infrastructure.vcs.{SubversionPaths, SubversionPath}
 class DatabaseSourceRepositoryDao extends SourceRepositoryDao {
   import play.api.Play.current
 
+  private[this] val sourceRepositories = TableQuery[SourceRepositories]
+
+  private[this] val subversionPaths = TableQuery[SubversionPaths]
+
 //  protected[this] def convertRowToSourceRepository(row: Row): SourceRepository = {
 //    row match {
 //      // TODO use Enumeration for git/subversion
@@ -25,10 +29,10 @@ class DatabaseSourceRepositoryDao extends SourceRepositoryDao {
   override def findByProjectId(id: String): Option[(SourceRepository, Seq[SubversionPath])] = {
     DB.withTransaction { implicit session =>
       val query = for {
-        sourceRepository <- SourceRepositories if sourceRepository.projectId === id
+        sourceRepository <- sourceRepositories if sourceRepository.projectId === id
       } yield sourceRepository
       val subQuery = for {
-        path <- SubversionPaths if path.projectId === id
+        path <- subversionPaths if path.projectId === id
       } yield path
       query.firstOption.map(r => (r, subQuery.list))
     }
@@ -52,15 +56,15 @@ class DatabaseSourceRepositoryDao extends SourceRepositoryDao {
 
   override def save(sourceRepository: SourceRepository, subversionPaths: Seq[SubversionPath]) {
     DB.withTransaction { implicit session: Session =>
-      val rowCount = SourceRepositories.where(_.projectId === sourceRepository.projectId)
-        .map(r => r.software ~ r.url)
+      val rowCount = sourceRepositories.where(_.projectId === sourceRepository.projectId)
+        .map(r => (r.software, r.url))
         .update((sourceRepository.software, sourceRepository.url))
       if (rowCount == 0) {
-        SourceRepositories.insert(
+        sourceRepositories.insert(
           SourceRepository(sourceRepository.projectId, sourceRepository.software, sourceRepository.url))
       }
-      SubversionPaths.where(_.projectId === sourceRepository.projectId).delete
-      SubversionPaths.insertAll(subversionPaths:_*)
+      TableQuery[SubversionPaths].filter(_.projectId === sourceRepository.projectId).delete
+      TableQuery[SubversionPaths].insertAll(subversionPaths:_*)
       // TODO: SubversionPath
 //      if (sourceRepository.software == "subversion") {
 //        SubversionPaths.insert(SubversionPath(sourceRepository.projectId))
@@ -99,7 +103,7 @@ class DatabaseSourceRepositoryDao extends SourceRepositoryDao {
     DB.withTransaction { implicit session: Session =>
       //SubversionPaths.where(_.projectId === projectId).delete
       val query = for {
-        sourceRepository <- SourceRepositories if sourceRepository.projectId === projectId
+        sourceRepository <- sourceRepositories if sourceRepository.projectId === projectId
       } yield sourceRepository
       query.delete
     }

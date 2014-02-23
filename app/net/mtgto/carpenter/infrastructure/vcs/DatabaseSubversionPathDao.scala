@@ -6,6 +6,8 @@ import play.api.db.slick.DB
 
 class DatabaseSubversionPathDao extends SubversionPathDao {
   import play.api.Play.current
+
+  private[this] val subversionPaths = TableQuery[SubversionPaths]
 //  protected[this] def convertRowToSubversionPath(row: Row): SubversionPath = {
 //    row match {
 //      case Row(path: String, isDirectory: Boolean) =>
@@ -16,7 +18,7 @@ class DatabaseSubversionPathDao extends SubversionPathDao {
   override def findAllByProjectId(projectId: String): Seq[SubversionPath] = {
     DB.withSession { implicit session =>
       val query = for {
-        path <- SubversionPaths if path.projectId === projectId
+        path <- subversionPaths if path.projectId === projectId
       } yield path
       query.list
     }

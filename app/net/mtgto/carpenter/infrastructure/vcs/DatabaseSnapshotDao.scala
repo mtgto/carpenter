@@ -7,6 +7,8 @@ import play.api.db.slick.DB
 class DatabaseSnapshotDao extends SnapshotDao {
   import play.api.Play.current
 
+  private[this] val snapshots = TableQuery[Snapshots]
+
 //  protected[this] def convertRowToSnapshot(row: Row): Snapshot = {
 //    row match {
 //      case Row(name: String, revision: String, branchType: String) =>
@@ -17,7 +19,7 @@ class DatabaseSnapshotDao extends SnapshotDao {
   override def findByJobId(id: String): Option[Snapshot] = {
     DB.withSession { implicit session =>
       val query = for {
-        snapshot <- Snapshots if snapshot.jobId === id
+        snapshot <- snapshots if snapshot.jobId === id
       } yield snapshot
       query.firstOption
     }
@@ -30,11 +32,11 @@ class DatabaseSnapshotDao extends SnapshotDao {
 
   override def save(jobId: String, name: String, revision: String, branchType: String) {
     DB.withTransaction { implicit session: Session =>
-      val rowCount = Snapshots.where(_.jobId === jobId)
-        .map(s => s.name ~ s.revision ~ s.branchType)
+      val rowCount = snapshots.where(_.jobId === jobId)
+        .map(s => (s.name, s.revision, s.branchType))
         .update((name, revision, branchType))
       if (rowCount == 0) {
-        Snapshots.insert(Snapshot(jobId, name, revision, branchType))
+        snapshots += Snapshot(jobId, name, revision, branchType)
       }
     }
 //    DB.withConnection{ implicit c =>

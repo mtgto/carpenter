@@ -8,11 +8,15 @@ import java.util.UUID
 class DatabaseUserDao extends UserDao {
   import play.api.Play.current
 
+  private[this] val users = TableQuery[Users]
+
+  private[this] val authorities = TableQuery[Authorities]
+
   override def findById(id: String): Option[(User, Authority)] = {
     DB.withSession { implicit session =>
       val query = for {
-        user <- Users if user.id === id
-        authority <- Authorities if authority.userId === user.id
+        user <- users if user.id === id
+        authority <- authorities if authority.userId === user.id
       } yield (user, authority)
       query.firstOption
     }
@@ -21,8 +25,8 @@ class DatabaseUserDao extends UserDao {
   override def findByNameAndPassword(name: String, password: String): Option[(User, Authority)] = {
     DB.withSession { implicit session =>
       val query = for {
-        user <- Users if user.name === name && user.password === password
-        authority <- Authorities if authority.userId === user.id
+        user <- users if user.name === name && user.password === password
+        authority <- authorities if authority.userId === user.id
       } yield (user, authority)
       query.firstOption
     }
@@ -31,8 +35,8 @@ class DatabaseUserDao extends UserDao {
   override def findAll: Seq[(User, Authority)] = {
     DB.withSession { implicit session =>
       val query = for {
-        user <- Users
-        authority <- Authorities if authority.userId === user.id
+        user <- users
+        authority <- authorities if authority.userId === user.id
       } yield (user, authority)
       query.list
     }
@@ -40,24 +44,24 @@ class DatabaseUserDao extends UserDao {
 
   override def save(id: String, name: String, password: String, authority: Authority): Unit = {
     DB.withTransaction { implicit session: Session =>
-      val query = Query(Users).where(_.id === id)
-      val rowCount = query.map(user => user.name ~ user.password).update((name, password))
+      val query = users.where(_.id === id)
+      val rowCount = query.map(user => (user.name, user.password)).update((name, password))
       if (rowCount == 0) {
-        Users.insert(User(id, name, password))
+        users += User(id, name, password)
       }
-      val subQuery = Authorities.where(_.userId === id)
-      val subRowCount = subQuery.map(authority => authority.canLogin ~ authority.canCreateUser)
+      val subQuery = authorities.where(_.userId === id)
+      val subRowCount = subQuery.map(authority => (authority.canLogin, authority.canCreateUser))
       .update((authority.canLogin, authority.canCreateUser))
       if (subRowCount == 0) {
-        Authorities.insert(authority)
+        authorities += authority
       }
     }
   }
 
   override def delete(id: String): Int = {
     DB.withTransaction { implicit session =>
-      Authorities.where(_.userId === id).delete
-      Users.where(_.id === id).delete
+      authorities.where(_.userId === id).delete
+      users.where(_.id === id).delete
     }
   }
 }
