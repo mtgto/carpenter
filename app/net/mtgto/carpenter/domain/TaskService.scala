@@ -1,5 +1,6 @@
 package net.mtgto.carpenter.domain
 
+import java.io.File
 import java.net.URI
 import org.sisioh.baseunits.scala.time.{Duration, TimePoint}
 import org.sisioh.baseunits.scala.timeutil.Clock
@@ -33,9 +34,20 @@ class DefaultTaskService(workspacePath: String) extends TaskService {
     if (!projectDirectory.isDirectory) {
       projectDirectory.mkdirs
     }
-    val file = new java.io.File(projectDirectory, "Capfile")
+    createCapfile(new File(projectDirectory, "Capfile"), project)
+    createGemfile(new File(projectDirectory, "Gemfile"))
+  }
+
+  protected[this] def createCapfile(file: File, project: Project): Unit = {
     val writer = new java.io.PrintWriter(file)
     writer.print(project.recipe)
+    writer.close()
+  }
+
+  protected[this] def createGemfile(file: File): Unit = {
+    val writer = new java.io.PrintWriter(file)
+    writer.println("source \"https://rubygems.org/\"")
+    writer.println("gem 'capistrano', '~> 2.15.5'")
     writer.close()
   }
 
@@ -58,7 +70,7 @@ class DefaultTaskService(workspacePath: String) extends TaskService {
   override def getAllTasks(project: Project): Future[Seq[Task]] = {
     future {
       createProjectWorkspace(project)
-      val (exitCode, output, error) = executeProcessBuilder(Process("cap -vT", getProjectWorkspace(project)))
+      val (exitCode, output, error) = executeProcessBuilder(Process(s"bundle exec cap -vT", getProjectWorkspace(project)))
       if (exitCode == 0) {
         output.split(System.lineSeparator).withFilter(_.contains("#")).map{ line =>
           val index = line.lastIndexOf("#")
@@ -83,7 +95,7 @@ class DefaultTaskService(workspacePath: String) extends TaskService {
       }
       val (exitCode, _, errorOutput) =
         executeProcessBuilder(
-          Process(Seq("cap", taskName, "HOSTS="+project.hostname) ++ repositoryParams, getProjectWorkspace(project)))
+          Process(Seq("bundle", "exec", "cap", taskName, "HOSTS="+project.hostname) ++ repositoryParams, getProjectWorkspace(project)))
       val executeDuration = Duration.milliseconds(Clock.now.breachEncapsulationOfMillisecondsFromEpoc - startTimePoint.breachEncapsulationOfMillisecondsFromEpoc)
       (exitCode, errorOutput, startTimePoint, executeDuration)
     }

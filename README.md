@@ -4,3 +4,7 @@ Carpenter is Web UI frontend for [capistrano](https://github.com/capistrano/capi
 
 # License
 Carpenter is licensed under the GNU GPL v3.
+
+# Dependencies
+- bundler
+
